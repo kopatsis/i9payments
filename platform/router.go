@@ -5,6 +5,7 @@ import (
 
 	"i9pay/platform/login"
 	"i9pay/platform/middleware"
+	"i9pay/platform/multipass"
 
 	"firebase.google.com/go/auth"
 	"github.com/gin-gonic/gin"
@@ -17,7 +18,11 @@ func New(auth *auth.Client, database *mongo.Database) *gin.Engine {
 	router.Use(middleware.CORSMiddleware())
 	router.Static("/static", "./static")
 
-	router.LoadHTMLGlob("templates/*")
+	router.LoadHTMLGlob("../html/*")
+	router.GET("/sub", multipass.Multipass(auth, database))
+
+	router.GET("/code", multipass.SpecialCode(database))
+
 	router.GET("/", func(c *gin.Context) {
 
 		uid := "None"

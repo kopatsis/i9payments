@@ -2,6 +2,7 @@ package multipass
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/golang-jwt/jwt"
 	"go.mongodb.org/mongo-driver/bson"
@@ -13,6 +14,25 @@ import (
 type SpecialCodeSB struct {
 	ID     primitive.ObjectID `bson:"_id,omitempty"`
 	Status string             `bson:"status"`
+}
+
+func getSpecialCode(database *mongo.Database) (string, error) {
+	specialCode := SpecialCodeSB{
+		Status: "Archived",
+	}
+
+	collection := database.Collection("specialcode")
+	insertResult, err := collection.InsertOne(context.Background(), specialCode)
+	if err != nil {
+		return "", err
+	}
+
+	objectID, ok := insertResult.InsertedID.(primitive.ObjectID)
+	if !ok {
+		return "", fmt.Errorf("invalid ID type")
+	}
+
+	return objectID.Hex(), nil
 }
 
 func checkSpecialCode(code string, database *mongo.Database) bool {

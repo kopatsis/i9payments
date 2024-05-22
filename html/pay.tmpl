@@ -11,11 +11,22 @@
 
 <div x-data="paymentHandler()" x-init="init()">
     <form id="payment-form" action="/process-payment" method="POST" @submit.prevent="handlePayment">
+        <div>
+            <label>
+                <input type="radio" name="subscription" value="monthly" x-model="subscription" checked>
+                Monthly ($4.99/month)
+            </label>
+            <label>
+                <input type="radio" name="subscription" value="yearly" x-model="subscription">
+                Yearly ($49.99/year)
+            </label>
+        </div>
         <div id="card-element"><!-- Stripe Elements will be inserted here --></div>
         <button type="submit">Pay</button>
         <input type="hidden" name="token" x-model="token">
         <input type="hidden" name="email" :value="email">
         <input type="hidden" name="userId" :value="userId">
+        <input type="hidden" name="subscription" :value="subscription">
     </form>
 
     <div id="payment-message" style="display: none; color: red;"></div>
@@ -29,6 +40,7 @@ function paymentHandler() {
         token: '',
         email: document.getElementById('user-data').dataset.email,
         userId: document.getElementById('user-data').dataset.id,
+        subscription: 'monthly',
 
         init() {
             const elements = this.stripe.elements();
@@ -39,13 +51,12 @@ function paymentHandler() {
         async handlePayment() {
             const {token, error} = await this.stripe.createToken(this.cardElement);
             if (error) {
-                // Display error message
                 const messageElement = document.getElementById('payment-message');
                 messageElement.textContent = error.message;
                 messageElement.style.display = 'block';
             } else {
                 this.token = token.id;
-                this.$el.submit(); // Submit the form with the token
+                this.$el.submit();
             }
         }
     }
