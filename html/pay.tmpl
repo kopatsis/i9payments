@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stripe Payment</title>
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.2.3"></script>
+    <script src="https://js.stripe.com/v3/"></script>
+</head>
+<body>
+
+<div x-data="paymentHandler()" x-init="init()">
+    <form id="payment-form" action="/process-payment" method="POST" @submit.prevent="handlePayment">
+        <div id="card-element"><!-- Stripe Elements will be inserted here --></div>
+        <button type="submit">Pay</button>
+        <input type="hidden" name="token" x-model="token">
+        <input type="hidden" name="email" :value="email">
+        <input type="hidden" name="userId" :value="userId">
+    </form>
+
+    <div id="payment-message" style="display: none; color: red;"></div>
+</div>
+
+<script>
+function paymentHandler() {
+    return {
+        stripe: Stripe('your-publishable-key'),
+        cardElement: null,
+        token: '',
+        email: document.getElementById('user-data').dataset.email,
+        userId: document.getElementById('user-data').dataset.id,
+
+        init() {
+            const elements = this.stripe.elements();
+            this.cardElement = elements.create('card');
+            this.cardElement.mount('#card-element');
+        },
+
+        async handlePayment() {
+            const {token, error} = await this.stripe.createToken(this.cardElement);
+            if (error) {
+                // Display error message
+                const messageElement = document.getElementById('payment-message');
+                messageElement.textContent = error.message;
+                messageElement.style.display = 'block';
+            } else {
+                this.token = token.id;
+                this.$el.submit(); // Submit the form with the token
+            }
+        }
+    }
+}
+
+document.addEventListener('alpine:init', () => {
+    Alpine.data('paymentHandler', paymentHandler);
+});
+</script>
+
+<div id="user-data" data-email="{{.UserEmail}}" data-id="{{.UserID}}" style="display: none;"></div>
+
+</body>
+</html>
