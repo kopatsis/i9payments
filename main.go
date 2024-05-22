@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"os"
 
+	"i9pay/db"
 	"i9pay/platform"
 	"i9pay/platform/login"
 
@@ -20,7 +21,13 @@ func main() {
 
 	auth := login.InitFirebase()
 
-	rtr := platform.New(auth)
+	client, database, err := db.ConnectDB()
+	if err != nil {
+		log.Fatalf("Error while connecting to mongoDB: %s.\nExiting.", err)
+	}
+	defer db.DisConnectDB(client)
+
+	rtr := platform.New(auth, database)
 
 	port := os.Getenv("PORT")
 	if port == "" {

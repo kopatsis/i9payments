@@ -8,9 +8,10 @@ import (
 
 	"firebase.google.com/go/auth"
 	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func New(auth *auth.Client) *gin.Engine {
+func New(auth *auth.Client, database *mongo.Database) *gin.Engine {
 	router := gin.Default()
 
 	router.Use(middleware.CORSMiddleware())
