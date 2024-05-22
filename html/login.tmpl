@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login Page</title>
+  </head>
+  <body>
+    <h1>Login</h1>
+    <input type="email" id="email" placeholder="Email" />
+    <input type="password" id="password" placeholder="Password" />
+    <button id="loginButton">Login</button>
+
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
+      import {
+        getAuth,
+        signInWithEmailAndPassword,
+      } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyBOksfyE0unI87E533LWTKV6jpW-F1dqDA",
+        authDomain: "i9auth.firebaseapp.com",
+        projectId: "i9auth",
+        storageBucket: "i9auth.appspot.com",
+        messagingSenderId: "284108905250",
+        appId: "1:284108905250:web:b866b21949e149af7ca37b",
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+
+      document
+        .getElementById("loginButton")
+        .addEventListener("click", function () {
+          const email = document.getElementById("email").value;
+          const password = document.getElementById("password").value;
+          signInWithEmailAndPassword(auth, email, password)
+            .then((userCredential) => {
+              return userCredential.user.getIdToken().then((idToken) => {
+                return fetch("/verifyToken", {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify({ "idToken": idToken }),
+                  credentials: 'include'
+                });
+              });
+            })
+            .then((response) => {
+              if (response.ok) {
+                console.log("Token verified");
+                window.location.assign("/");
+              } else {
+                console.error("Token verification failed");
+                response.json().then((data) => console.error(data));
+              }
+            })
+            .catch((error) => {
+              const errorCode = error.code;
+              const errorMessage = error.message;
+              console.error("Login failed:", errorCode, errorMessage);
+            });
+        });
+    </script>
+  </body>
+</html>
