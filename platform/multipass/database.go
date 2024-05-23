@@ -3,12 +3,11 @@ package multipass
 import (
 	"context"
 	"fmt"
+	"i9pay/db"
 
-	"github.com/golang-jwt/jwt"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type SpecialCodeSB struct {
@@ -65,41 +64,17 @@ func deleteSpecialCode(code string, database *mongo.Database) error {
 	return err
 }
 
-func emailAndIDfromToken(idt string, database *mongo.Database) (string, string, error) {
-
-	token, _, err := new(jwt.Parser).ParseUnverified(idt, jwt.MapClaims{})
-	if err != nil {
-		return "", "", err
-	}
-
-	claims, ok := token.Claims.(jwt.MapClaims)
-	if !ok {
-		return "", "", jwt.ErrInvalidKey
-	}
-
-	sub, ok := claims["sub"].(string)
-	if !ok {
-		return "", "", jwt.ErrInvalidKey
-	}
-
-	email, ok := claims["email"].(string)
-	if !ok {
-		return "", "", jwt.ErrInvalidKey
-	}
-
+func UserFromUID(sub string, database *mongo.Database) (*db.User, error) {
 	collection := database.Collection("user")
 
-	var result struct {
-		ID primitive.ObjectID `bson:"_id"`
-	}
+	var user db.User
 
 	if err := collection.FindOne(
 		context.Background(),
 		bson.M{"username": sub},
-		options.FindOne().SetProjection(bson.M{"_id": 1}),
-	).Decode(&result); err != nil {
-		return "", "", err
+	).Decode(&user); err != nil {
+		return nil, err
 	}
 
-	return result.ID.Hex(), email, nil
+	return &user, nil
 }

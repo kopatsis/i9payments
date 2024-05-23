@@ -14,6 +14,8 @@ func New(auth *auth.Client, database *mongo.Database) *gin.Engine {
 	router := gin.Default()
 
 	router.Use(middleware.CORSMiddleware())
+	router.Use(middleware.AuthMiddleware(auth))
+
 	router.Static("/static", "./static")
 
 	router.LoadHTMLGlob("../html/*")
@@ -21,7 +23,7 @@ func New(auth *auth.Client, database *mongo.Database) *gin.Engine {
 
 	router.GET("/code", multipass.SpecialCode(database))
 
-	router.GET("/login")
+	router.GET("/login", login.LoginPage(auth))
 
 	router.POST("/verifyToken", login.VerifyToken(auth))
 
