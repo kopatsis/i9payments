@@ -44,6 +44,7 @@ func PostPayment(auth *auth.Client) gin.HandlerFunc {
 				},
 			},
 		}
+		subscriptionParams.AddMetadata("userId", userId)
 
 		newsub, err := sub.New(subscriptionParams)
 		if err != nil {
