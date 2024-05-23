@@ -10,6 +10,7 @@ import (
 	"github.com/stripe/stripe-go/v72"
 	"github.com/stripe/stripe-go/v72/customer"
 	"github.com/stripe/stripe-go/v72/paymentintent"
+	"github.com/stripe/stripe-go/v72/sub"
 	"github.com/stripe/stripe-go/v72/webhook"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -66,6 +67,11 @@ func Webhook(auth *auth.Client, database *mongo.Database) gin.HandlerFunc {
 				c.JSON(http.StatusBadRequest, gin.H{"error": "Error updating the user"})
 				return
 			}
+
+			params := &stripe.SubscriptionParams{
+				DefaultPaymentMethod: stripe.String(paymentIntent.PaymentMethod.ID),
+			}
+			sub.Update(subscriptionID.ID, params)
 
 			c.JSON(http.StatusOK, gin.H{"status": "success"})
 
