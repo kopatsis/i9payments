@@ -10,6 +10,7 @@ import (
 	"i9pay/platform/login"
 
 	"github.com/joho/godotenv"
+	"github.com/stripe/stripe-go"
 )
 
 func main() {
@@ -26,6 +27,8 @@ func main() {
 		log.Fatalf("Error while connecting to mongoDB: %s.\nExiting.", err)
 	}
 	defer db.DisConnectDB(client)
+
+	stripe.Key = os.Getenv("STRIPE_SECRET")
 
 	rtr := platform.New(auth, database)
 
