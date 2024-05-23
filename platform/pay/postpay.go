@@ -5,9 +5,9 @@ import (
 
 	"firebase.google.com/go/auth"
 	"github.com/gin-gonic/gin"
-	"github.com/stripe/stripe-go"
-	"github.com/stripe/stripe-go/customer"
-	"github.com/stripe/stripe-go/sub"
+	"github.com/stripe/stripe-go/v72"
+	"github.com/stripe/stripe-go/v72/customer"
+	"github.com/stripe/stripe-go/v72/sub"
 )
 
 func PostPayment(auth *auth.Client) gin.HandlerFunc {
@@ -17,26 +17,25 @@ func PostPayment(auth *auth.Client) gin.HandlerFunc {
 		token := c.PostForm("token")
 		subscription := c.PostForm("subscription")
 
-		priceID := "price_1JHkW2LJHkW2LJHkW2LJHkW2" // Replace with your actual monthly price ID
+		priceID := "price_1PJfbQIstWH7VBmuNNsoLTN2"
 		if subscription == "yearly" {
-			priceID = "price_1JHkW2LJHkW2LJHkW2LJHkW3" // Replace with your actual yearly price ID
+			priceID = "price_1PJfbpIstWH7VBmu1nToVdC9"
 		}
 
-		// Create a new customer in Stripe
 		customerParams := &stripe.CustomerParams{
 			Email: stripe.String(email),
 		}
-		customerParams.SetSource(token) // set the token for the customer's payment method
+		customerParams.SetSource(token)
 		customerParams.Metadata = map[string]string{
-			"userId": userId, // include user ID in metadata
+			"userId": userId,
 		}
+
 		stripeCustomer, err := customer.New(customerParams)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
 
-		// Create a subscription for the customer
 		subscriptionParams := &stripe.SubscriptionParams{
 			Customer: stripe.String(stripeCustomer.ID),
 			Items: []*stripe.SubscriptionItemsParams{
@@ -45,16 +44,16 @@ func PostPayment(auth *auth.Client) gin.HandlerFunc {
 				},
 			},
 		}
-		subscription, err := sub.New(subscriptionParams)
+
+		newsub, err := sub.New(subscriptionParams)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
 
-		// Respond with the subscription details
 		c.JSON(http.StatusOK, gin.H{
-			"subscriptionId": subscription.ID,
-			"status":         subscription.Status,
+			"subscriptionId": newsub.ID,
+			"status":         newsub.Status,
 		})
 	}
 }

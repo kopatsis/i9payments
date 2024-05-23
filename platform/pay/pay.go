@@ -11,7 +11,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func Multipass(auth *auth.Client, database *mongo.Database) gin.HandlerFunc {
+func Subscription(auth *auth.Client, database *mongo.Database) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		uid, err := login.ExtractUIDFromSession(c, auth)
 		if err != nil {

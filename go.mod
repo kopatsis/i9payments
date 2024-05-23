@@ -5,6 +5,7 @@ go 1.21.6
 require (
 	github.com/gin-gonic/gin v1.10.0
 	github.com/joho/godotenv v1.5.1
+	github.com/stripe/stripe-go/v72 v72.122.0
 	google.golang.org/api v0.181.0
 )
 
