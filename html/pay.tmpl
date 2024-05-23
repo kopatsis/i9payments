@@ -23,7 +23,7 @@
         </div>
         <div id="card-element"><!-- Stripe Elements will be inserted here --></div>
         <button type="submit">Pay</button>
-        <input type="hidden" name="token" x-model="token">
+        <input type="hidden" name="paymentMethod" x-model="paymentMethod">
         <input type="hidden" name="email" :value="email">
         <input type="hidden" name="userId" :value="userId">
         <input type="hidden" name="subscription" :value="subscription">
@@ -35,9 +35,9 @@
 <script>
 function paymentHandler() {
     return {
-        stripe: Stripe('your-publishable-key'),
+        stripe: Stripe('pk_test_51PJLOAIstWH7VBmuSbipom0Z6Gy1Wj6wOjFtApmfGspxtTCywa9WEhP1UjB5XheYdCVXnUScy1zChx4lagbeZYvE002At1oIiP'),
         cardElement: null,
-        token: '',
+        paymentMethod: '',
         email: document.getElementById('user-data').dataset.email,
         userId: document.getElementById('user-data').dataset.id,
         subscription: 'monthly',
@@ -49,13 +49,16 @@ function paymentHandler() {
         },
 
         async handlePayment() {
-            const {token, error} = await this.stripe.createToken(this.cardElement);
+            const {paymentMethod, error} = await this.stripe.createPaymentMethod({
+                type: 'card',
+                card: this.cardElement,
+            });
             if (error) {
                 const messageElement = document.getElementById('payment-message');
                 messageElement.textContent = error.message;
                 messageElement.style.display = 'block';
             } else {
-                this.token = token.id;
+                this.paymentMethod = paymentMethod.id;
                 this.$el.submit();
             }
         }

@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/stripe/stripe-go/v72"
 	"github.com/stripe/stripe-go/v72/customer"
+	"github.com/stripe/stripe-go/v72/paymentmethod"
 	"github.com/stripe/stripe-go/v72/sub"
 )
 
@@ -14,7 +15,7 @@ func PostPayment(auth *auth.Client) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		email := c.PostForm("email")
 		userId := c.PostForm("userId")
-		token := c.PostForm("token")
+		paymentMethodID := c.PostForm("paymentMethod")
 		subscription := c.PostForm("subscription")
 
 		priceID := "price_1PJfbQIstWH7VBmuNNsoLTN2"
@@ -23,14 +24,34 @@ func PostPayment(auth *auth.Client) gin.HandlerFunc {
 		}
 
 		customerParams := &stripe.CustomerParams{
-			Email: stripe.String(email),
+			Email:         stripe.String(email),
+			PaymentMethod: stripe.String(paymentMethodID),
 		}
-		customerParams.SetSource(token)
 		customerParams.Metadata = map[string]string{
 			"userId": userId,
 		}
 
 		stripeCustomer, err := customer.New(customerParams)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		params := &stripe.PaymentMethodAttachParams{
+			Customer: stripe.String(stripeCustomer.ID),
+		}
+		_, err = paymentmethod.Attach(paymentMethodID, params)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		customerParamsUpdate := &stripe.CustomerParams{
+			InvoiceSettings: &stripe.CustomerInvoiceSettingsParams{
+				DefaultPaymentMethod: stripe.String(paymentMethodID),
+			},
+		}
+		_, err = customer.Update(stripeCustomer.ID, customerParamsUpdate)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
