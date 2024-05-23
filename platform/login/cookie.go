@@ -9,7 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func Cookie(IDToken string, authClient *auth.Client, c *gin.Context) error {
+func Cookie(IDToken, refreshToken string, authClient *auth.Client, c *gin.Context) error {
 	expiresIn := time.Hour * 24 * 14
 	sessionCookie, err := authClient.SessionCookie(context.Background(), IDToken, expiresIn)
 	if err != nil {
@@ -25,5 +25,17 @@ func Cookie(IDToken string, authClient *auth.Client, c *gin.Context) error {
 		Secure:   false,
 	})
 
+	http.SetCookie(c.Writer, &http.Cookie{
+		Name:     "refreshToken",
+		Value:    refreshToken,
+		HttpOnly: true,
+		Secure:   false,
+		Path:     "/",
+	})
+
 	return nil
+}
+
+func RefreshCookie() {
+
 }

@@ -11,7 +11,8 @@ import (
 func VerifyToken(authClient *auth.Client) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var request struct {
-			IDToken string `json:"idToken"`
+			IDToken      string `json:"idToken"`
+			RefreshToken string `json:"refreshToken"`
 		}
 
 		if err := c.ShouldBindJSON(&request); err != nil {
@@ -20,7 +21,7 @@ func VerifyToken(authClient *auth.Client) gin.HandlerFunc {
 			return
 		}
 
-		if err := Cookie(request.IDToken, authClient, c); err != nil {
+		if err := Cookie(request.IDToken, request.RefreshToken, authClient, c); err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Failed to create a session cookie"})
 			return
 		}

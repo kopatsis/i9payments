@@ -13,6 +13,7 @@ import (
 func Multipass(authClient *auth.Client, database *mongo.Database) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		token := c.Query("multipass")
+		refresh := c.Query("multipass")
 		code := c.Query("code")
 
 		if status := checkSpecialCode(code, database); !status || token == "" {
@@ -27,14 +28,7 @@ func Multipass(authClient *auth.Client, database *mongo.Database) gin.HandlerFun
 			})
 		}
 
-		mongoID, email, err := emailAndIDfromToken(token, database)
-		if err != nil {
-			c.JSON(400, gin.H{
-				"error": "invalid user",
-			})
-		}
-
-		if err := login.Cookie(token, authClient, c); err != nil {
+		if err := login.Cookie(token, refresh, authClient, c); err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Failed to create a session cookie"})
 			return
 		}
@@ -43,10 +37,7 @@ func Multipass(authClient *auth.Client, database *mongo.Database) gin.HandlerFun
 			deleteSpecialCode(code, database)
 		}()
 
-		c.HTML(http.StatusOK, "pay.tmpl", gin.H{
-			"UserID":    mongoID,
-			"UserEmail": email,
-		})
+		c.Redirect(http.StatusFound, "/pay")
 
 	}
 }

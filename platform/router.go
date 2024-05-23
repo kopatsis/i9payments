@@ -1,8 +1,6 @@
 package platform
 
 import (
-	"net/http"
-
 	"i9pay/platform/login"
 	"i9pay/platform/middleware"
 	"i9pay/platform/multipass"
@@ -23,9 +21,7 @@ func New(auth *auth.Client, database *mongo.Database) *gin.Engine {
 
 	router.GET("/code", multipass.SpecialCode(database))
 
-	router.GET("/login", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "login.tmpl", nil)
-	})
+	router.GET("/login")
 
 	router.POST("/verifyToken", login.VerifyToken(auth))
 
