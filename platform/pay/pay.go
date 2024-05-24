@@ -33,7 +33,27 @@ func Subscription(auth *auth.Client, database *mongo.Database) gin.HandlerFunc {
 		}
 
 		if user.Paying {
-			c.HTML(200, "error.tmpl", gin.H{})
+
+			external := ""
+			cardBrand := ""
+			lastFour := ""
+			if user.Provider == "Apple" || user.Provider == "Android" {
+				external = user.Provider
+			} else {
+				_, cardBrand, lastFour, err = getPaymentMethodDetails(user.Provider)
+				if err != nil {
+					c.HTML(200, "error.tmpl", nil)
+					return
+				}
+			}
+
+			c.HTML(200, "alreadypaying.tmpl", gin.H{
+				"Email":    email,
+				"UserID":   user.ID.Hex(),
+				"External": external,
+				"Brand":    cardBrand,
+				"Four":     lastFour,
+			})
 			return
 		}
 

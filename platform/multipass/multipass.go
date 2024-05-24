@@ -17,20 +17,23 @@ func Multipass(authClient *auth.Client, database *mongo.Database) gin.HandlerFun
 		code := c.Query("code")
 
 		if status := checkSpecialCode(code, database); !status || token == "" {
-			c.JSON(400, gin.H{
-				"error": "invalid code",
-			})
+			c.Redirect(http.StatusFound, "/pay")
+			go func() {
+				deleteSpecialCode(code, database)
+			}()
+			return
 		}
 
 		if _, err := authClient.VerifyIDToken(context.Background(), token); err != nil {
-			c.JSON(400, gin.H{
-				"error": "invalid token",
-			})
+			c.Redirect(http.StatusFound, "/pay")
+			go func() {
+				deleteSpecialCode(code, database)
+			}()
+			return
 		}
 
 		if err := login.Cookie(token, refresh, authClient, c); err != nil {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Failed to create a session cookie"})
-			return
+			c.Redirect(http.StatusFound, "/pay")
 		}
 
 		go func() {
