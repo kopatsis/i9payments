@@ -17,8 +17,8 @@
             Display Name: <span x-text="name"></span>
             <button @click="editing = true">Edit</button>
         </div>
-        <form x-show="editing" action="/updateName" method="POST">
-            <input type="hidden" name="user_id" value="{{.UserID}}">
+        <form x-show="editing" action="/update_display_name" method="POST">
+            <input type="hidden" name="id" value="{{.ID}}">
             <input type="text" name="name" x-model="name">
             <button type="submit">Save</button>
             <button type="button" @click="editing = false">Cancel</button>
