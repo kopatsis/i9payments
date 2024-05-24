@@ -13,10 +13,10 @@ func CancelPayment(auth *auth.Client, database *mongo.Database) gin.HandlerFunc 
 	return func(c *gin.Context) {
 
 		var req struct {
-			UserID string `json:"user"`
+			UserID string `form:"user"`
 		}
 
-		if err := c.ShouldBindJSON(&req); err != nil {
+		if err := c.ShouldBind(&req); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request payload"})
 			return
 		}

@@ -8,6 +8,7 @@ import (
 
 	"firebase.google.com/go/auth"
 	"github.com/gin-gonic/gin"
+	"github.com/stripe/stripe-go/sub"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -37,6 +38,7 @@ func Subscription(auth *auth.Client, database *mongo.Database) gin.HandlerFunc {
 			external := ""
 			cardBrand := ""
 			lastFour := ""
+			customerID := ""
 			if user.Provider == "Apple" || user.Provider == "Android" {
 				external = user.Provider
 			} else {
@@ -45,14 +47,22 @@ func Subscription(auth *auth.Client, database *mongo.Database) gin.HandlerFunc {
 					c.HTML(200, "error.tmpl", nil)
 					return
 				}
+				s, err := sub.Get(user.Provider, nil)
+				if err != nil {
+					c.HTML(200, "error.tmpl", nil)
+					return
+				}
+				customerID = s.Customer.ID
 			}
 
 			c.HTML(200, "alreadypaying.tmpl", gin.H{
-				"Email":    email,
-				"UserID":   user.ID.Hex(),
-				"External": external,
-				"Brand":    cardBrand,
-				"Four":     lastFour,
+				"Email":        email,
+				"UserID":       user.ID.Hex(),
+				"External":     external,
+				"Brand":        cardBrand,
+				"Four":         lastFour,
+				"Customer":     customerID,
+				"Subscription": user.Provider,
 			})
 			return
 		}

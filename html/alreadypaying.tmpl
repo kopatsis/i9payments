@@ -1,59 +1,74 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Cancel Membership</title>
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.2.3"></script>
-</head>
-<body>
+  </head>
+  <body>
+    <p>Email: {{.Email}}</p>
+    {{ if .External }}
+    <p>Your payment is managed externally through {{.External}}.</p>
+    {{ else }}
+    <p>
+      Your payment is managed by a card with the brand {{.Brand}} and last four
+      digits of {{.Four}}.
+    </p>
+    {{ end }}
 
-<div x-data="cancelHandler()" x-init="init()">
-    <form id="cancel-form" @submit.prevent="handleSubmit">
-        <p>Email: <span x-text="email"></span></p>
-        <input type="hidden" name="user" x-model="userId">
+    <div x-data="cancelHandler()" x-init="init()">
+      <form id="cancel-form" @submit.prevent="handleSubmit">
+        <input type="hidden" name="user" value="{{.UserID}}" />
         <button type="submit">Manage Membership</button>
-    </form>
-</div>
+      </form>
+      <div x-show="errorMessage" x-text="errorMessage" style="color: red"></div>
+    </div>
 
-<script>
-function cancelHandler() {
-    return {
-        email: '',
-        userId: '',
+    <script>
+      function cancelHandler() {
+        return {
+          email: "{{.Email}}",
+          userId: "{{.UserID}}",
+          external: "{{.External}}",
+          cardBrand: "{{.Brand}}",
+          lastFour: "{{.Four}}",
+          errorMessage: "",
 
-        init() {
-            this.email = document.getElementById('user-data').dataset.email;
-            this.userId = document.getElementById('user-data').dataset.id;
-        },
-
-        async handleSubmit() {
-            const form = document.getElementById('cancel-form');
+          async handleSubmit() {
+            this.errorMessage = "";
+            const form = document.getElementById("cancel-form");
             const formData = new FormData(form);
 
-            const response = await fetch('/cancel_membership', {
-                method: 'POST',
-                body: formData,
+            const response = await fetch("/cancel_membership", {
+              method: "POST",
+              body: formData,
             });
 
             if (response.ok) {
-                const result = await response.json();
-                console.log('Membership canceled:', result);
-                // Handle success (e.g., show a success message)
+              window.location.href = "/";
             } else {
-                console.error('Failed to cancel membership:', response.statusText);
-                // Handle error (e.g., show an error message)
+              const result = await response.json();
+              this.errorMessage =
+                "Failed to cancel membership: " +
+                (result.message || response.statusText);
             }
-        }
-    }
-}
+          },
+        };
+      }
 
-document.addEventListener('alpine:init', () => {
-    Alpine.data('cancelHandler', cancelHandler);
-});
-</script>
+      document.addEventListener("alpine:init", () => {
+        Alpine.data("cancelHandler", cancelHandler);
+      });
+    </script>
 
-<div id="user-data" data-email="{{.Email}}" data-id="{{.UserID}}" style="display: none;"></div>
-
-</body>
+    <div
+      id="user-data"
+      data-email="{{.Email}}"
+      data-id="{{.UserID}}"
+      data-customer="{{.Customer}}"
+      data-subscription="{{.Subscription}}"
+      style="display: none"
+    ></div>
+  </body>
 </html>
