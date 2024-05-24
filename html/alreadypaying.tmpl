@@ -1,74 +1,123 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cancel Membership</title>
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.2.3"></script>
-  </head>
-  <body>
-    <p>Email: {{.Email}}</p>
-    {{ if .External }}
-    <p>Your payment is managed externally through {{.External}}.</p>
-    {{ else }}
-    <p>
-      Your payment is managed by a card with the brand {{.Brand}} and last four
-      digits of {{.Four}}.
-    </p>
-    {{ end }}
+    <script src="https://js.stripe.com/v3/"></script>
+    <style>
+        #payment-update-form {
+            display: none;
+        }
+    </style>
+</head>
+<body>
 
-    <div x-data="cancelHandler()" x-init="init()">
-      <form id="cancel-form" @submit.prevent="handleSubmit">
-        <input type="hidden" name="user" value="{{.UserID}}" />
+<div x-data="cancelHandler()" x-init="init()">
+    <form id="cancel-form" @submit.prevent="handleSubmit">
+        <p>Email: {{.Email}}</p>
+        {{ if .External }}
+        <p>Your payment is managed externally through {{.External}}.</p>
+        {{ else }}
+        <p>Your payment is managed by a card with the brand {{.Brand}} and last four digits of {{.Four}}.</p>
+        {{ end }}
+        <input type="hidden" name="user" value="{{.UserID}}">
         <button type="submit">Manage Membership</button>
-      </form>
-      <div x-show="errorMessage" x-text="errorMessage" style="color: red"></div>
+    </form>
+    <div x-show="errorMessage" x-text="errorMessage" style="color: red;"></div>
+
+    <button @click="togglePaymentUpdateForm">Update Payment Method</button>
+    <div id="payment-update-form">
+        <form id="update-payment-form" @submit.prevent="handlePaymentUpdate">
+            <div id="card-element"><!-- Stripe Elements will be inserted here --></div>
+            <button type="submit">Update Payment Method</button>
+        </form>
     </div>
+</div>
 
-    <script>
-      function cancelHandler() {
-        return {
-          email: "{{.Email}}",
-          userId: "{{.UserID}}",
-          external: "{{.External}}",
-          cardBrand: "{{.Brand}}",
-          lastFour: "{{.Four}}",
-          errorMessage: "",
+<script>
+function cancelHandler() {
+    return {
+        email: '{{.Email}}',
+        userId: '{{.UserID}}',
+        external: '{{.External}}',
+        cardBrand: '{{.Brand}}',
+        lastFour: '{{.Four}}',
+        customerID: '{{.Customer}}',
+        subscriptionID: '{{.Subscription}}',
+        errorMessage: '',
+        stripe: null,
+        card: null,
 
-          async handleSubmit() {
-            this.errorMessage = "";
-            const form = document.getElementById("cancel-form");
+        init() {
+            const stripe = Stripe('your-publishable-key');
+            const elements = stripe.elements();
+            const card = elements.create('card');
+            card.mount('#card-element');
+            this.stripe = stripe;
+            this.card = card;
+        },
+
+        togglePaymentUpdateForm() {
+            const form = document.getElementById('payment-update-form');
+            form.style.display = form.style.display === 'none' ? 'block' : 'none';
+        },
+
+        async handleSubmit() {
+            this.errorMessage = '';
+            const form = document.getElementById('cancel-form');
             const formData = new FormData(form);
 
-            const response = await fetch("/cancel_membership", {
-              method: "POST",
-              body: formData,
+            const response = await fetch('/cancel', {
+                method: 'POST',
+                body: formData,
             });
 
             if (response.ok) {
-              window.location.href = "/";
+                window.location.href = '/';
             } else {
-              const result = await response.json();
-              this.errorMessage =
-                "Failed to cancel membership: " +
-                (result.message || response.statusText);
+                const result = await response.json();
+                this.errorMessage = 'Failed to cancel membership: ' + (result.message || response.statusText);
             }
-          },
-        };
-      }
+        },
 
-      document.addEventListener("alpine:init", () => {
-        Alpine.data("cancelHandler", cancelHandler);
-      });
-    </script>
+        async handlePaymentUpdate() {
+            const {paymentMethod, error} = await this.stripe.createPaymentMethod('card', this.card);
 
-    <div
-      id="user-data"
-      data-email="{{.Email}}"
-      data-id="{{.UserID}}"
-      data-customer="{{.Customer}}"
-      data-subscription="{{.Subscription}}"
-      style="display: none"
-    ></div>
-  </body>
+            if (error) {
+                this.errorMessage = error.message;
+                return;
+            }
+
+            const response = await fetch('/update', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    subscription_id: this.subscriptionID,
+                    payment_method_id: paymentMethod.id,
+                    customer_id: this.customerID,
+                }),
+            });
+
+            if (response.ok) {
+                window.location.href = '/';
+            } else {
+                const result = await response.json();
+                this.errorMessage = 'Failed to update payment method: ' + (result.message || response.statusText);
+            }
+        }
+    }
+}
+
+document.addEventListener('alpine:init', () => {
+    Alpine.data('cancelHandler', cancelHandler);
+});
+</script>
+
+<div id="user-data" data-email="{{.Email}}" data-id="{{.UserID}}" data-external="{{.External}}" data-brand="{{.Brand}}" data-four="{{.Four}}" data-customer="{{.Customer}}" data-subscription="{{.Subscription}}" style="display: none;"></div>
+
+</body>
 </html>

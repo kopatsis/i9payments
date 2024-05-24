@@ -29,6 +29,8 @@ func New(auth *auth.Client, database *mongo.Database) *gin.Engine {
 
 	router.POST("/verifyToken", login.VerifyToken(auth))
 	router.POST("/process-payment", pay.PostPayment(auth))
+	router.POST("/cancel", pay.CancelPayment(auth, database))
+	router.POST("/update", pay.UpdateSubscriptionPaymentMethod())
 
 	return router
 }
