@@ -44,6 +44,17 @@
       ></div>
     </div>
 
+    <div x-data="{ showConfirmation: false }">
+        <button @click="showConfirmation = true">Delete Account</button>
+        
+        <form x-show="showConfirmation" action="/delete" method="POST" @submit="showConfirmation = false">
+            <p>Are you sure you want to delete your account?</p>
+            <input type="hidden" name="id" value="{{.ID}}">
+            <button type="submit">Yes, Delete</button>
+            <button type="button" @click="showConfirmation = false">Cancel</button>
+        </form>
+    </div>
+
     <div id="user-data" data-id="{{.ID}}" style="display: none"></div>
 
     <script>
