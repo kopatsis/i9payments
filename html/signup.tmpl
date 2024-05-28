@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Login Page</title>
+    <title>Register Page</title>
     <script
       src="https://cdn.jsdelivr.net/npm/alpinejs@3.10.0/dist/cdn.min.js"
       defer
@@ -12,7 +12,7 @@
       import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
       import {
         getAuth,
-        signInWithEmailAndPassword,
+        createUserWithEmailAndPassword,
       } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
 
       const firebaseConfig = {
@@ -28,8 +28,8 @@
       window.auth = getAuth(app);
     </script>
   </head>
-  <body x-data="loginHandler">
-    <h1>Login</h1>
+  <body x-data="registerHandler">
+    <h1>Register</h1>
     {{ if .Email }}
     <div style="margin-top: 20px">
       <p>
@@ -43,19 +43,34 @@
 
     <input type="email" x-model="email" placeholder="Email" />
     <input type="password" x-model="password" placeholder="Password" />
-    <button @click="login">Login</button>
+    <input type="password" x-model="confirmPassword" placeholder="Confirm Password" />
+    <button @click="register">Register</button>
+    <div id="error-message" style="display: none; color: red;"></div>
 
-    <a href="/new" style="text-decoration: none">
-      <button type="button">Create New Account</button>
-    </a>
+    <a href="/login" style="text-decoration: none">
+        <button type="button">Login to existing Account</button>
+      </a>
 
     <script>
-      function loginHandler() {
+      function registerHandler() {
         return {
           email: "",
           password: "",
-          login() {
-            signInWithEmailAndPassword(auth, this.email, this.password)
+          confirmPassword: "",
+          register() {
+            if (!this.isValidPassword(this.password)) {
+              document.getElementById('error-message').textContent = "Password must be at least 10 characters long, include at least one letter and one number.";
+              document.getElementById('error-message').style.display = 'block';
+              return;
+            }
+
+            if (this.password !== this.confirmPassword) {
+              document.getElementById('error-message').textContent = "Passwords do not match.";
+              document.getElementById('error-message').style.display = 'block';
+              return;
+            }
+
+            createUserWithEmailAndPassword(auth, this.email, this.password)
               .then((userCredential) => {
                 const idToken = userCredential.user.getIdToken();
                 const refreshToken = userCredential.user.refreshToken;
@@ -84,9 +99,12 @@
                 }
               })
               .catch((error) => {
-                console.error("Login failed:", error.code, error.message);
+                console.error("Registration failed:", error.code, error.message);
               });
           },
+          isValidPassword(password) {
+            return /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{10,}$/.test(password);
+          }
         };
       }
     </script>

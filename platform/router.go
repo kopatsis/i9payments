@@ -26,6 +26,7 @@ func New(auth *auth.Client, database *mongo.Database) *gin.Engine {
 	router.GET("/code", multipass.SpecialCode(database))
 
 	router.GET("/login", login.LoginPage(auth))
+	router.GET("/new", login.SignUpPage(auth))
 
 	router.POST("/verifyToken", login.VerifyToken(auth))
 	router.POST("/process-payment", pay.PostPayment(auth))
