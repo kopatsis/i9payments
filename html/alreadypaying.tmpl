@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cancel Membership</title>
+    <title>Manage Membership</title>
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.2.3"></script>
     <script src="https://js.stripe.com/v3/"></script>
     <style>
@@ -23,7 +23,7 @@
         <p>Your payment is managed by a card with the brand {{.Brand}} and last four digits of {{.Four}}.</p>
         {{ end }}
         <input type="hidden" name="user" value="{{.UserID}}">
-        <button type="submit">Manage Membership</button>
+        <button type="submit">Cancel Membership</button>
     </form>
     <div x-show="errorMessage" x-text="errorMessage" style="color: red;"></div>
 

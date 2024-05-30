@@ -23,3 +23,14 @@ type User struct {
 	LastDifficulty    int                `bson:"lastdiff"`
 	Assessed          bool               `bson:"assessed"`
 }
+
+type UserPayment struct {
+	ID             primitive.ObjectID  `bson:"_id,omitempty"`
+	Username       string              `bson:"username"`
+	Provider       string              `bson:"provider"`
+	SubscriptionID string              `bson:"subid"`
+	SubLength      string              `bson:"length"`
+	EndDate        primitive.Timestamp `bson:"end"`
+	SwitchDate     primitive.Timestamp `bson:"switch"`
+	Processing     bool                `bson:"processing"`
+}
