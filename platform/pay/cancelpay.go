@@ -1,6 +1,7 @@
 package pay
 
 import (
+	"i9pay/platform/multipass"
 	"log"
 	"net/http"
 	"time"
@@ -15,26 +16,23 @@ import (
 func CancelPayment(auth *auth.Client, database *mongo.Database) gin.HandlerFunc {
 	return func(c *gin.Context) {
 
-		var req struct {
-			UserID string `form:"user"`
-		}
-
-		if err := c.ShouldBind(&req); err != nil {
-			log.Printf("Error in binding the request payload: %s", err.Error())
+		_, userid, err := multipass.BothIDsFromCookie(c, auth, database)
+		if err != nil {
+			log.Printf("Error in getting the user: %s", err.Error())
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request payload"})
 			return
 		}
 
-		subID, err := userIdToSubscriptionId(database, req.UserID)
+		subID, err := userIdToSubscriptionId(database, userid)
 		if err != nil || subID == "" {
-			log.Printf("Error in getting subID for user: %s; %s", req.UserID, err.Error())
+			log.Printf("Error in getting subID for user: %s; %s", userid, err.Error())
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Some issue with user"})
 			return
 		}
 
 		stripeSub, err := sub.Get(subID, nil)
 		if err != nil {
-			log.Printf("Error in getting sub for sub ID: %s; for user: %s; %s", subID, req.UserID, err.Error())
+			log.Printf("Error in getting sub for sub ID: %s; for user: %s; %s", subID, userid, err.Error())
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve subscription from Stripe"})
 			return
 		}
@@ -43,20 +41,20 @@ func CancelPayment(auth *auth.Client, database *mongo.Database) gin.HandlerFunc 
 
 		_, err = sub.Cancel(subID, nil)
 		if err != nil {
-			log.Printf("Error in cancelling sub for sub ID: %s; for user: %s; %s", subID, req.UserID, err.Error())
+			log.Printf("Error in cancelling sub for sub ID: %s; for user: %s; %s", subID, userid, err.Error())
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to cancel subscription on stripe side"})
 			return
 		}
 
-		cancelID, err := backupCancellation(database, subID, req.UserID, endTime)
+		cancelID, err := backupCancellation(database, subID, userid, endTime)
 		if err != nil {
-			log.Printf("Error in pushing backup post for sub ID: %s; for user: %s; %s", subID, req.UserID, err.Error())
+			log.Printf("Error in pushing backup post for sub ID: %s; for user: %s; %s", subID, userid, err.Error())
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save cancellation backup"})
 			return
 		}
 
 		scheduler := gocron.NewScheduler(time.UTC)
-		scheduleCancellation(scheduler, database, req.UserID, cancelID, endTime)
+		scheduleCancellation(scheduler, database, userid, cancelID, endTime)
 		scheduler.StartAsync()
 
 		c.JSON(http.StatusOK, gin.H{"message": "Subscription cancelled successfully"})

@@ -4,7 +4,10 @@ import (
 	"context"
 	"fmt"
 	"i9pay/db"
+	"i9pay/platform/login"
 
+	"firebase.google.com/go/auth"
+	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -77,4 +80,19 @@ func UserFromUID(sub string, database *mongo.Database) (*db.User, error) {
 	}
 
 	return &user, nil
+}
+
+func BothIDsFromCookie(c *gin.Context, authClient *auth.Client, database *mongo.Database) (uid string, userid string, reterror error) {
+	uid, err := login.ExtractUIDFromSession(c, authClient)
+	if err != nil {
+		return "", "", err
+	}
+
+	user, err := UserFromUID(uid, database)
+	if err != nil {
+		return "", "", err
+	}
+
+	return uid, user.ID.Hex(), nil
+
 }

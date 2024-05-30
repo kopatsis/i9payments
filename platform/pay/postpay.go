@@ -1,7 +1,6 @@
 package pay
 
 import (
-	"i9pay/platform/login"
 	"i9pay/platform/multipass"
 	"net/http"
 
@@ -21,15 +20,9 @@ func PostPayment(auth *auth.Client, database *mongo.Database) gin.HandlerFunc {
 		paymentMethodID := c.PostForm("paymentMethod")
 		subscription := c.PostForm("subscription")
 
-		uid, err := login.ExtractUIDFromSession(c, auth)
+		uid, userid, err := multipass.BothIDsFromCookie(c, auth, database)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
-		}
-
-		user, err := multipass.UserFromUID(uid, database)
-		if err != nil {
-			c.Redirect(http.StatusFound, "/login")
 			return
 		}
 
@@ -43,7 +36,7 @@ func PostPayment(auth *auth.Client, database *mongo.Database) gin.HandlerFunc {
 			PaymentMethod: stripe.String(paymentMethodID),
 		}
 		customerParams.Metadata = map[string]string{
-			"userId": user.ID.Hex(),
+			"userId": userid,
 		}
 
 		stripeCustomer, err := customer.New(customerParams)
@@ -80,7 +73,7 @@ func PostPayment(auth *auth.Client, database *mongo.Database) gin.HandlerFunc {
 				},
 			},
 		}
-		subscriptionParams.AddMetadata("userId", user.ID.Hex())
+		subscriptionParams.AddMetadata("userId", userid)
 
 		newsub, err := sub.New(subscriptionParams)
 		if err != nil {
@@ -88,7 +81,7 @@ func PostPayment(auth *auth.Client, database *mongo.Database) gin.HandlerFunc {
 			return
 		}
 
-		if err := setUserPayingPartial(database, newsub.ID, uid, subscription, user.ID.Hex()); err != nil {
+		if err := setUserPayingPartial(database, newsub.ID, uid, subscription, userid); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}

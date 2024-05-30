@@ -57,7 +57,6 @@ func Subscription(auth *auth.Client, database *mongo.Database) gin.HandlerFunc {
 
 			c.HTML(200, "alreadypaying.tmpl", gin.H{
 				"Email":        email,
-				"UserID":       user.ID.Hex(),
 				"External":     external,
 				"Brand":        cardBrand,
 				"Four":         lastFour,
@@ -67,9 +66,7 @@ func Subscription(auth *auth.Client, database *mongo.Database) gin.HandlerFunc {
 			return
 		}
 
-		c.HTML(200, "pay.tmpl", gin.H{
-			"UserEmail": email,
-		})
+		c.HTML(200, "pay.tmpl", nil)
 
 	}
 }
