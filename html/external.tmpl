@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>External Payment Provider</title>
+</head>
+<body>
+
+<div>Your subscription is currently managed through {{.Provider}}</div>
+<div>Because of restrictions for subscriptions through {{.Provider}}, we can't manage subscriptions through our interface.</div>
+
+{{ if eq .Provider "Apple" }}
+    <div><a href="https://apps.apple.com/account/subscriptions" target="_blank">Manage your iOS subscriptions here</a></div>
+{{ else }}
+    <div><a href="https://play.google.com/store/account/subscriptions" target="_blank">Manage your iOS subscriptions here</a></div>
+{{ end }}
+
+</body>
+</html>

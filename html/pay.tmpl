@@ -10,7 +10,7 @@
 <body>
 
 <div x-data="paymentHandler()" x-init="init()">
-    <form id="payment-form" action="/process-payment" method="POST" @submit.prevent="handlePayment">
+    <form id="payment-form" @submit.prevent="handlePayment">
         <div>
             <label>
                 <input type="radio" name="subscription" value="monthly" x-model="subscription" checked>
@@ -59,7 +59,23 @@ function paymentHandler() {
                 messageElement.style.display = 'block';
             } else {
                 this.paymentMethod = paymentMethod.id;
-                this.$el.submit();
+                await this.submitPayment();
+            }
+        },
+
+        async submitPayment() {
+            const formData = new FormData(document.getElementById('payment-form'));
+            const response = await fetch('/process-payment', {
+                method: 'POST',
+                body: formData,
+                credentials: 'include'
+            });
+            if (!response.ok) {
+                const messageElement = document.getElementById('payment-message');
+                messageElement.textContent = 'Payment failed. Please try again.';
+                messageElement.style.display = 'block';
+            } else {
+                location.reload();
             }
         }
     }
@@ -74,3 +90,4 @@ document.addEventListener('alpine:init', () => {
 
 </body>
 </html>
+

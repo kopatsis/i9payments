@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subscription Ending Soon</title>
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.2.3" defer></script>
+</head>
+<body>
+
+<div x-data="undoHandler({{.UserID}}, '{{.ErrorMessage}}')">
+    <div>Your subscription is still active, but has been cancelled and will be ending on {{.Date}}</div>
+    <button @click="undoCancellation">Undo Cancellation</button>
+    <div x-show="errorMessage" x-text="errorMessage" style="color: red;"></div>
+</div>
+
+<script>
+function undoHandler(userID, errorMessage) {
+    return {
+        userID: userID,
+        errorMessage: '',
+        async undoCancellation() {
+            try {
+                const response = await fetch('/uncancel', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ userID: this.userID }),
+                    credentials: 'include'
+                });
+                if (response.ok) {
+                    location.reload();
+                } else {
+                    this.errorMessage = errorMessage;
+                }
+            } catch (error) {
+                this.errorMessage = 'An error occurred. Please try again.';
+            }
+        }
+    }
+}
+</script>
+
+</body>
+</html>

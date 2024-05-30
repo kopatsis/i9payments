@@ -72,10 +72,11 @@ function cancelHandler() {
             const response = await fetch('/cancel', {
                 method: 'POST',
                 body: formData,
+                credentials: 'include'
             });
 
             if (response.ok) {
-                window.location.href = '/';
+                location.reload();
             } else {
                 const result = await response.json();
                 this.errorMessage = 'Failed to cancel membership: ' + (result.message || response.statusText);
@@ -100,10 +101,11 @@ function cancelHandler() {
                     payment_method_id: paymentMethod.id,
                     customer_id: this.customerID,
                 }),
+                credentials: 'include'
             });
 
             if (response.ok) {
-                window.location.href = '/';
+                location.reload();
             } else {
                 const result = await response.json();
                 this.errorMessage = 'Failed to update payment method: ' + (result.message || response.statusText);
