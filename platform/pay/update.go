@@ -12,6 +12,7 @@ import (
 
 func UpdateSubscriptionPaymentMethod() gin.HandlerFunc {
 	return func(c *gin.Context) {
+
 		var req struct {
 			SubscriptionID  string `json:"subscription_id"`
 			PaymentMethodID string `json:"payment_method_id"`
