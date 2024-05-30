@@ -18,7 +18,6 @@
             <button @click="editing = true">Edit</button>
         </div>
         <form x-show="editing" action="/update_display_name" method="POST">
-            <input type="hidden" name="id" value="{{.ID}}">
             <input type="text" name="name" x-model="name">
             <button type="submit">Save</button>
             <button type="button" @click="editing = false">Cancel</button>
@@ -49,13 +48,10 @@
         
         <form x-show="showConfirmation" action="/delete" method="POST" @submit="showConfirmation = false">
             <p>Are you sure you want to delete your account?</p>
-            <input type="hidden" name="id" value="{{.ID}}">
             <button type="submit">Yes, Delete</button>
             <button type="button" @click="showConfirmation = false">Cancel</button>
         </form>
     </div>
-
-    <div id="user-data" data-id="{{.ID}}" style="display: none"></div>
 
     <script>
       function firebaseHandler(email) {

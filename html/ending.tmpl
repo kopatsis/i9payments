@@ -8,16 +8,15 @@
 </head>
 <body>
 
-<div x-data="undoHandler({{.UserID}}, '{{.ErrorMessage}}')">
+<div x-data="undoHandler()">
     <div>Your subscription is still active, but has been cancelled and will be ending on {{.Date}}</div>
     <button @click="undoCancellation">Undo Cancellation</button>
     <div x-show="errorMessage" x-text="errorMessage" style="color: red;"></div>
 </div>
 
 <script>
-function undoHandler(userID, errorMessage) {
+function undoHandler() {
     return {
-        userID: userID,
         errorMessage: '',
         async undoCancellation() {
             try {
@@ -26,13 +25,12 @@ function undoHandler(userID, errorMessage) {
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ userID: this.userID }),
                     credentials: 'include'
                 });
                 if (response.ok) {
                     location.reload();
                 } else {
-                    this.errorMessage = errorMessage;
+                    this.errorMessage = 'Failed to undo cancellation. Please try again.';
                 }
             } catch (error) {
                 this.errorMessage = 'An error occurred. Please try again.';

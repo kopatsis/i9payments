@@ -22,7 +22,6 @@
         {{ else }}
         <p>Your payment is managed by a card with the brand {{.Brand}} and last four digits of {{.Four}}.</p>
         {{ end }}
-        <input type="hidden" name="user" value="{{.UserID}}">
         <button type="submit">Cancel Membership</button>
     </form>
     <div x-show="errorMessage" x-text="errorMessage" style="color: red;"></div>
@@ -40,7 +39,6 @@
 function cancelHandler() {
     return {
         email: '{{.Email}}',
-        userId: '{{.UserID}}',
         external: '{{.External}}',
         cardBrand: '{{.Brand}}',
         lastFour: '{{.Four}}',
@@ -119,7 +117,7 @@ document.addEventListener('alpine:init', () => {
 });
 </script>
 
-<div id="user-data" data-email="{{.Email}}" data-id="{{.UserID}}" data-external="{{.External}}" data-brand="{{.Brand}}" data-four="{{.Four}}" data-customer="{{.Customer}}" data-subscription="{{.Subscription}}" style="display: none;"></div>
+<div id="user-data" data-email="{{.Email}}" data-external="{{.External}}" data-brand="{{.Brand}}" data-four="{{.Four}}" data-customer="{{.Customer}}" data-subscription="{{.Subscription}}" style="display: none;"></div>
 
 </body>
 </html>
