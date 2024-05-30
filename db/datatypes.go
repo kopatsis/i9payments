@@ -26,6 +26,7 @@ type User struct {
 
 type UserPayment struct {
 	ID             primitive.ObjectID  `bson:"_id,omitempty"`
+	UserMongoID    string              `bson:"userid"`
 	Username       string              `bson:"username"`
 	Provider       string              `bson:"provider"`
 	SubscriptionID string              `bson:"subid"`

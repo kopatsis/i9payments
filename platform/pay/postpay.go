@@ -1,6 +1,8 @@
 package pay
 
 import (
+	"i9pay/platform/login"
+	"i9pay/platform/multipass"
 	"net/http"
 
 	"firebase.google.com/go/auth"
@@ -9,14 +11,27 @@ import (
 	"github.com/stripe/stripe-go/v72/customer"
 	"github.com/stripe/stripe-go/v72/paymentmethod"
 	"github.com/stripe/stripe-go/v72/sub"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func PostPayment(auth *auth.Client) gin.HandlerFunc {
+func PostPayment(auth *auth.Client, database *mongo.Database) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		email := c.PostForm("email")
-		userId := c.PostForm("userId")
+
 		paymentMethodID := c.PostForm("paymentMethod")
 		subscription := c.PostForm("subscription")
+
+		uid, err := login.ExtractUIDFromSession(c, auth)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		user, err := multipass.UserFromUID(uid, database)
+		if err != nil {
+			c.Redirect(http.StatusFound, "/login")
+			return
+		}
 
 		priceID := "price_1PJfbQIstWH7VBmuNNsoLTN2"
 		if subscription == "yearly" {
@@ -28,7 +43,7 @@ func PostPayment(auth *auth.Client) gin.HandlerFunc {
 			PaymentMethod: stripe.String(paymentMethodID),
 		}
 		customerParams.Metadata = map[string]string{
-			"userId": userId,
+			"userId": user.ID.Hex(),
 		}
 
 		stripeCustomer, err := customer.New(customerParams)
@@ -65,10 +80,15 @@ func PostPayment(auth *auth.Client) gin.HandlerFunc {
 				},
 			},
 		}
-		subscriptionParams.AddMetadata("userId", userId)
+		subscriptionParams.AddMetadata("userId", user.ID.Hex())
 
 		newsub, err := sub.New(subscriptionParams)
 		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		if err := setUserPayingPartial(database, newsub.ID, uid, subscription, user.ID.Hex()); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}

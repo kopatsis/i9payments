@@ -25,7 +25,6 @@
         <button type="submit">Pay</button>
         <input type="hidden" name="paymentMethod" x-model="paymentMethod">
         <input type="hidden" name="email" :value="email">
-        <input type="hidden" name="userId" :value="userId">
         <input type="hidden" name="subscription" :value="subscription">
     </form>
 
@@ -39,7 +38,6 @@ function paymentHandler() {
         cardElement: null,
         paymentMethod: '',
         email: document.getElementById('user-data').dataset.email,
-        userId: document.getElementById('user-data').dataset.id,
         subscription: 'monthly',
 
         init() {
@@ -86,7 +84,7 @@ document.addEventListener('alpine:init', () => {
 });
 </script>
 
-<div id="user-data" data-email="{{.UserEmail}}" data-id="{{.UserID}}" style="display: none;"></div>
+<div id="user-data" data-email="{{.UserEmail}}" style="display: none;"></div>
 
 </body>
 </html>

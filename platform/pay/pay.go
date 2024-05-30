@@ -69,7 +69,6 @@ func Subscription(auth *auth.Client, database *mongo.Database) gin.HandlerFunc {
 
 		c.HTML(200, "pay.tmpl", gin.H{
 			"UserEmail": email,
-			"UserID":    user.ID.Hex(),
 		})
 
 	}

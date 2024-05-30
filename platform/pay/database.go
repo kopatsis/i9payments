@@ -2,6 +2,7 @@ package pay
 
 import (
 	"context"
+	"i9pay/db"
 	"log"
 	"time"
 
@@ -35,6 +36,28 @@ func setUserPaying(database *mongo.Database, subscriptionID, userID string) erro
 
 	collection := database.Collection("user")
 	_, err = collection.UpdateOne(context.TODO(), filter, update)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func setUserPayingPartial(database *mongo.Database, subscriptionID, firebaseID, length, userid string) error {
+
+	partial := db.UserPayment{
+		UserMongoID:    userid,
+		Username:       firebaseID,
+		Provider:       "Stripe",
+		SubscriptionID: subscriptionID,
+		SubLength:      length,
+		EndDate:        primitive.Timestamp{},
+		SwitchDate:     primitive.Timestamp{},
+		Processing:     true,
+	}
+
+	collection := database.Collection("userpayment")
+	_, err := collection.InsertOne(context.TODO(), partial)
 	if err != nil {
 		return err
 	}
