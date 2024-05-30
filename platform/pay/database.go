@@ -40,6 +40,19 @@ func setUserPaying(database *mongo.Database, subscriptionID, userID string) erro
 		return err
 	}
 
+	userPaymentFilter := bson.M{"userid": userID}
+	userPaymentUpdate := bson.M{
+		"$set": bson.M{
+			"processing": false,
+		},
+	}
+
+	userPaymentCollection := database.Collection("userpayment")
+	_, err = userPaymentCollection.UpdateOne(context.TODO(), userPaymentFilter, userPaymentUpdate)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -99,29 +112,31 @@ func setUserNotPaying(database *mongo.Database, userID string) error {
 		return err
 	}
 
+	userPaymentFilter := bson.M{"userid": userID}
+	userPaymentCollection := database.Collection("userpaying")
+	_, err = userPaymentCollection.DeleteOne(context.TODO(), userPaymentFilter)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
 func userIdToSubscriptionId(database *mongo.Database, userID string) (string, error) {
-	objID, err := primitive.ObjectIDFromHex(userID)
-	if err != nil {
-		return "", err
-	}
-
-	filter := bson.M{"_id": objID}
-	projection := bson.M{"provider": 1}
+	filter := bson.M{"userid": userID}
+	projection := bson.M{"subid": 1}
 
 	var result struct {
-		Provider string `bson:"provider"`
+		SubID string `bson:"subid"`
 	}
 
-	collection := database.Collection("user")
-	err = collection.FindOne(context.TODO(), filter, options.FindOne().SetProjection(projection)).Decode(&result)
+	collection := database.Collection("userpayment")
+	err := collection.FindOne(context.TODO(), filter, options.FindOne().SetProjection(projection)).Decode(&result)
 	if err != nil {
 		return "", err
 	}
 
-	return result.Provider, nil
+	return result.SubID, nil
 }
 
 func backupCancellation(database *mongo.Database, subID, userID string, endTime time.Time) (string, error) {
