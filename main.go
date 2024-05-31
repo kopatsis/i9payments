@@ -34,7 +34,7 @@ func main() {
 
 	stripe.Key = os.Getenv("STRIPE_SECRET")
 
-	rtr := platform.New(auth, database)
+	rtr := platform.New(auth, database, scheduler)
 
 	port := os.Getenv("PORT")
 	if port == "" {
