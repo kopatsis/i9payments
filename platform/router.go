@@ -33,6 +33,8 @@ func New(auth *auth.Client, database *mongo.Database, scheduler *gocron.Schedule
 	router.POST("/process-payment", pay.PostPayment(auth, database))
 	router.POST("/cancel", pay.CancelPayment(auth, database, scheduler))
 	router.POST("/update", pay.UpdateSubscriptionPaymentMethod())
+	router.POST("/uncancel", pay.PostUncancel(auth, database, scheduler))
+	router.POST("/swap", pay.UpdateFrequency(auth, database))
 
 	return router
 }

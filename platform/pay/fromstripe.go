@@ -48,11 +48,11 @@ func UpdateSubscriptionPlan(subscriptionID, newPriceID string) error {
 	updateParams := &stripe.SubscriptionParams{
 		Items: []*stripe.SubscriptionItemsParams{
 			{
-				ID:    stripe.String(currentSub.Items.Data[0].ID), // Existing item ID
+				ID:    stripe.String(currentSub.Items.Data[0].ID),
 				Price: stripe.String(newPriceID),
 			},
 		},
-		ProrationBehavior: stripe.String("none"), // Change at the end of the current period
+		ProrationBehavior: stripe.String("none"),
 	}
 
 	_, err = sub.Update(subscriptionID, updateParams)
