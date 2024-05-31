@@ -21,9 +21,9 @@
         <form id="cancel-form" @submit.prevent="handleSubmit">
             <p>Email: {{.Email}}</p>
             {{ if .External }}
-            <p>Your payment is managed externally through {{.External}}.</p>
+                <p>Your payment is managed through {{.External}}.</p>
             {{ else }}
-            <p>Your payment is managed by a card with the brand {{.Brand}} and last four digits of {{.Four}}.</p>
+                <p>Your payment is managed by a card with the brand {{.Brand}} and last four digits of {{.Four}}.</p>
             {{ end }}
             <button type="submit">Cancel Membership</button>
         </form>
