@@ -168,3 +168,20 @@ func deleteCancellation(database *mongo.Database, cancelID string) error {
 	_, err = collection.DeleteOne(context.TODO(), filter)
 	return err
 }
+
+func getCancellationByUser(database *mongo.Database, userID string) (string, error) {
+	collection := database.Collection("cancellations")
+
+	filter := bson.M{"user_id": userID}
+
+	var result struct {
+		ID primitive.ObjectID `bson:"_id"`
+	}
+
+	err := collection.FindOne(context.TODO(), filter).Decode(&result)
+	if err != nil {
+		return "", err
+	}
+
+	return result.ID.Hex(), nil
+}

@@ -8,10 +8,11 @@ import (
 
 	"firebase.google.com/go/auth"
 	"github.com/gin-gonic/gin"
+	"github.com/go-co-op/gocron"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func New(auth *auth.Client, database *mongo.Database) *gin.Engine {
+func New(auth *auth.Client, database *mongo.Database, scheduler *gocron.Scheduler) *gin.Engine {
 	router := gin.Default()
 
 	router.Use(middleware.CORSMiddleware())
@@ -30,7 +31,7 @@ func New(auth *auth.Client, database *mongo.Database) *gin.Engine {
 
 	router.POST("/verifyToken", login.VerifyToken(auth))
 	router.POST("/process-payment", pay.PostPayment(auth, database))
-	router.POST("/cancel", pay.CancelPayment(auth, database))
+	router.POST("/cancel", pay.CancelPayment(auth, database, scheduler))
 	router.POST("/update", pay.UpdateSubscriptionPaymentMethod())
 
 	return router

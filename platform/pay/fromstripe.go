@@ -6,6 +6,7 @@ import (
 	"github.com/stripe/stripe-go/v72"
 	"github.com/stripe/stripe-go/v72/invoice"
 	"github.com/stripe/stripe-go/v72/paymentintent"
+	"github.com/stripe/stripe-go/v72/sub"
 )
 
 func getPaymentMethodDetails(subscriptionID string) (string, string, string, error) {
@@ -36,4 +37,28 @@ func getPaymentMethodDetails(subscriptionID string) (string, string, string, err
 		}
 	}
 	return "", "", "", fmt.Errorf("no payment method found for payment intent: %s", inv.PaymentIntent.ID)
+}
+
+func UpdateSubscriptionPlan(subscriptionID, newPriceID string) error {
+	currentSub, err := sub.Get(subscriptionID, nil)
+	if err != nil {
+		return err
+	}
+
+	updateParams := &stripe.SubscriptionParams{
+		Items: []*stripe.SubscriptionItemsParams{
+			{
+				ID:    stripe.String(currentSub.Items.Data[0].ID), // Existing item ID
+				Price: stripe.String(newPriceID),
+			},
+		},
+		ProrationBehavior: stripe.String("none"), // Change at the end of the current period
+	}
+
+	_, err = sub.Update(subscriptionID, updateParams)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

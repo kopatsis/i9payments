@@ -4,11 +4,13 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"i9pay/db"
 	"i9pay/platform"
 	"i9pay/platform/login"
 
+	"github.com/go-co-op/gocron"
 	"github.com/joho/godotenv"
 	"github.com/stripe/stripe-go"
 )
@@ -21,6 +23,8 @@ func main() {
 	}
 
 	auth := login.InitFirebase()
+
+	scheduler := gocron.NewScheduler(time.UTC)
 
 	client, database, err := db.ConnectDB()
 	if err != nil {

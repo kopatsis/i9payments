@@ -13,7 +13,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func CancelPayment(auth *auth.Client, database *mongo.Database) gin.HandlerFunc {
+func CancelPayment(auth *auth.Client, database *mongo.Database, scheduler *gocron.Scheduler) gin.HandlerFunc {
 	return func(c *gin.Context) {
 
 		_, userid, err := multipass.BothIDsFromCookie(c, auth, database)
@@ -37,14 +37,7 @@ func CancelPayment(auth *auth.Client, database *mongo.Database) gin.HandlerFunc 
 			return
 		}
 
-		endTime := time.Unix(stripeSub.CurrentPeriodEnd, 0)
-
-		_, err = sub.Cancel(subID, nil)
-		if err != nil {
-			log.Printf("Error in cancelling sub for sub ID: %s; for user: %s; %s", subID, userid, err.Error())
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to cancel subscription on stripe side"})
-			return
-		}
+		endTime := time.Unix(stripeSub.CurrentPeriodEnd, 0).Add(-2 * time.Hour)
 
 		cancelID, err := backupCancellation(database, subID, userid, endTime)
 		if err != nil {
@@ -53,8 +46,13 @@ func CancelPayment(auth *auth.Client, database *mongo.Database) gin.HandlerFunc 
 			return
 		}
 
-		scheduler := gocron.NewScheduler(time.UTC)
-		scheduleCancellation(scheduler, database, userid, cancelID, endTime)
+		err = scheduleCancellation(scheduler, database, subID, userid, cancelID, endTime)
+		if err != nil {
+			log.Printf("Error in scheduling cancel: %s; for user: %s; %s", subID, userid, err.Error())
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to schedule cancel"})
+			return
+		}
+
 		scheduler.StartAsync()
 
 		c.JSON(http.StatusOK, gin.H{"message": "Subscription cancelled successfully"})
