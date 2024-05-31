@@ -1,6 +1,8 @@
 package pay
 
 import (
+	"context"
+	"i9pay/platform/emails"
 	"i9pay/platform/multipass"
 	"log"
 	"net/http"
@@ -17,7 +19,7 @@ import (
 func CancelPayment(auth *auth.Client, database *mongo.Database, scheduler *gocron.Scheduler) gin.HandlerFunc {
 	return func(c *gin.Context) {
 
-		_, userid, err := multipass.BothIDsFromCookie(c, auth, database)
+		uid, userid, err := multipass.BothIDsFromCookie(c, auth, database)
 		if err != nil {
 			log.Printf("Error in getting the user: %s", err.Error())
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request payload"})
@@ -70,6 +72,19 @@ func CancelPayment(auth *auth.Client, database *mongo.Database, scheduler *gocro
 		}
 
 		scheduler.StartAsync()
+
+		userRecord, err := auth.GetUser(context.Background(), uid)
+		if err != nil {
+			log.Printf("Error in getting user for cancel: %s; for user: %s; %s", subID, userid, err.Error())
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get user for cancel"})
+			return
+		}
+
+		if err := emails.SendCancelled(userRecord.Email, userRecord.DisplayName); err != nil {
+			log.Printf("Error in emailing user for cancel: %s; for user: %s; %s", subID, userid, err.Error())
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to email user for cancel"})
+			return
+		}
 
 		c.JSON(http.StatusOK, gin.H{"message": "Subscription cancelled successfully"})
 	}

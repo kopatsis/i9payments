@@ -1,6 +1,8 @@
 package pay
 
 import (
+	"context"
+	"i9pay/platform/emails"
 	"i9pay/platform/multipass"
 	"log"
 	"net/http"
@@ -17,7 +19,7 @@ import (
 func PostUncancel(auth *auth.Client, database *mongo.Database, scheduler *gocron.Scheduler) gin.HandlerFunc {
 	return func(c *gin.Context) {
 
-		_, userID, err := multipass.BothIDsFromCookie(c, auth, database)
+		uid, userID, err := multipass.BothIDsFromCookie(c, auth, database)
 		if err != nil {
 			log.Printf("Failed to cancel cancellation in finding user: %s; %s", userID, err.Error())
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to cancel cancellation in finding user"})
@@ -63,6 +65,19 @@ func PostUncancel(auth *auth.Client, database *mongo.Database, scheduler *gocron
 		if err := setUserPaymentEnding(database, userID, false, time.Time{}); err != nil {
 			log.Printf("Failed to edit db payment entry for user: %s; %s", userID, err.Error())
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to edit db payment entry for user"})
+			return
+		}
+
+		userRecord, err := auth.GetUser(context.Background(), uid)
+		if err != nil {
+			log.Printf("Error in getting user for cancel: %s; for user: %s; %s", subID, userID, err.Error())
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get user for cancel"})
+			return
+		}
+
+		if err := emails.SendUnCancelled(userRecord.Email, userRecord.DisplayName); err != nil {
+			log.Printf("Error in emailing user for cancel: %s; for user: %s; %s", subID, userID, err.Error())
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to email user for cancel"})
 			return
 		}
 

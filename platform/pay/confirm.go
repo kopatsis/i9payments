@@ -2,6 +2,8 @@ package pay
 
 import (
 	"encoding/json"
+	"i9pay/platform/emails"
+	"log"
 	"net/http"
 	"os"
 	"time"
@@ -73,6 +75,12 @@ func Webhook(auth *auth.Client, database *mongo.Database) gin.HandlerFunc {
 				DefaultPaymentMethod: stripe.String(paymentIntent.PaymentMethod.ID),
 			}
 			sub.Update(subscription.ID, params)
+
+			if err := emails.SendConfirmation(invoice.CustomerEmail, *invoice.CustomerName); err != nil {
+				log.Printf("Error in emailing user: %s; %s", invoice.CustomerEmail, err.Error())
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to email user for cancel"})
+				return
+			}
 
 			c.JSON(http.StatusOK, gin.H{"status": "success"})
 
