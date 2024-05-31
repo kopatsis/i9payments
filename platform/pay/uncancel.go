@@ -8,6 +8,8 @@ import (
 	"firebase.google.com/go/auth"
 	"github.com/gin-gonic/gin"
 	"github.com/go-co-op/gocron"
+	"github.com/stripe/stripe-go/v72"
+	"github.com/stripe/stripe-go/v72/sub"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -31,6 +33,23 @@ func PostUncancel(auth *auth.Client, database *mongo.Database, scheduler *gocron
 		if err = deleteScheduledJob(scheduler, cancelID); err != nil {
 			log.Printf("Failed to cancel cancellation schduler for user: %s; %s", userID, err.Error())
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to cancel cancellation schduler"})
+			return
+		}
+
+		params := &stripe.SubscriptionParams{
+			CancelAtPeriodEnd: stripe.Bool(false),
+		}
+
+		subID, err := userIdToSubscriptionId(database, userID)
+		if err != nil {
+			log.Printf("Failed to retrieve subscription from Stripe user: %s; %s", userID, err.Error())
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve subscription from Stripe"})
+			return
+		}
+
+		if _, err := sub.Update(subID, params); err != nil {
+			log.Printf("Error in setting sub for sub ID: %s; for user: %s; %s", subID, userID, err.Error())
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve subscription from Stripe"})
 			return
 		}
 

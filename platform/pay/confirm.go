@@ -42,7 +42,7 @@ func Webhook(auth *auth.Client, database *mongo.Database) gin.HandlerFunc {
 				return
 			}
 
-			subscriptionID := invoice.Subscription
+			subscription := invoice.Subscription
 			customerID := invoice.Customer.ID
 
 			customerReal, err := customer.Get(customerID, nil)
@@ -63,7 +63,7 @@ func Webhook(auth *auth.Client, database *mongo.Database) gin.HandlerFunc {
 				return
 			}
 
-			if err := setUserPaying(database, subscriptionID.ID, userId); err != nil {
+			if err := setUserPaying(database, subscription.ID, userId); err != nil {
 				c.JSON(http.StatusBadRequest, gin.H{"error": "Error updating the user"})
 				return
 			}
@@ -71,7 +71,7 @@ func Webhook(auth *auth.Client, database *mongo.Database) gin.HandlerFunc {
 			params := &stripe.SubscriptionParams{
 				DefaultPaymentMethod: stripe.String(paymentIntent.PaymentMethod.ID),
 			}
-			sub.Update(subscriptionID.ID, params)
+			sub.Update(subscription.ID, params)
 
 			c.JSON(http.StatusOK, gin.H{"status": "success"})
 

@@ -33,5 +33,6 @@ type UserPayment struct {
 	SubLength      string              `bson:"length"`
 	EndDate        primitive.Timestamp `bson:"end"`
 	SwitchDate     primitive.Timestamp `bson:"switch"`
+	Expires        primitive.Timestamp `bson:"expires"`
 	Processing     bool                `bson:"processing"`
 }

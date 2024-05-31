@@ -9,6 +9,7 @@ import (
 	"firebase.google.com/go/auth"
 	"github.com/gin-gonic/gin"
 	"github.com/go-co-op/gocron"
+	"github.com/stripe/stripe-go/v72"
 	"github.com/stripe/stripe-go/v72/sub"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -37,7 +38,17 @@ func CancelPayment(auth *auth.Client, database *mongo.Database, scheduler *gocro
 			return
 		}
 
-		endTime := time.Unix(stripeSub.CurrentPeriodEnd, 0).Add(-2 * time.Hour)
+		params := &stripe.SubscriptionParams{
+			CancelAtPeriodEnd: stripe.Bool(true),
+		}
+
+		if _, err := sub.Update(subID, params); err != nil {
+			log.Printf("Error in setting sub for sub ID: %s; for user: %s; %s", subID, userid, err.Error())
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve subscription from Stripe"})
+			return
+		}
+
+		endTime := time.Unix(stripeSub.CurrentPeriodEnd, 0)
 
 		cancelID, err := backupCancellation(database, subID, userid, endTime)
 		if err != nil {
