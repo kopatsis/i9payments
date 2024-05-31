@@ -139,6 +139,23 @@ func userIdToSubscriptionId(database *mongo.Database, userID string) (string, er
 	return result.SubID, nil
 }
 
+func getUserPayment(database *mongo.Database, userID string) (*db.UserPayment, error) {
+	filter := bson.M{"userid": userID}
+
+	var result db.UserPayment
+
+	collection := database.Collection("userpayment")
+	err := collection.FindOne(context.TODO(), filter).Decode(&result)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	return &result, nil
+}
+
 func backupCancellation(database *mongo.Database, subID, userID string, endTime time.Time) (string, error) {
 	cancellation := SubscriptionCancellation{
 		SubID:   subID,

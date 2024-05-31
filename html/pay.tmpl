@@ -9,6 +9,7 @@
 </head>
 <body>
 
+<div>For {{.Email}}</div>
 <div x-data="paymentHandler()" x-init="init()">
     <form id="payment-form" @submit.prevent="handlePayment">
         <div>

@@ -33,40 +33,66 @@ func Subscription(auth *auth.Client, database *mongo.Database) gin.HandlerFunc {
 			return
 		}
 
-		if user.Paying {
+		userpayment, err := getUserPayment(database, user.ID.Hex())
+		if err != nil {
+			c.HTML(200, "error.tmpl", nil)
+			return
+		}
 
-			external := ""
-			cardBrand := ""
-			lastFour := ""
-			customerID := ""
-			if user.Provider == "Apple" || user.Provider == "Android" {
-				external = user.Provider
-			} else {
-				_, cardBrand, lastFour, err = getPaymentMethodDetails(user.Provider)
-				if err != nil {
-					c.HTML(200, "error.tmpl", nil)
-					return
-				}
-				s, err := sub.Get(user.Provider, nil)
-				if err != nil {
-					c.HTML(200, "error.tmpl", nil)
-					return
-				}
-				customerID = s.Customer.ID
-			}
-
-			c.HTML(200, "alreadypaying.tmpl", gin.H{
-				"Email":        email,
-				"External":     external,
-				"Brand":        cardBrand,
-				"Four":         lastFour,
-				"Customer":     customerID,
-				"Subscription": user.Provider,
+		if userpayment == nil {
+			c.HTML(200, "pay.tmpl", gin.H{
+				"Email": email,
 			})
 			return
 		}
 
-		c.HTML(200, "pay.tmpl", nil)
+		if userpayment.Processing {
+			c.HTML(200, "processing.tmpl", nil)
+			return
+		}
+
+		if user.Paying {
+
+			if user.Provider == "Apple" || user.Provider == "Android" {
+				c.HTML(200, "external.tmpl", nil)
+				return
+			}
+
+			s, err := sub.Get(userpayment.SubscriptionID, nil)
+			if err != nil {
+				c.HTML(200, "error.tmpl", nil)
+				return
+			}
+
+			paymentType, cardBrand, lastFour, err := getPaymentMethodDetails(userpayment.SubscriptionID)
+			if err != nil {
+				c.HTML(200, "error.tmpl", nil)
+				return
+			}
+
+			if paymentType != "Card" {
+				c.HTML(200, "alreadypaying.tmpl", gin.H{
+					"Email":        email,
+					"External":     paymentType,
+					"Customer":     s.Customer.ID,
+					"Length":       userpayment.SubLength,
+					"Subscription": userpayment.SubscriptionID,
+				})
+				return
+			}
+
+			c.HTML(200, "alreadypaying.tmpl", gin.H{
+				"Email":        email,
+				"Brand":        cardBrand,
+				"Four":         lastFour,
+				"Customer":     s.Customer.ID,
+				"Length":       userpayment.SubLength,
+				"Subscription": userpayment.SubscriptionID,
+			})
+			return
+		}
+
+		c.HTML(200, "error.tmpl", nil)
 
 	}
 }
