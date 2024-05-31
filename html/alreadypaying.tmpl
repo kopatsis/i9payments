@@ -1,3 +1,4 @@
+{{/* page.tmpl */}}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -16,7 +17,15 @@
 
 <body>
 
-    <div>Subscription Frequency: {{.Length}}</div>
+    {{if eq .Length "monthly"}}
+        <div>Subscription Plan: $4.99 Monthly</div>
+        <button @click="swapFrequency('yearly')">Change to $49.99 Yearly*</button>
+    {{else}}
+        <div>Subscription Plan: $49.99 Yearly</div>
+        <button @click="swapFrequency('monthly')">Change to $4.99 Monthly*</button>
+    {{end}}
+    <div>*Will begin at the end of this current billing cycle</div>
+
     <div x-data="cancelHandler()" x-init="init()">
         <form id="cancel-form" @submit.prevent="handleSubmit">
             <p>Email: {{.Email}}</p>
@@ -110,6 +119,25 @@
                     } else {
                         const result = await response.json();
                         this.errorMessage = 'Failed to update payment method: ' + (result.message || response.statusText);
+                    }
+                },
+
+                async swapFrequency(newFrequency) {
+                    this.errorMessage = '';
+                    const formData = new FormData();
+                    formData.append('frequency', newFrequency);
+
+                    const response = await fetch('/swap', {
+                        method: 'POST',
+                        body: formData,
+                        credentials: 'include'
+                    });
+
+                    if (response.ok) {
+                        location.reload();
+                    } else {
+                        const result = await response.json();
+                        this.errorMessage = 'Failed to change membership frequency: ' + (result.message || response.statusText);
                     }
                 }
             }
