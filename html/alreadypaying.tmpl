@@ -26,6 +26,7 @@
     {{end}}
     <div>*Will begin at the end of this current billing cycle</div>
 
+    <div>Next billing cycle charge date: {{.Date}}</div>
     <div x-data="cancelHandler()" x-init="init()">
         <form id="cancel-form" @submit.prevent="handleSubmit">
             <p>Email: {{.Email}}</p>

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"os"
+	"time"
 
 	"firebase.google.com/go/auth"
 	"github.com/gin-gonic/gin"
@@ -63,7 +64,7 @@ func Webhook(auth *auth.Client, database *mongo.Database) gin.HandlerFunc {
 				return
 			}
 
-			if err := setUserPaying(database, subscription.ID, userId); err != nil {
+			if err := setUserPaying(database, subscription.ID, userId, time.Unix(subscription.CurrentPeriodEnd, 0)); err != nil {
 				c.JSON(http.StatusBadRequest, gin.H{"error": "Error updating the user"})
 				return
 			}

@@ -49,6 +49,11 @@ func CancelPayment(auth *auth.Client, database *mongo.Database, scheduler *gocro
 		}
 
 		endTime := time.Unix(stripeSub.CurrentPeriodEnd, 0)
+		if err := setUserPaymentEnding(database, userid, true, endTime); err != nil {
+			log.Printf("Error in setting user payment: %s; for user: %s; %s", subID, userid, err.Error())
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to set user payment"})
+			return
+		}
 
 		cancelID, err := backupCancellation(database, subID, userid, endTime)
 		if err != nil {

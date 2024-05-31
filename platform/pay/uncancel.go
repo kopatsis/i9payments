@@ -4,6 +4,7 @@ import (
 	"i9pay/platform/multipass"
 	"log"
 	"net/http"
+	"time"
 
 	"firebase.google.com/go/auth"
 	"github.com/gin-gonic/gin"
@@ -56,6 +57,12 @@ func PostUncancel(auth *auth.Client, database *mongo.Database, scheduler *gocron
 		if err = deleteCancellation(database, cancelID); err != nil {
 			log.Printf("Failed to cancel cancellation db entry for user: %s; %s", userID, err.Error())
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to cancel cancellation db entry"})
+			return
+		}
+
+		if err := setUserPaymentEnding(database, userID, false, time.Time{}); err != nil {
+			log.Printf("Failed to edit db payment entry for user: %s; %s", userID, err.Error())
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to edit db payment entry for user"})
 			return
 		}
 

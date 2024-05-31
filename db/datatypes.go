@@ -25,14 +25,14 @@ type User struct {
 }
 
 type UserPayment struct {
-	ID             primitive.ObjectID  `bson:"_id,omitempty"`
-	UserMongoID    string              `bson:"userid"`
-	Username       string              `bson:"username"`
-	Provider       string              `bson:"provider"`
-	SubscriptionID string              `bson:"subid"`
-	SubLength      string              `bson:"length"`
-	EndDate        primitive.Timestamp `bson:"end"`
-	SwitchDate     primitive.Timestamp `bson:"switch"`
-	Expires        primitive.Timestamp `bson:"expires"`
-	Processing     bool                `bson:"processing"`
+	ID             primitive.ObjectID `bson:"_id,omitempty"`
+	UserMongoID    string             `bson:"userid"`
+	Username       string             `bson:"username"`
+	Provider       string             `bson:"provider"`
+	SubscriptionID string             `bson:"subid"`
+	SubLength      string             `bson:"length"`
+	EndDate        primitive.DateTime `bson:"end"`
+	Expires        primitive.DateTime `bson:"expires"`
+	Processing     bool               `bson:"processing"`
+	Ending         bool               `bson:"ending"`
 }

@@ -5,6 +5,7 @@ import (
 	"i9pay/platform/login"
 	"i9pay/platform/multipass"
 	"net/http"
+	"time"
 
 	"firebase.google.com/go/auth"
 	"github.com/gin-gonic/gin"
@@ -64,6 +65,12 @@ func Subscription(auth *auth.Client, database *mongo.Database) gin.HandlerFunc {
 				return
 			}
 
+			if userpayment.Ending {
+				c.HTML(200, "ending.html", gin.H{
+					"Date": userpayment.EndDate.Time().Format("01/02/2006"),
+				})
+			}
+
 			paymentType, cardBrand, lastFour, err := getPaymentMethodDetails(userpayment.SubscriptionID)
 			if err != nil {
 				c.HTML(200, "error.tmpl", nil)
@@ -72,6 +79,7 @@ func Subscription(auth *auth.Client, database *mongo.Database) gin.HandlerFunc {
 
 			if paymentType != "Card" {
 				c.HTML(200, "alreadypaying.tmpl", gin.H{
+					"Date":         time.Unix(s.CurrentPeriodEnd, 0).Format("01/02/2006"),
 					"Email":        email,
 					"External":     paymentType,
 					"Customer":     s.Customer.ID,
@@ -82,6 +90,7 @@ func Subscription(auth *auth.Client, database *mongo.Database) gin.HandlerFunc {
 			}
 
 			c.HTML(200, "alreadypaying.tmpl", gin.H{
+				"Date":         time.Unix(s.CurrentPeriodEnd, 0).Format("01/02/2006"),
 				"Email":        email,
 				"Brand":        cardBrand,
 				"Four":         lastFour,

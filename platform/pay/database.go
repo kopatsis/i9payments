@@ -18,7 +18,7 @@ type SubscriptionCancellation struct {
 	EndTime time.Time          `bson:"end_time"`
 }
 
-func setUserPaying(database *mongo.Database, subscriptionID, userID string) error {
+func setUserPaying(database *mongo.Database, subscriptionID, userID string, expires time.Time) error {
 	objID, err := primitive.ObjectIDFromHex(userID)
 	if err != nil {
 		return err
@@ -29,6 +29,7 @@ func setUserPaying(database *mongo.Database, subscriptionID, userID string) erro
 		"$set": bson.M{
 			"paying":   true,
 			"provider": subscriptionID,
+			"expires":  primitive.NewDateTimeFromTime(expires),
 		},
 	}
 
@@ -62,9 +63,9 @@ func setUserPayingPartial(database *mongo.Database, subscriptionID, firebaseID, 
 		Provider:       "Stripe",
 		SubscriptionID: subscriptionID,
 		SubLength:      length,
-		EndDate:        primitive.Timestamp{},
-		SwitchDate:     primitive.Timestamp{},
+		EndDate:        primitive.DateTime(0),
 		Processing:     true,
+		Ending:         false,
 	}
 
 	collection := database.Collection("userpayment")
@@ -138,6 +139,24 @@ func getUserPayment(database *mongo.Database, userID string) (*db.UserPayment, e
 	}
 
 	return &result, nil
+}
+
+func setUserPaymentEnding(database *mongo.Database, userID string, status bool, ending time.Time) error {
+	filter := bson.M{"userid": userID}
+	update := bson.M{
+		"$set": bson.M{
+			"ending":  status,
+			"expires": primitive.NewDateTimeFromTime(ending),
+		},
+	}
+
+	collection := database.Collection("userpayment")
+	_, err := collection.UpdateOne(context.TODO(), filter, update, options.Update().SetUpsert(false))
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func backupCancellation(database *mongo.Database, subID, userID string, endTime time.Time) (string, error) {
