@@ -1,7 +1,6 @@
 package multipass
 
 import (
-	"context"
 	"i9pay/platform/login"
 	"net/http"
 
@@ -12,11 +11,10 @@ import (
 
 func Multipass(authClient *auth.Client, database *mongo.Database) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		token := c.Query("multipass")
 		refresh := c.Query("multipass")
 		code := c.Query("code")
 
-		if status := checkSpecialCode(code, database); !status || token == "" {
+		if status := checkSpecialCode(code, database); !status || refresh == "" {
 			c.Redirect(http.StatusFound, "/pay")
 			go func() {
 				deleteSpecialCode(code, database)
@@ -24,7 +22,8 @@ func Multipass(authClient *auth.Client, database *mongo.Database) gin.HandlerFun
 			return
 		}
 
-		if _, err := authClient.VerifyIDToken(context.Background(), token); err != nil {
+		refresh, token, err := login.GetNewIDToken(refresh)
+		if err != nil {
 			c.Redirect(http.StatusFound, "/pay")
 			go func() {
 				deleteSpecialCode(code, database)
