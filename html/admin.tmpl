@@ -5,9 +5,32 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Admin Dashboard</title>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.2.3"></script>
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.10.0/dist/cdn.min.js" defer></script>
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
+      import {
+        getAuth,
+        sendPasswordResetEmail,
+        sendEmailVerification
+      } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyBOksfyE0unI87E533LWTKV6jpW-F1dqDA",
+        authDomain: "i9auth.firebaseapp.com",
+        projectId: "i9auth",
+        storageBucket: "i9auth.appspot.com",
+        messagingSenderId: "284108905250",
+        appId: "1:284108905250:web:b866b21949e149af7ca37b",
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+
+      // Expose the necessary Firebase functions globally
+      window.sendPasswordResetEmail = sendPasswordResetEmail;
+      window.sendEmailVerification = sendEmailVerification;
+      window.auth = auth;
+    </script>
   </head>
   <body>
     <h1>Admin Dashboard</h1>
@@ -19,7 +42,7 @@
             <button @click="editing = true">Edit</button>
         </div>
         <form x-show="editing" action="/updateName" method="POST">
-            <input type="text" name="name" x-model="name">
+          Display Name:  <input type="text" name="name" x-model="name">
             <button type="submit">Save</button>
             <button type="button" @click="editing = false">Cancel</button>
         </form>
@@ -34,7 +57,7 @@
     </div>
 
     <div x-data="firebaseHandler('{{.Email}}')">
-      <button @click="sendPasswordResetEmail">Send password reset email</button>
+      <button @click="sendReset">Send password reset email</button>
       <button @click="sendVerificationEmail">Send verification email</button>
       <div x-show="errorMessage" style="color: red" x-text="errorMessage"></div>
       <div
@@ -58,7 +81,6 @@
        <button><a href="/logout">Logout</a></button>
     </div>
    
-
     <script>
       function firebaseHandler(email) {
         return {
@@ -66,23 +88,12 @@
           successMessage: "",
           email: email,
 
-          init() {
-            var firebaseConfig = {
-              apiKey: "AIzaSyBOksfyE0unI87E533LWTKV6jpW-F1dqDA",
-              authDomain: "i9auth.firebaseapp.com",
-              projectId: "i9auth",
-              storageBucket: "i9auth.appspot.com",
-              messagingSenderId: "284108905250",
-              appId: "1:284108905250:web:b866b21949e149af7ca37b",
-            };
-            firebase.initializeApp(firebaseConfig);
-          },
-
-          async sendPasswordResetEmail() {
+          async sendReset() {
             this.errorMessage = "";
             this.successMessage = "";
             try {
-              await firebase.auth().sendPasswordResetEmail(this.email);
+              console.log(window.auth.currentUser, this.email)
+              await window.sendPasswordResetEmail(window.auth, this.email);
               this.successMessage = "Password reset email sent!";
             } catch (error) {
               this.errorMessage =
@@ -94,8 +105,8 @@
             this.errorMessage = "";
             this.successMessage = "";
             try {
-              const user = await firebase.auth().getUserByEmail(this.email);
-              await user.sendEmailVerification();
+              console.log(window.auth.currentUser);
+              await window.sendEmailVerification(window.auth.currentUser);
               this.successMessage = "Verification email sent!";
             } catch (error) {
               this.errorMessage =
