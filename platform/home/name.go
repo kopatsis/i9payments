@@ -2,6 +2,7 @@ package home
 
 import (
 	"context"
+	"i9pay/platform/multipass"
 	"net/http"
 
 	"firebase.google.com/go/auth"
@@ -13,7 +14,12 @@ import (
 
 func Name(auth *auth.Client, database *mongo.Database) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		id := c.PostForm("id")
+		_, id, err := multipass.BothIDsFromCookie(c, auth, database)
+		if err != nil {
+			c.HTML(200, "error.tmpl", nil)
+			return
+		}
+
 		name := c.PostForm("name")
 
 		objectID, err := primitive.ObjectIDFromHex(id)

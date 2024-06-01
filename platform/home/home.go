@@ -33,7 +33,6 @@ func AdminPanel(auth *auth.Client, database *mongo.Database) gin.HandlerFunc {
 		}
 
 		c.HTML(200, "admin.tmpl", gin.H{
-			"ID":     user.ID.Hex(),
 			"Email":  email,
 			"Paying": user.Paying,
 			"Name":   user.Name,

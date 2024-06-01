@@ -12,6 +12,7 @@ import (
 
 func InitFirebase() *auth.Client {
 	opt := option.WithCredentialsFile("i9auth-firebase-adminsdk-dgzg6-f59f9349ed.json")
+	fmt.Println(opt)
 	app, err := firebase.NewApp(context.Background(), nil, opt)
 	if err != nil {
 		panic("Failed to initialize Firebase app")

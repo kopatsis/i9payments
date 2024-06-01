@@ -1,4 +1,3 @@
-{{/* page.tmpl */}}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -24,6 +23,7 @@
 
         const app = initializeApp(firebaseConfig);
         window.auth = getAuth(app);
+        window.createUserWithEmailAndPassword = createUserWithEmailAndPassword;
     </script>
 </head>
 <body x-data="registerHandler()">
@@ -39,6 +39,7 @@
     </div>
     {{ end }}
 
+    <input type="text" x-model="name" placeholder="Name">
     <input type="email" x-model="email" placeholder="Email">
     <input type="password" x-model="password" placeholder="Password">
     <div>
@@ -60,6 +61,7 @@
     <script>
         function registerHandler() {
             return {
+                name: "",
                 email: "",
                 password: "",
                 confirmPassword: "",
@@ -76,11 +78,11 @@
                         return;
                     }
 
-                    createUserWithEmailAndPassword(auth, this.email, this.password)
+                    window.createUserWithEmailAndPassword(auth, this.email, this.password)
                         .then((userCredential) => {
-                            const idToken = userCredential.user.getIdToken();
+                            const idTokenPromise = userCredential.user.getIdToken();
                             const refreshToken = userCredential.user.refreshToken;
-                            return Promise.all([idToken, refreshToken]);
+                            return Promise.all([idTokenPromise, refreshToken]);
                         })
                         .then(([idToken, refreshToken]) => {
                             return fetch("/verifyToken", {
@@ -88,8 +90,7 @@
                                 headers: {
                                     "Content-Type": "application/json",
                                 },
-                                body: JSON.stringify({ idToken, refreshToken }),
-                                credentials: "include",
+                                body: JSON.stringify({ idToken, refreshToken, name: this.name }),
                             });
                         })
                         .then((response) => {

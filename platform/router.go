@@ -1,6 +1,7 @@
 package platform
 
 import (
+	"i9pay/platform/home"
 	"i9pay/platform/login"
 	"i9pay/platform/middleware"
 	"i9pay/platform/multipass"
@@ -18,18 +19,19 @@ func New(auth *auth.Client, database *mongo.Database, scheduler *gocron.Schedule
 	router.Use(middleware.CORSMiddleware())
 	router.Use(middleware.AuthMiddleware(auth))
 
-	router.Static("/static", "./static")
+	// router.Static("/static", "./static")
 
-	router.LoadHTMLGlob("../html/*")
+	router.LoadHTMLGlob("html/*")
 	router.GET("/multipass", multipass.Multipass(auth, database))
 	router.GET("/sub", pay.Subscription(auth, database))
+	router.GET("/", home.AdminPanel(auth, database))
 
 	router.GET("/code", multipass.SpecialCode(database))
 
 	router.GET("/login", login.LoginPage(auth))
 	router.GET("/new", login.SignUpPage(auth))
 
-	router.POST("/verifyToken", login.VerifyToken(auth))
+	router.POST("/verifyToken", login.VerifyToken(auth, database))
 	router.POST("/process-payment", pay.PostPayment(auth, database))
 	router.POST("/cancel", pay.CancelPayment(auth, database, scheduler))
 	router.POST("/update", pay.UpdateSubscriptionPaymentMethod())

@@ -35,7 +35,3 @@ func Cookie(IDToken, refreshToken string, authClient *auth.Client, c *gin.Contex
 
 	return nil
 }
-
-func RefreshCookie() {
-
-}

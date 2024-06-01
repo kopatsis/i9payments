@@ -1,14 +1,10 @@
-{{/* page.tmpl */}}
 <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Login Page</title>
-    <script
-      src="https://cdn.jsdelivr.net/npm/alpinejs@3.10.0/dist/cdn.min.js"
-      defer
-    ></script>
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.10.0/dist/cdn.min.js" defer></script>
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
       import {
@@ -26,7 +22,11 @@
       };
 
       const app = initializeApp(firebaseConfig);
-      window.auth = getAuth(app);
+      const auth = getAuth(app);
+
+      // Expose the necessary Firebase functions globally
+      window.signInWithEmailAndPassword = signInWithEmailAndPassword;
+      window.auth = auth;
     </script>
   </head>
   <body x-data="loginHandler">
@@ -56,11 +56,11 @@
           email: "",
           password: "",
           login() {
-            signInWithEmailAndPassword(auth, this.email, this.password)
+            window.signInWithEmailAndPassword(window.auth, this.email, this.password)
               .then((userCredential) => {
-                const idToken = userCredential.user.getIdToken();
+                const idTokenPromise = userCredential.user.getIdToken();
                 const refreshToken = userCredential.user.refreshToken;
-                return Promise.all([idToken, refreshToken]);
+                return Promise.all([idTokenPromise, refreshToken]);
               })
               .then(([idToken, refreshToken]) => {
                 return fetch("/verifyToken", {
@@ -68,8 +68,7 @@
                   headers: {
                     "Content-Type": "application/json",
                   },
-                  body: JSON.stringify({ idToken, refreshToken }),
-                  credentials: "include",
+                  body: JSON.stringify({ idToken, refreshToken, name: "" }),
                 });
               })
               .then((response) => {
@@ -77,11 +76,7 @@
                   console.log("Token verified");
                   window.location.assign("/");
                 } else {
-                  response
-                    .json()
-                    .then((data) =>
-                      console.error("Token verification failed", data)
-                    );
+                  response.json().then((data) => console.error("Token verification failed", data));
                 }
               })
               .catch((error) => {
