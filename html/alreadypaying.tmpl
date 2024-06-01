@@ -1,158 +1,177 @@
 {{/* page.tmpl */}}
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Manage Membership</title>
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.2.3"></script>
     <script src="https://js.stripe.com/v3/"></script>
     <style>
-        #payment-update-form {
-            display: none;
-        }
+      #payment-update-form {
+        display: none;
+      }
     </style>
-</head>
+  </head>
 
-<body>
-
+  <body>
     {{if eq .Length "monthly"}}
-        <div>Subscription Plan: $4.99 Monthly</div>
-        <button @click="swapFrequency('yearly')">Change to $49.99 Yearly*</button>
+    <div>Subscription Plan: $4.99 Monthly</div>
+    <button @click="swapFrequency('yearly')">Change to $49.99 Yearly*</button>
     {{else}}
-        <div>Subscription Plan: $49.99 Yearly</div>
-        <button @click="swapFrequency('monthly')">Change to $4.99 Monthly*</button>
-    {{end}}
+    <div>Subscription Plan: $49.99 Yearly</div>
+    <button @click="swapFrequency('monthly')">Change to $4.99 Monthly*</button>
+    {{ end }}
     <div>*Will begin at the end of this current billing cycle</div>
 
     <div>Next billing cycle charge date: {{.Date}}</div>
     <div x-data="cancelHandler()" x-init="init()">
-        <form id="cancel-form" @submit.prevent="handleSubmit">
-            <p>Email: {{.Email}}</p>
-            {{ if .External }}
-                <p>Your payment is managed through {{.External}}.</p>
-            {{ else }}
-                <p>Your payment is managed by a card with the brand {{.Brand}} and last four digits of {{.Four}}.</p>
-            {{ end }}
-            <button type="submit">Cancel Membership</button>
-        </form>
-        <div x-show="errorMessage" x-text="errorMessage" style="color: red;"></div>
+      <form id="cancel-form" @submit.prevent="handleSubmit">
+        <p>Email: {{.Email}}</p>
+        {{ if .External }}
+        <p>Your payment is managed through {{.External}}.</p>
+        {{ else }}
+        <p>
+          Your payment is managed by a card with the brand {{.Brand}} and last
+          four digits of {{.Four}}.
+        </p>
+        {{ end }}
+        <button type="submit">Cancel Membership</button>
+      </form>
+      <div x-show="errorMessage" x-text="errorMessage" style="color: red"></div>
 
-        <button @click="togglePaymentUpdateForm">Update Payment Method</button>
-        <div id="payment-update-form">
-            <form id="update-payment-form" @submit.prevent="handlePaymentUpdate">
-                <div id="card-element"><!-- Stripe Elements will be inserted here --></div>
-                <button type="submit">Update Payment Method</button>
-            </form>
-        </div>
+      <button @click="togglePaymentUpdateForm">Update Payment Method</button>
+      <div id="payment-update-form">
+        <form id="update-payment-form" @submit.prevent="handlePaymentUpdate">
+          <div id="card-element">
+            <!-- Stripe Elements will be inserted here -->
+          </div>
+          <button type="submit">Update Payment Method</button>
+        </form>
+      </div>
     </div>
 
+    <div>
+      <button><a href="/logout">Logout</a></button>
+    </div>
     <script>
-        function cancelHandler() {
-            return {
-                email: '{{.Email}}',
-                external: '{{.External}}',
-                cardBrand: '{{.Brand}}',
-                lastFour: '{{.Four}}',
-                customerID: '{{.Customer}}',
-                subscriptionID: '{{.Subscription}}',
-                errorMessage: '',
-                stripe: null,
-                card: null,
+      function cancelHandler() {
+        return {
+          email: "{{.Email}}",
+          external: "{{.External}}",
+          cardBrand: "{{.Brand}}",
+          lastFour: "{{.Four}}",
+          customerID: "{{.Customer}}",
+          subscriptionID: "{{.Subscription}}",
+          errorMessage: "",
+          stripe: null,
+          card: null,
 
-                init() {
-                    const stripe = Stripe('your-publishable-key');
-                    const elements = stripe.elements();
-                    const card = elements.create('card');
-                    card.mount('#card-element');
-                    this.stripe = stripe;
-                    this.card = card;
-                },
+          init() {
+            const stripe = Stripe("your-publishable-key");
+            const elements = stripe.elements();
+            const card = elements.create("card");
+            card.mount("#card-element");
+            this.stripe = stripe;
+            this.card = card;
+          },
 
-                togglePaymentUpdateForm() {
-                    const form = document.getElementById('payment-update-form');
-                    form.style.display = form.style.display === 'none' ? 'block' : 'none';
-                },
+          togglePaymentUpdateForm() {
+            const form = document.getElementById("payment-update-form");
+            form.style.display =
+              form.style.display === "none" ? "block" : "none";
+          },
 
-                async handleSubmit() {
-                    this.errorMessage = '';
-                    const form = document.getElementById('cancel-form');
-                    const formData = new FormData(form);
+          async handleSubmit() {
+            this.errorMessage = "";
+            const form = document.getElementById("cancel-form");
+            const formData = new FormData(form);
 
-                    const response = await fetch('/cancel', {
-                        method: 'POST',
-                        body: formData,
-                        credentials: 'include'
-                    });
+            const response = await fetch("/cancel", {
+              method: "POST",
+              body: formData,
+              credentials: "include",
+            });
 
-                    if (response.ok) {
-                        location.reload();
-                    } else {
-                        const result = await response.json();
-                        this.errorMessage = 'Failed to cancel membership: ' + (result.message || response.statusText);
-                    }
-                },
-
-                async handlePaymentUpdate() {
-                    const { paymentMethod, error } = await this.stripe.createPaymentMethod('card', this.card);
-
-                    if (error) {
-                        this.errorMessage = error.message;
-                        return;
-                    }
-
-                    const response = await fetch('/update', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            subscription_id: this.subscriptionID,
-                            payment_method_id: paymentMethod.id,
-                            customer_id: this.customerID,
-                        }),
-                        credentials: 'include'
-                    });
-
-                    if (response.ok) {
-                        location.reload();
-                    } else {
-                        const result = await response.json();
-                        this.errorMessage = 'Failed to update payment method: ' + (result.message || response.statusText);
-                    }
-                },
-
-                async swapFrequency(newFrequency) {
-                    this.errorMessage = '';
-                    const formData = new FormData();
-                    formData.append('frequency', newFrequency);
-
-                    const response = await fetch('/swap', {
-                        method: 'POST',
-                        body: formData,
-                        credentials: 'include'
-                    });
-
-                    if (response.ok) {
-                        location.reload();
-                    } else {
-                        const result = await response.json();
-                        this.errorMessage = 'Failed to change membership frequency: ' + (result.message || response.statusText);
-                    }
-                }
+            if (response.ok) {
+              location.reload();
+            } else {
+              const result = await response.json();
+              this.errorMessage =
+                "Failed to cancel membership: " +
+                (result.message || response.statusText);
             }
-        }
+          },
 
-        document.addEventListener('alpine:init', () => {
-            Alpine.data('cancelHandler', cancelHandler);
-        });
+          async handlePaymentUpdate() {
+            const { paymentMethod, error } =
+              await this.stripe.createPaymentMethod("card", this.card);
+
+            if (error) {
+              this.errorMessage = error.message;
+              return;
+            }
+
+            const response = await fetch("/update", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                subscription_id: this.subscriptionID,
+                payment_method_id: paymentMethod.id,
+                customer_id: this.customerID,
+              }),
+              credentials: "include",
+            });
+
+            if (response.ok) {
+              location.reload();
+            } else {
+              const result = await response.json();
+              this.errorMessage =
+                "Failed to update payment method: " +
+                (result.message || response.statusText);
+            }
+          },
+
+          async swapFrequency(newFrequency) {
+            this.errorMessage = "";
+            const formData = new FormData();
+            formData.append("frequency", newFrequency);
+
+            const response = await fetch("/swap", {
+              method: "POST",
+              body: formData,
+              credentials: "include",
+            });
+
+            if (response.ok) {
+              location.reload();
+            } else {
+              const result = await response.json();
+              this.errorMessage =
+                "Failed to change membership frequency: " +
+                (result.message || response.statusText);
+            }
+          },
+        };
+      }
+
+      document.addEventListener("alpine:init", () => {
+        Alpine.data("cancelHandler", cancelHandler);
+      });
     </script>
 
-    <div id="user-data" data-email="{{.Email}}" data-external="{{.External}}" data-brand="{{.Brand}}"
-        data-four="{{.Four}}" data-customer="{{.Customer}}" data-subscription="{{.Subscription}}"
-        style="display: none;"></div>
-
-</body>
-
+    <div
+      id="user-data"
+      data-email="{{.Email}}"
+      data-external="{{.External}}"
+      data-brand="{{.Brand}}"
+      data-four="{{.Four}}"
+      data-customer="{{.Customer}}"
+      data-subscription="{{.Subscription}}"
+      style="display: none"
+    ></div>
+  </body>
 </html>

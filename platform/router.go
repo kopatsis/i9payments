@@ -30,6 +30,7 @@ func New(auth *auth.Client, database *mongo.Database, scheduler *gocron.Schedule
 
 	router.GET("/login", login.LoginPage(auth))
 	router.GET("/new", login.SignUpPage(auth))
+	router.GET("/logout", login.Logout(auth))
 
 	router.POST("/verifyToken", login.VerifyToken(auth, database))
 	router.POST("/process-payment", pay.PostPayment(auth, database))
