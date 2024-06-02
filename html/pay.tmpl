@@ -47,8 +47,9 @@
                 const { setupIntent, error } = await stripe.confirmSetup({
                     elements,
                     confirmParams: {
-                        return_url: 'http://localhost:4040/pay',
+                        return_url: window.location.href,
                     },
+                    redirect: 'if_required'
                 });
 
                 if (error) {
@@ -56,11 +57,12 @@
                 } else {
                     const paymentMethodId = setupIntent.payment_method;
 
-                    const response = await fetch('/process-subscription', {
+                    const response = await fetch('/process', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
                         },
+                        credentials: 'include',
                         body: JSON.stringify({ paymentMethodId, priceId }),
                     });
 

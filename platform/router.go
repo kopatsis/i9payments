@@ -37,7 +37,7 @@ func New(auth *auth.Client, database *mongo.Database, scheduler *gocron.Schedule
 	router.POST("/delete", home.Delete(auth, database))
 
 	router.POST("/verifyToken", login.VerifyToken(auth, database))
-	router.POST("/process-payment", pay.PostPayment(auth, database))
+	router.POST("/process", pay.PostPayment(auth, database))
 	router.POST("/cancel", pay.CancelPayment(auth, database, scheduler))
 	router.POST("/update", pay.UpdateSubscriptionPaymentMethod())
 	router.POST("/uncancel", pay.PostUncancel(auth, database, scheduler))

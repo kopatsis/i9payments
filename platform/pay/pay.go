@@ -2,6 +2,7 @@ package pay
 
 import (
 	"context"
+	"fmt"
 	"i9pay/platform/login"
 	"i9pay/platform/multipass"
 	"net/http"
@@ -76,9 +77,12 @@ func Subscription(auth *auth.Client, database *mongo.Database) gin.HandlerFunc {
 
 			s, err := sub.Get(userpayment.SubscriptionID, nil)
 			if err != nil {
+				fmt.Println("error here" + err.Error())
 				c.HTML(200, "error.tmpl", nil)
 				return
 			}
+
+			fmt.Println(s)
 
 			if userpayment.Ending {
 				c.HTML(200, "ending.html", gin.H{
@@ -88,6 +92,7 @@ func Subscription(auth *auth.Client, database *mongo.Database) gin.HandlerFunc {
 
 			paymentType, cardBrand, lastFour, err := getPaymentMethodDetails(userpayment.SubscriptionID)
 			if err != nil {
+				fmt.Println("error here 2" + err.Error())
 				c.HTML(200, "error.tmpl", nil)
 				return
 			}

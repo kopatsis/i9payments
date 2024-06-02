@@ -1,6 +1,7 @@
 package pay
 
 import (
+	"context"
 	"i9pay/platform/multipass"
 	"net/http"
 
@@ -15,10 +16,15 @@ import (
 
 func PostPayment(auth *auth.Client, database *mongo.Database) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		email := c.PostForm("email")
+		var request struct {
+			PaymentMethodID string `json:"paymentMethodId"`
+			PriceID         string `json:"priceId"`
+		}
 
-		paymentMethodID := c.PostForm("paymentMethod")
-		subscription := c.PostForm("subscription")
+		if err := c.BindJSON(&request); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+			return
+		}
 
 		uid, userid, err := multipass.BothIDsFromCookie(c, auth, database)
 		if err != nil {
@@ -26,14 +32,16 @@ func PostPayment(auth *auth.Client, database *mongo.Database) gin.HandlerFunc {
 			return
 		}
 
-		priceID := "price_1PJfbQIstWH7VBmuNNsoLTN2"
-		if subscription == "yearly" {
-			priceID = "price_1PJfbpIstWH7VBmu1nToVdC9"
+		userRecord, err := auth.GetUser(context.Background(), uid)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
 		}
 
+		email := userRecord.Email
+
 		customerParams := &stripe.CustomerParams{
-			Email:         stripe.String(email),
-			PaymentMethod: stripe.String(paymentMethodID),
+			Email: stripe.String(email),
 		}
 		customerParams.Metadata = map[string]string{
 			"userId": userid,
@@ -45,21 +53,21 @@ func PostPayment(auth *auth.Client, database *mongo.Database) gin.HandlerFunc {
 			return
 		}
 
-		params := &stripe.PaymentMethodAttachParams{
+		attachParams := &stripe.PaymentMethodAttachParams{
 			Customer: stripe.String(stripeCustomer.ID),
 		}
-		_, err = paymentmethod.Attach(paymentMethodID, params)
+		_, err = paymentmethod.Attach(request.PaymentMethodID, attachParams)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
 
-		customerParamsUpdate := &stripe.CustomerParams{
+		customerUpdateParams := &stripe.CustomerParams{
 			InvoiceSettings: &stripe.CustomerInvoiceSettingsParams{
-				DefaultPaymentMethod: stripe.String(paymentMethodID),
+				DefaultPaymentMethod: stripe.String(request.PaymentMethodID),
 			},
 		}
-		_, err = customer.Update(stripeCustomer.ID, customerParamsUpdate)
+		_, err = customer.Update(stripeCustomer.ID, customerUpdateParams)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
@@ -69,26 +77,31 @@ func PostPayment(auth *auth.Client, database *mongo.Database) gin.HandlerFunc {
 			Customer: stripe.String(stripeCustomer.ID),
 			Items: []*stripe.SubscriptionItemsParams{
 				{
-					Price: stripe.String(priceID),
+					Price: stripe.String(request.PriceID),
 				},
 			},
 		}
 		subscriptionParams.AddMetadata("userId", userid)
 
-		newsub, err := sub.New(subscriptionParams)
+		newSub, err := sub.New(subscriptionParams)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
 
-		if err := setUserPayingPartial(database, newsub.ID, uid, subscription, userid); err != nil {
+		length := "monthly"
+		if request.PriceID == "price_1PJfbpIstWH7VBmu1nToVdC9" {
+			length = "yearly"
+		}
+
+		if err := setUserPayingPartial(database, newSub.ID, uid, length, userid); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
 
 		c.JSON(http.StatusOK, gin.H{
-			"subscriptionId": newsub.ID,
-			"status":         newsub.Status,
+			"subscriptionId": newSub.ID,
+			"status":         newSub.Status,
 		})
 	}
 }
