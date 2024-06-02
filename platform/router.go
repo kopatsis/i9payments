@@ -31,6 +31,7 @@ func New(auth *auth.Client, database *mongo.Database, scheduler *gocron.Schedule
 	router.GET("/login", login.LoginPage(auth))
 	router.GET("/new", login.SignUpPage(auth))
 	router.GET("/logout", login.Logout(auth))
+	router.GET("/pay", pay.Subscription(auth, database))
 
 	router.POST("/updateName", home.Name(auth, database))
 	router.POST("/delete", home.Delete(auth, database))

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -12,7 +13,8 @@ import (
 
 	"github.com/go-co-op/gocron"
 	"github.com/joho/godotenv"
-	"github.com/stripe/stripe-go"
+	"github.com/stripe/stripe-go/v72"
+	"github.com/stripe/stripe-go/v72/account"
 )
 
 func main() {
@@ -32,7 +34,14 @@ func main() {
 	}
 	defer db.DisConnectDB(client)
 
+	fmt.Println(os.Getenv("STRIPE_SECRET"))
 	stripe.Key = os.Getenv("STRIPE_SECRET")
+
+	acct, err := account.Get()
+	if err != nil {
+		log.Fatalf("Stripe API key test failed: %v", err)
+	}
+	log.Printf("Stripe API key test succeeded: Account ID = %s, Email = %s", acct.ID, acct.Email)
 
 	rtr := platform.New(auth, database, scheduler)
 

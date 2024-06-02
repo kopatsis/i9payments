@@ -1,97 +1,78 @@
-{{/* page.tmpl */}}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stripe Payment</title>
-    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.2.3"></script>
+    <title>Subscribe</title>
     <script src="https://js.stripe.com/v3/"></script>
 </head>
 <body>
-
-<div>For {{.Email}}</div>
-<div x-data="paymentHandler()" x-init="init()">
-    <form id="payment-form" @submit.prevent="handlePayment">
+    <h1>Email: {{.Email}}</h1>
+    <form id="payment-form">
+        <div id="payment-element"></div>
         <div>
             <label>
-                <input type="radio" name="subscription" value="monthly" x-model="subscription" checked>
+                <input type="radio" name="subscription" value="monthly" checked>
                 Monthly ($4.99/month)
             </label>
             <label>
-                <input type="radio" name="subscription" value="yearly" x-model="subscription">
+                <input type="radio" name="subscription" value="yearly">
                 Yearly ($49.99/year)
             </label>
         </div>
-        <div id="card-element"><!-- Stripe Elements will be inserted here --></div>
-        <button type="submit">Pay</button>
-        <input type="hidden" name="paymentMethod" x-model="paymentMethod">
-        <input type="hidden" name="email" :value="email">
-        <input type="hidden" name="subscription" :value="subscription">
+        <button type="submit">Subscribe</button>
     </form>
+    <div id="error-message"></div>
 
-    <div id="payment-message" style="display: none; color: red;"></div>
-</div>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const stripe = Stripe('pk_test_51PJLOAIstWH7VBmuSbipom0Z6Gy1Wj6wOjFtApmfGspxtTCywa9WEhP1UjB5XheYdCVXnUScy1zChx4lagbeZYvE002At1oIiP');
+            const clientSecret = "{{ .ClientSecret }}";
 
-<div>
-    <button><a href="/logout">Logout</a></button>
- </div>
+            const elements = stripe.elements({ clientSecret });
+            const paymentElement = elements.create('payment');
+            paymentElement.mount('#payment-element');
 
-<script>
-function paymentHandler() {
-    return {
-        stripe: Stripe('pk_test_51PJLOAIstWH7VBmuSbipom0Z6Gy1Wj6wOjFtApmfGspxtTCywa9WEhP1UjB5XheYdCVXnUScy1zChx4lagbeZYvE002At1oIiP'),
-        cardElement: null,
-        paymentMethod: '',
-        email: document.getElementById('user-data').dataset.email,
-        subscription: 'monthly',
+            const form = document.getElementById('payment-form');
+            form.addEventListener('submit', async (event) => {
+                event.preventDefault();
 
-        init() {
-            const elements = this.stripe.elements();
-            this.cardElement = elements.create('card');
-            this.cardElement.mount('#card-element');
-        },
+                const subscriptionType = document.querySelector('input[name="subscription"]:checked').value;
+                let priceId;
+                if (subscriptionType === 'yearly') {
+                    priceId = 'price_1PJfbpIstWH7VBmu1nToVdC9';
+                } else {
+                    priceId = 'price_1PJfbQIstWH7VBmuNNsoLTN2';
+                }
 
-        async handlePayment() {
-            const {paymentMethod, error} = await this.stripe.createPaymentMethod({
-                type: 'card',
-                card: this.cardElement,
+                const { setupIntent, error } = await stripe.confirmSetup({
+                    elements,
+                    confirmParams: {
+                        return_url: 'http://localhost:4040/pay',
+                    },
+                });
+
+                if (error) {
+                    document.getElementById('error-message').textContent = error.message;
+                } else {
+                    const paymentMethodId = setupIntent.payment_method;
+
+                    const response = await fetch('/process-subscription', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ paymentMethodId, priceId }),
+                    });
+
+                    if (response.ok) {
+                        location.reload(); // Refresh the page on success
+                    } else {
+                        const errorData = await response.json();
+                        document.getElementById('error-message').textContent = errorData.error;
+                    }
+                }
             });
-            if (error) {
-                const messageElement = document.getElementById('payment-message');
-                messageElement.textContent = error.message;
-                messageElement.style.display = 'block';
-            } else {
-                this.paymentMethod = paymentMethod.id;
-                await this.submitPayment();
-            }
-        },
-
-        async submitPayment() {
-            const formData = new FormData(document.getElementById('payment-form'));
-            const response = await fetch('/process-payment', {
-                method: 'POST',
-                body: formData,
-                credentials: 'include'
-            });
-            if (!response.ok) {
-                const messageElement = document.getElementById('payment-message');
-                messageElement.textContent = 'Payment failed. Please try again.';
-                messageElement.style.display = 'block';
-            } else {
-                location.reload();
-            }
-        }
-    }
-}
-
-document.addEventListener('alpine:init', () => {
-    Alpine.data('paymentHandler', paymentHandler);
-});
-</script>
-
-<div id="user-data" data-email="{{.UserEmail}}" style="display: none;"></div>
-
+        });
+    </script>
 </body>
 </html>
-

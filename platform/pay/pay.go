@@ -9,7 +9,9 @@ import (
 
 	"firebase.google.com/go/auth"
 	"github.com/gin-gonic/gin"
-	"github.com/stripe/stripe-go/sub"
+	"github.com/stripe/stripe-go/v72"
+	"github.com/stripe/stripe-go/v72/setupintent"
+	"github.com/stripe/stripe-go/v72/sub"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -41,8 +43,21 @@ func Subscription(auth *auth.Client, database *mongo.Database) gin.HandlerFunc {
 		}
 
 		if userpayment == nil {
+
+			params := &stripe.SetupIntentParams{
+				PaymentMethodTypes: stripe.StringSlice([]string{
+					"card",
+				}),
+			}
+			si, err := setupintent.New(params)
+			if err != nil {
+				c.String(http.StatusInternalServerError, err.Error())
+				return
+			}
+
 			c.HTML(200, "pay.tmpl", gin.H{
-				"Email": email,
+				"ClientSecret": si.ClientSecret,
+				"Email":        email,
 			})
 			return
 		}
