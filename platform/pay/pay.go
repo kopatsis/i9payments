@@ -2,7 +2,6 @@ package pay
 
 import (
 	"context"
-	"fmt"
 	"i9pay/platform/login"
 	"i9pay/platform/multipass"
 	"net/http"
@@ -39,7 +38,7 @@ func Subscription(auth *auth.Client, database *mongo.Database) gin.HandlerFunc {
 
 		userpayment, err := getUserPayment(database, user.ID.Hex())
 		if err != nil {
-			c.HTML(200, "error.tmpl", nil)
+			c.HTML(200, "error.tmpl", gin.H{"Error": err.Error()})
 			return
 		}
 
@@ -77,12 +76,9 @@ func Subscription(auth *auth.Client, database *mongo.Database) gin.HandlerFunc {
 
 			s, err := sub.Get(userpayment.SubscriptionID, nil)
 			if err != nil {
-				fmt.Println("error here" + err.Error())
-				c.HTML(200, "error.tmpl", nil)
+				c.HTML(200, "error.tmpl", gin.H{"Error": err.Error()})
 				return
 			}
-
-			fmt.Println(s)
 
 			if userpayment.Ending {
 				c.HTML(200, "ending.html", gin.H{
@@ -92,8 +88,7 @@ func Subscription(auth *auth.Client, database *mongo.Database) gin.HandlerFunc {
 
 			paymentType, cardBrand, lastFour, err := getPaymentMethodDetails(userpayment.SubscriptionID)
 			if err != nil {
-				fmt.Println("error here 2" + err.Error())
-				c.HTML(200, "error.tmpl", nil)
+				c.HTML(200, "error.tmpl", gin.H{"Error": err.Error()})
 				return
 			}
 
@@ -121,7 +116,7 @@ func Subscription(auth *auth.Client, database *mongo.Database) gin.HandlerFunc {
 			return
 		}
 
-		c.HTML(200, "error.tmpl", nil)
+		c.HTML(200, "error.tmpl", gin.H{"Error": "User payment exists and processing false, but user obj paying false (shouldn't be possible)"})
 
 	}
 }

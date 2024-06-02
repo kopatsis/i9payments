@@ -17,10 +17,10 @@
   <body>
     {{if eq .Length "monthly"}}
     <div>Subscription Plan: $4.99 Monthly</div>
-    <button @click="swapFrequency('yearly')">Change to $49.99 Yearly*</button>
+    <button @click="swapFrequency('yearly')">Change to $49.99 Yearly</button>
     {{else}}
     <div>Subscription Plan: $49.99 Yearly</div>
-    <button @click="swapFrequency('monthly')">Change to $4.99 Monthly*</button>
+    <button @click="swapFrequency('monthly')">Change to $4.99 Monthly</button>
     {{ end }}
     <div>*Will begin at the end of this current billing cycle</div>
 

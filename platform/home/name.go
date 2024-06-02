@@ -16,7 +16,7 @@ func Name(auth *auth.Client, database *mongo.Database) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		_, id, err := multipass.BothIDsFromCookie(c, auth, database)
 		if err != nil {
-			c.HTML(200, "error.tmpl", nil)
+			c.HTML(200, "error.tmpl", gin.H{"Error": err.Error()})
 			return
 		}
 
@@ -24,7 +24,7 @@ func Name(auth *auth.Client, database *mongo.Database) gin.HandlerFunc {
 
 		objectID, err := primitive.ObjectIDFromHex(id)
 		if err != nil {
-			c.HTML(200, "error.tmpl", nil)
+			c.HTML(200, "error.tmpl", gin.H{"Error": err.Error()})
 			return
 		}
 
@@ -34,7 +34,7 @@ func Name(auth *auth.Client, database *mongo.Database) gin.HandlerFunc {
 		collection := database.Collection("user")
 		_, err = collection.UpdateOne(context.TODO(), filter, update)
 		if err != nil {
-			c.HTML(200, "error.tmpl", nil)
+			c.HTML(200, "error.tmpl", gin.H{"Error": err.Error()})
 			return
 		}
 
