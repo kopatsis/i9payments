@@ -20,7 +20,7 @@ type SpecialCodeSB struct {
 
 func getSpecialCode(database *mongo.Database) (string, error) {
 	specialCode := SpecialCodeSB{
-		Status: "Archived",
+		Status: "Active",
 	}
 
 	collection := database.Collection("specialcode")
