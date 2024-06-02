@@ -7,171 +7,171 @@
     <title>Manage Membership</title>
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.2.3"></script>
     <script src="https://js.stripe.com/v3/"></script>
-    <style>
-      #payment-update-form {
-        display: none;
-      }
-    </style>
   </head>
 
   <body>
-    {{if eq .Length "monthly"}}
-    <div>Subscription Plan: $4.99 Monthly</div>
-    <button @click="swapFrequency('yearly')">Change to $49.99 Yearly</button>
-    {{else}}
-    <div>Subscription Plan: $49.99 Yearly</div>
-    <button @click="swapFrequency('monthly')">Change to $4.99 Monthly</button>
-    {{ end }}
+    <div x-data="{ showError: false, errorMessage: '' }">
+      {{if eq .Length "monthly"}}
+      <div>Subscription Plan: $4.99 Monthly</div>
+      <button @click="swapFrequency('yearly')">Change to $49.99 Yearly</button>
+      {{else}}
+      <div>Subscription Plan: $49.99 Yearly</div>
+      <button @click="swapFrequency('monthly')">Change to $4.99 Monthly</button>
+      {{ end }}
+
+      <div x-show="showError">
+        <p x-text="errorMessage"></p>
+      </div>
+    </div>
+
     <div>*Will begin at the end of this current billing cycle</div>
 
     <div>Next billing cycle charge date: {{.Date}}</div>
-    <div x-data="cancelHandler()" x-init="init()">
-      <form id="cancel-form" @submit.prevent="handleSubmit">
-        <p>Email: {{.Email}}</p>
-        {{ if .External }}
-        <p>Your payment is managed through {{.External}}.</p>
-        {{ else }}
-        <p>
-          Your payment is managed by a card with the brand {{.Brand}} and last
-          four digits of {{.Four}}.
-        </p>
-        {{ end }}
-        <button type="submit">Cancel Membership</button>
-      </form>
-      <div x-show="errorMessage" x-text="errorMessage" style="color: red"></div>
 
-      <button @click="togglePaymentUpdateForm">Update Payment Method</button>
-      <div id="payment-update-form">
-        <form id="update-payment-form" @submit.prevent="handlePaymentUpdate">
-          <div id="card-element">
-            <!-- Stripe Elements will be inserted here -->
-          </div>
-          <button type="submit">Update Payment Method</button>
-        </form>
+    <p>Email: {{.Email}}</p>
+
+    {{ if .External }}
+    <p>Your payment is managed through {{.External}}.</p>
+    {{ else }}
+    <p>
+      Your payment is managed by a card with the brand {{.Brand}} and last four
+      digits of {{.Four}}.
+    </p>
+    {{ end }}
+
+    <button @click="showForm = !showForm">Update Payment Method</button>
+
+    <div
+      id="payment-update-form"
+      x-data="{ showForm: false }"
+      x-show="showForm"
+    >
+      <form id="payment-form">
+        <div id="payment-element"></div>
+        <button type="submit">Submit New Payment Method</button>
+        <button type="button" @click="showForm = false">Cancel</button>
+      </form>
+    </div>
+
+    <div id="error-message"></div>
+
+    <div x-data="{ showConfirm: false, showError: false }">
+      <button x-show="!showConfirm" @click="showConfirm = true">
+        Cancel Membership
+      </button>
+
+      <div x-show="showConfirm">
+        <p>Are you sure you want to cancel your membership?</p>
+        <button @click="cancelMembership">Confirm</button>
+        <button @click="showConfirm = false">Go Back</button>
+      </div>
+
+      <div x-show="showError">
+        <p>Error cancelling membership. Please try again.</p>
       </div>
     </div>
 
     <div>
       <button><a href="/logout">Logout</a></button>
     </div>
+
     <script>
-      function cancelHandler() {
-        return {
-          email: "{{.Email}}",
-          external: "{{.External}}",
-          cardBrand: "{{.Brand}}",
-          lastFour: "{{.Four}}",
-          customerID: "{{.Customer}}",
-          subscriptionID: "{{.Subscription}}",
-          errorMessage: "",
-          stripe: null,
-          card: null,
-
-          init() {
-            const stripe = Stripe("your-publishable-key");
-            const elements = stripe.elements();
-            const card = elements.create("card");
-            card.mount("#card-element");
-            this.stripe = stripe;
-            this.card = card;
-          },
-
-          togglePaymentUpdateForm() {
-            const form = document.getElementById("payment-update-form");
-            form.style.display =
-              form.style.display === "none" ? "block" : "none";
-          },
-
-          async handleSubmit() {
-            this.errorMessage = "";
-            const form = document.getElementById("cancel-form");
-            const formData = new FormData(form);
-
-            const response = await fetch("/cancel", {
-              method: "POST",
-              body: formData,
-              credentials: "include",
-            });
-
+      function cancelMembership() {
+        fetch("/cancel", {
+          method: "POST",
+          credentials: "include",
+        })
+          .then((response) => {
             if (response.ok) {
-              location.reload();
+              window.location.reload();
             } else {
-              const result = await response.json();
-              this.errorMessage =
-                "Failed to cancel membership: " +
-                (result.message || response.statusText);
+              this.showError = true;
+              this.showConfirm = false;
             }
-          },
+          })
+          .catch(() => {
+            this.showError = true;
+            this.showConfirm = false;
+          });
+      }
 
-          async handlePaymentUpdate() {
-            const { paymentMethod, error } =
-              await this.stripe.createPaymentMethod("card", this.card);
+      function swapFrequency(newFrequency) {
+        const formData = new FormData();
+        formData.append("frequency", newFrequency);
 
-            if (error) {
-              this.errorMessage = error.message;
-              return;
+        fetch("/swap", {
+          method: "POST",
+          credentials: "include",
+          body: formData,
+        })
+          .then((response) => {
+            if (response.ok) {
+              window.location.reload();
+            } else {
+              response.text().then((text) => {
+                this.showError = true;
+                this.errorMessage = text;
+              });
             }
+          })
+          .catch((error) => {
+            this.showError = true;
+            this.errorMessage = "An error occurred. Please try again.";
+          });
+      }
+
+      document.addEventListener("DOMContentLoaded", async () => {
+        const stripe = Stripe(
+          "pk_test_51PJLOAIstWH7VBmuSbipom0Z6Gy1Wj6wOjFtApmfGspxtTCywa9WEhP1UjB5XheYdCVXnUScy1zChx4lagbeZYvE002At1oIiP"
+        );
+        const clientSecret = "{{ .ClientSecret }}";
+
+        const elements = stripe.elements({ clientSecret });
+        const paymentElement = elements.create("payment");
+        paymentElement.mount("#payment-element");
+
+        const form = document.getElementById("payment-form");
+        form.addEventListener("submit", async (event) => {
+          event.preventDefault();
+
+          const { setupIntent, error } = await stripe.confirmSetup({
+            elements,
+            confirmParams: {
+              return_url: window.location.href,
+            },
+            redirect: "if_required",
+          });
+
+          if (error) {
+            document.getElementById("error-message").textContent =
+              error.message;
+          } else {
+            const paymentMethodId = setupIntent.payment_method;
 
             const response = await fetch("/update", {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
               },
+              credentials: "include",
               body: JSON.stringify({
-                subscription_id: this.subscriptionID,
-                payment_method_id: paymentMethod.id,
-                customer_id: this.customerID,
+                subscription_id: "{{.Customer}}",
+                payment_method_id: paymentMethodId,
+                customer_id: "{{.Subscription}}",
               }),
-              credentials: "include",
             });
 
             if (response.ok) {
               location.reload();
             } else {
-              const result = await response.json();
-              this.errorMessage =
-                "Failed to update payment method: " +
-                (result.message || response.statusText);
+              const errorData = await response.json();
+              document.getElementById("error-message").textContent =
+                errorData.error;
             }
-          },
-
-          async swapFrequency(newFrequency) {
-            this.errorMessage = "";
-            const formData = new FormData();
-            formData.append("frequency", newFrequency);
-
-            const response = await fetch("/swap", {
-              method: "POST",
-              body: formData,
-              credentials: "include",
-            });
-
-            if (response.ok) {
-              location.reload();
-            } else {
-              const result = await response.json();
-              this.errorMessage =
-                "Failed to change membership frequency: " +
-                (result.message || response.statusText);
-            }
-          },
-        };
-      }
-
-      document.addEventListener("alpine:init", () => {
-        Alpine.data("cancelHandler", cancelHandler);
+          }
+        });
       });
     </script>
 
-    <div
-      id="user-data"
-      data-email="{{.Email}}"
-      data-external="{{.External}}"
-      data-brand="{{.Brand}}"
-      data-four="{{.Four}}"
-      data-customer="{{.Customer}}"
-      data-subscription="{{.Subscription}}"
-      style="display: none"
-    ></div>
   </body>
 </html>

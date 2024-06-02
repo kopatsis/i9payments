@@ -51,7 +51,7 @@ func Subscription(auth *auth.Client, database *mongo.Database) gin.HandlerFunc {
 			}
 			si, err := setupintent.New(params)
 			if err != nil {
-				c.String(http.StatusInternalServerError, err.Error())
+				c.HTML(200, "error.tmpl", gin.H{"Error": err.Error()})
 				return
 			}
 
@@ -92,8 +92,20 @@ func Subscription(auth *auth.Client, database *mongo.Database) gin.HandlerFunc {
 				return
 			}
 
+			params := &stripe.SetupIntentParams{
+				PaymentMethodTypes: stripe.StringSlice([]string{
+					"card",
+				}),
+			}
+			si, err := setupintent.New(params)
+			if err != nil {
+				c.HTML(200, "error.tmpl", gin.H{"Error": err.Error()})
+				return
+			}
+
 			if paymentType != "Card" {
 				c.HTML(200, "alreadypaying.tmpl", gin.H{
+					"ClientSecret": si.ClientSecret,
 					"Date":         time.Unix(s.CurrentPeriodEnd, 0).Format("01/02/2006"),
 					"Email":        email,
 					"External":     paymentType,
@@ -105,6 +117,7 @@ func Subscription(auth *auth.Client, database *mongo.Database) gin.HandlerFunc {
 			}
 
 			c.HTML(200, "alreadypaying.tmpl", gin.H{
+				"ClientSecret": si.ClientSecret,
 				"Date":         time.Unix(s.CurrentPeriodEnd, 0).Format("01/02/2006"),
 				"Email":        email,
 				"Brand":        cardBrand,
