@@ -1,6 +1,7 @@
 package multipass
 
 import (
+	"fmt"
 	"i9pay/platform/login"
 	"net/http"
 
@@ -15,6 +16,7 @@ func Multipass(authClient *auth.Client, database *mongo.Database) gin.HandlerFun
 		code := c.Query("code")
 
 		if status := checkSpecialCode(code, database); !status || refresh == "" {
+			fmt.Println("failed on code")
 			c.Redirect(http.StatusFound, "/pay")
 			go func() {
 				deleteSpecialCode(code, database)
@@ -22,16 +24,21 @@ func Multipass(authClient *auth.Client, database *mongo.Database) gin.HandlerFun
 			return
 		}
 
-		refresh, token, err := login.GetNewIDToken(refresh)
+		token, refresh, err := login.GetNewIDToken(refresh)
 		if err != nil {
+			fmt.Println("failed on get tokens")
 			c.Redirect(http.StatusFound, "/pay")
 			go func() {
 				deleteSpecialCode(code, database)
 			}()
 			return
 		}
+
+		fmt.Println(refresh)
+		fmt.Println(token)
 
 		if err := login.Cookie(token, refresh, authClient, c); err != nil {
+			fmt.Println("failed on cookie create")
 			c.Redirect(http.StatusFound, "/pay")
 		}
 

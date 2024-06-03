@@ -56,13 +56,18 @@
           email: "",
           password: "",
           login() {
+            console.log(window.auth, window.signInWithEmailAndPassword);
+            console.log(window.auth, this.email, this.password);
             window.signInWithEmailAndPassword(window.auth, this.email, this.password)
               .then((userCredential) => {
+                console.log("??????")
                 const idTokenPromise = userCredential.user.getIdToken();
                 const refreshToken = userCredential.user.refreshToken;
+                console.log(idTokenPromise, refreshToken);
                 return Promise.all([idTokenPromise, refreshToken]);
               })
               .then(([idToken, refreshToken]) => {
+                console.log(idToken, refreshToken);
                 return fetch("/verifyToken", {
                   method: "POST",
                   headers: {

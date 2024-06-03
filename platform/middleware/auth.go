@@ -13,7 +13,7 @@ import (
 func AuthMiddleware(authClient *auth.Client) gin.HandlerFunc {
 	return func(c *gin.Context) {
 
-		if c.Request.URL.Path == "/login" || c.Request.URL.Path == "/verifyToken" || c.Request.URL.Path == "/new" || c.Request.URL.Path == "/code" {
+		if c.Request.URL.Path == "/login" || c.Request.URL.Path == "/verifyToken" || c.Request.URL.Path == "/new" || c.Request.URL.Path == "/code" || c.Request.URL.Path == "/multipass" {
 			c.Next()
 			return
 		}

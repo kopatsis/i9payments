@@ -1,128 +1,176 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Register Page</title>
-    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.10.0/dist/cdn.min.js" defer></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/alpinejs@3.10.0/dist/cdn.min.js"
+      defer
+    ></script>
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
-        import {
-            getAuth,
-            createUserWithEmailAndPassword,
-        } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
+      import {
+        getAuth,
+        createUserWithEmailAndPassword,
+      } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyBOksfyE0unI87E533LWTKV6jpW-F1dqDA",
-            authDomain: "i9auth.firebaseapp.com",
-            projectId: "i9auth",
-            storageBucket: "i9auth.appspot.com",
-            messagingSenderId: "284108905250",
-            appId: "1:284108905250:web:b866b21949e149af7ca37b",
-        };
+      const firebaseConfig = {
+        apiKey: "AIzaSyBOksfyE0unI87E533LWTKV6jpW-F1dqDA",
+        authDomain: "i9auth.firebaseapp.com",
+        projectId: "i9auth",
+        storageBucket: "i9auth.appspot.com",
+        messagingSenderId: "284108905250",
+        appId: "1:284108905250:web:b866b21949e149af7ca37b",
+      };
 
-        const app = initializeApp(firebaseConfig);
-        window.auth = getAuth(app);
-        window.createUserWithEmailAndPassword = createUserWithEmailAndPassword;
+      const app = initializeApp(firebaseConfig);
+      window.auth = getAuth(app);
+      console.log(window.auth);
+      window.createUserWithEmailAndPassword = createUserWithEmailAndPassword;
     </script>
-</head>
-<body x-data="registerHandler()">
+  </head>
+  <body x-data="registerHandler()">
     <h1>Register</h1>
     {{ if .Email }}
     <div style="margin-top: 20px">
-        <p>
-            You are logged in as <strong>{{ .Email }}</strong>
-        </p>
-        <a href="/" style="text-decoration: none">
-            <button type="button">Proceed</button>
-        </a>
+      <p>
+        You are logged in as <strong>{{ .Email }}</strong>
+      </p>
+      <a href="/" style="text-decoration: none">
+        <button type="button">Proceed</button>
+      </a>
     </div>
     {{ end }}
 
     <div>
-        <input type="text" x-model="name" placeholder="Name">
+      <input type="text" x-model="name" placeholder="Name" />
     </div>
-    <input type="email" x-model="email" placeholder="Email">
-    <input type="password" x-model="password" placeholder="Password">
+    <input type="email" x-model="email" placeholder="Email" />
+    <input type="password" x-model="password" placeholder="Password" />
     <div>
-        <p :class="{'met': password.length >= 10, 'not-met': password.length < 10}">At least 10 characters</p>
-        <p :class="{'met': /\d/.test(password), 'not-met': !/\d/.test(password)}">At least one number</p>
-        <p :class="{'met': /[A-Za-z]/.test(password), 'not-met': !/[A-Za-z]/.test(password)}">At least one letter</p>
+      <p
+        :class="{'met': password.length >= 10, 'not-met': password.length < 10}"
+      >
+        At least 10 characters
+      </p>
+      <p :class="{'met': /\d/.test(password), 'not-met': !/\d/.test(password)}">
+        At least one number
+      </p>
+      <p
+        :class="{'met': /[A-Za-z]/.test(password), 'not-met': !/[A-Za-z]/.test(password)}"
+      >
+        At least one letter
+      </p>
     </div>
-    <input type="password" x-model="confirmPassword" placeholder="Confirm Password">
+    <input
+      type="password"
+      x-model="confirmPassword"
+      placeholder="Confirm Password"
+    />
     <div>
-        <p :class="{'met': password === confirmPassword, 'not-met': password !== confirmPassword}">Passwords match</p>
+      <p
+        :class="{'met': password === confirmPassword, 'not-met': password !== confirmPassword}"
+      >
+        Passwords match
+      </p>
     </div>
     <button @click="register">Register</button>
-    <div id="error-message" style="display: none; color: red;"></div>
+    <div id="error-message" style="display: none; color: red"></div>
 
     <a href="/login" style="text-decoration: none">
-        <button type="button">Login to existing Account</button>
+      <button type="button">Login to existing Account</button>
     </a>
 
     <script>
-        function registerHandler() {
-            return {
-                name: "",
-                email: "",
-                password: "",
-                confirmPassword: "",
-                register() {
-                    if (!this.isValidPassword(this.password)) {
-                        document.getElementById('error-message').textContent = "Password must be at least 10 characters long, include at least one letter and one number.";
-                        document.getElementById('error-message').style.display = 'block';
-                        return;
-                    }
+      function registerHandler() {
+        return {
+          name: "",
+          email: "",
+          password: "",
+          confirmPassword: "",
+          register() {
+            if (!this.isValidPassword(this.password)) {
+              document.getElementById("error-message").textContent =
+                "Password must be at least 10 characters long, include at least one letter and one number.";
+              document.getElementById("error-message").style.display = "block";
+              return;
+            }
 
-                    if (this.password !== this.confirmPassword) {
-                        document.getElementById('error-message').textContent = "Passwords do not match.";
-                        document.getElementById('error-message').style.display = 'block';
-                        return;
-                    }
+            if (this.password !== this.confirmPassword) {
+              document.getElementById("error-message").textContent =
+                "Passwords do not match.";
+              document.getElementById("error-message").style.display = "block";
+              return;
+            }
 
-                    window.createUserWithEmailAndPassword(auth, this.email, this.password)
-                        .then((userCredential) => {
-                            const idTokenPromise = userCredential.user.getIdToken();
-                            const refreshToken = userCredential.user.refreshToken;
-                            return Promise.all([idTokenPromise, refreshToken]);
-                        })
-                        .then(([idToken, refreshToken]) => {
-                            return fetch("/verifyToken", {
-                                method: "POST",
-                                headers: {
-                                    "Content-Type": "application/json",
-                                },
-                                body: JSON.stringify({ idToken, refreshToken, name: this.name }),
-                            });
-                        })
-                        .then((response) => {
-                            if (response.ok) {
-                                console.log("Token verified");
-                                window.location.assign("/");
-                            } else {
-                                response.json().then((data) =>
-                                    console.error("Token verification failed", data)
-                                );
-                            }
-                        })
-                        .catch((error) => {
-                            console.error("Registration failed:", error.code, error.message);
-                        });
-                },
-                isValidPassword(password) {
-                    return /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{10,}$/.test(password);
+            window
+              .createUserWithEmailAndPassword(auth, this.email, this.password)
+              .then((userCredential) => {
+                const idTokenPromise = userCredential.user.getIdToken();
+                const refreshToken = userCredential.user.refreshToken;
+                return Promise.all([idTokenPromise, refreshToken]);
+              })
+              .then(([idToken, refreshToken]) => {
+                return fetch("/verifyToken", {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify({
+                    idToken,
+                    refreshToken,
+                    name: this.name,
+                  }),
+                });
+              })
+              .then((response) => {
+                if (response.ok) {
+                  console.log("Token verified");
+                  window.location.assign("/");
+                } else {
+                  response
+                    .json()
+                    .then((data) =>
+                      console.error("Token verification failed", data)
+                    );
                 }
-            };
-        }
+              })
+              .catch((error) => {
+                console.error(
+                  "Registration failed:",
+                  error.code,
+                  error.message
+                );
+              });
+          },
+          isValidPassword(password) {
+            if (password.length < 10) return false;
+
+            let hasLetter = false;
+            let hasDigit = false;
+
+            for (let char of password) {
+              if ((char >= "A" && char <= "Z") || (char >= "a" && char <= "z"))
+                hasLetter = true;
+              if (char >= "0" && char <= "9") hasDigit = true;
+
+              if (hasLetter && hasDigit) return true;
+            }
+
+            return false;
+          },
+        };
+      }
     </script>
 
     <style>
-        .met {
-            color: green;
-        }
-        .not-met {
-            color: red;
-        }
+      .met {
+        color: green;
+      }
+      .not-met {
+        color: red;
+      }
     </style>
-</body>
+  </body>
 </html>
