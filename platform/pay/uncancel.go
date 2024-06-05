@@ -75,7 +75,14 @@ func PostUncancel(auth *auth.Client, database *mongo.Database, scheduler *gocron
 			return
 		}
 
-		if err := emails.SendUnCancelled(userRecord.Email, userRecord.DisplayName); err != nil {
+		name, err := getUserName(database, userID)
+		if err != nil {
+			log.Printf("Error in getting db user for cancel: %s; for user: %s; %s", subID, userID, err.Error())
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get db user for cancel"})
+			return
+		}
+
+		if err := emails.SendUnCancelled(userRecord.Email, name); err != nil {
 			log.Printf("Error in emailing user for cancel: %s; for user: %s; %s", subID, userID, err.Error())
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to email user for cancel"})
 			return

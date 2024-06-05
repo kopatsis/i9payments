@@ -26,8 +26,8 @@ func SendConfirmation(email, name string) error {
 	</head>
 	<body>
 		<div class="container">
-			<h1>Hello, World!</h1>
-			<p>This is a sample email with CSS styling.</p>
+			<h1>Congrats</h1>
+			<p>Your i9 Giga Membership has officially begun!</p>
 		</div>
 	</body>
 	</html>
@@ -64,14 +64,15 @@ func SendCancelled(email, name string) error {
 	</head>
 	<body>
 		<div class="container">
-			<h1>Hello, World!</h1>
-			<p>This is a sample email with CSS styling.</p>
+			<h1>Aw</h1>
+			<p>Your i9 Giga Membership has officially been cancelled. We're sorry to see you go. </p>
+			<p>You will be able to use the same features until the end of your billing cycle and will not be charged again. </p>
 		</div>
 	</body>
 	</html>
 	`
 
-	message := mail.NewSingleEmail(from, "Confirmation: Your Membership Has Started", to, "", htmlContent)
+	message := mail.NewSingleEmail(from, "Confirmation: Your Membership Been Cancelled", to, "", htmlContent)
 	client := sendgrid.NewSendClient("SENDGRID_KEY")
 	response, err := client.Send(message)
 	if err != nil {
@@ -102,14 +103,14 @@ func SendUnCancelled(email, name string) error {
 	</head>
 	<body>
 		<div class="container">
-			<h1>Hello, World!</h1>
-			<p>This is a sample email with CSS styling.</p>
+			<h1>Nice</h1>
+			<p>Your i9 Giga Membership has officially been un-cancelled. We are so back.</p>
 		</div>
 	</body>
 	</html>
 	`
 
-	message := mail.NewSingleEmail(from, "Confirmation: Your Membership Has Started", to, "", htmlContent)
+	message := mail.NewSingleEmail(from, "Confirmation: Your Membership Been Un-cancelled", to, "", htmlContent)
 	client := sendgrid.NewSendClient("SENDGRID_KEY")
 	response, err := client.Send(message)
 	if err != nil {

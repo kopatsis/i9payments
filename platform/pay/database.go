@@ -204,3 +204,26 @@ func getCancellationByUser(database *mongo.Database, userID string) (string, err
 
 	return result.ID.Hex(), nil
 }
+
+func getUserName(database *mongo.Database, userID string) (string, error) {
+	collection := database.Collection("user")
+
+	objID, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		return "", err
+	}
+
+	filter := bson.M{"_id": objID}
+	projection := bson.M{"name": 1}
+
+	var result struct {
+		Name string `bson:"name"`
+	}
+
+	err = collection.FindOne(context.TODO(), filter, options.FindOne().SetProjection(projection)).Decode(&result)
+	if err != nil {
+		return "", err
+	}
+
+	return result.Name, nil
+}
