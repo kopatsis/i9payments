@@ -14,36 +14,41 @@ func getPaymentMethodDetails(subscriptionID string) (string, string, string, err
 	params := &stripe.InvoiceListParams{
 		Subscription: stripe.String(subscriptionID),
 	}
-	params.Filters.AddFilter("limit", "", "1")
+	params.Filters.AddFilter("limit", "", "10") // Retrieve more than one invoice
 
 	i := invoice.List(params)
-	if !i.Next() {
-		return "", "", "", fmt.Errorf("no invoices found for subscription ID: %s", subscriptionID)
+
+	for i.Next() {
+		inv := i.Invoice()
+		if inv.PaymentIntent != nil {
+			paymentIntent, err := paymentintent.Get(inv.PaymentIntent.ID, nil)
+			if err != nil {
+				return "", "", "", fmt.Errorf("error retrieving payment intent: %v", err)
+			}
+
+			if paymentIntent.PaymentMethod != nil {
+				paymentMethodID := paymentIntent.PaymentMethod.ID
+				if paymentMethodID == "" {
+					return "", "", "", fmt.Errorf("no payment method associated with the payment intent: %s", inv.PaymentIntent.ID)
+				}
+
+				paymentMethod, err := paymentmethod.Get(paymentMethodID, nil)
+				if err != nil {
+					return "", "", "", fmt.Errorf("error retrieving payment method: %v", err)
+				}
+
+				switch paymentMethod.Type {
+				case stripe.PaymentMethodTypeCard:
+					card := paymentMethod.Card
+					return "Card", string(card.Brand), card.Last4, nil
+				default:
+					return string(paymentMethod.Type), "", "", nil
+				}
+			}
+		}
 	}
 
-	inv := i.Invoice()
-	paymentIntent, err := paymentintent.Get(inv.PaymentIntent.ID, nil)
-	if err != nil {
-		return "", "", "", fmt.Errorf("error retrieving payment intent: %v", err)
-	}
-
-	paymentMethodID := paymentIntent.PaymentMethod.ID
-	if paymentMethodID == "" {
-		return "", "", "", fmt.Errorf("no payment method associated with the payment intent: %s", inv.PaymentIntent.ID)
-	}
-
-	paymentMethod, err := paymentmethod.Get(paymentMethodID, nil)
-	if err != nil {
-		return "", "", "", fmt.Errorf("error retrieving payment method: %v", err)
-	}
-
-	switch paymentMethod.Type {
-	case stripe.PaymentMethodTypeCard:
-		card := paymentMethod.Card
-		return "Card", string(card.Brand), card.Last4, nil
-	default:
-		return string(paymentMethod.Type), "", "", nil
-	}
+	return "", "", "", fmt.Errorf("no valid payment intent found for subscription ID: %s", subscriptionID)
 }
 
 func UpdateSubscriptionPlan(subscriptionID, newPriceID string) error {
@@ -59,8 +64,6 @@ func UpdateSubscriptionPlan(subscriptionID, newPriceID string) error {
 				Price: stripe.String(newPriceID),
 			},
 		},
-		ProrationBehavior:  stripe.String("none"),
-		BillingCycleAnchor: stripe.Int64(currentSub.CurrentPeriodEnd),
 	}
 
 	_, err = sub.Update(subscriptionID, updateParams)

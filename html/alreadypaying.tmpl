@@ -13,7 +13,7 @@
   </head>
 
   <body>
-    <div>
+    <div x-data>
       {{if eq .Length "monthly"}}
       <div>Subscription Plan: $4.99 Monthly</div>
       <button @click="swapFrequency('yearly')">Change to $49.99 Yearly</button>
@@ -103,6 +103,7 @@
           body: formData,
         })
           .then((response) => {
+            console.log("reached???")
             if (response.ok) {
               window.location.reload();
             } else {
