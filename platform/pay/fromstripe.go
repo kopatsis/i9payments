@@ -6,6 +6,7 @@ import (
 	"github.com/stripe/stripe-go/v72"
 	"github.com/stripe/stripe-go/v72/invoice"
 	"github.com/stripe/stripe-go/v72/paymentintent"
+	"github.com/stripe/stripe-go/v72/paymentmethod"
 	"github.com/stripe/stripe-go/v72/sub"
 )
 
@@ -26,17 +27,23 @@ func getPaymentMethodDetails(subscriptionID string) (string, string, string, err
 		return "", "", "", fmt.Errorf("error retrieving payment intent: %v", err)
 	}
 
-	paymentMethod := paymentIntent.PaymentMethod
-	if paymentMethod != nil {
-		switch paymentMethod.Type {
-		case stripe.PaymentMethodTypeCard:
-			card := paymentMethod.Card
-			return "Card", string(card.Brand), card.Last4, nil
-		default:
-			return string(paymentMethod.Type), "", "", nil
-		}
+	paymentMethodID := paymentIntent.PaymentMethod.ID
+	if paymentMethodID == "" {
+		return "", "", "", fmt.Errorf("no payment method associated with the payment intent: %s", inv.PaymentIntent.ID)
 	}
-	return "", "", "", fmt.Errorf("no payment method found for payment intent: %s", inv.PaymentIntent.ID)
+
+	paymentMethod, err := paymentmethod.Get(paymentMethodID, nil)
+	if err != nil {
+		return "", "", "", fmt.Errorf("error retrieving payment method: %v", err)
+	}
+
+	switch paymentMethod.Type {
+	case stripe.PaymentMethodTypeCard:
+		card := paymentMethod.Card
+		return "Card", string(card.Brand), card.Last4, nil
+	default:
+		return string(paymentMethod.Type), "", "", nil
+	}
 }
 
 func UpdateSubscriptionPlan(subscriptionID, newPriceID string) error {
@@ -52,7 +59,8 @@ func UpdateSubscriptionPlan(subscriptionID, newPriceID string) error {
 				Price: stripe.String(newPriceID),
 			},
 		},
-		ProrationBehavior: stripe.String("none"),
+		ProrationBehavior:  stripe.String("none"),
+		BillingCycleAnchor: stripe.Int64(currentSub.CurrentPeriodEnd),
 	}
 
 	_, err = sub.Update(subscriptionID, updateParams)

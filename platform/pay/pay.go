@@ -2,6 +2,7 @@ package pay
 
 import (
 	"context"
+	"fmt"
 	"i9pay/platform/login"
 	"i9pay/platform/multipass"
 	"net/http"
@@ -102,6 +103,8 @@ func Subscription(auth *auth.Client, database *mongo.Database) gin.HandlerFunc {
 				c.HTML(200, "error.tmpl", gin.H{"Error": err.Error()})
 				return
 			}
+
+			fmt.Println(paymentType, cardBrand, lastFour)
 
 			if paymentType != "Card" {
 				c.HTML(200, "alreadypaying.tmpl", gin.H{

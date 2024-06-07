@@ -45,6 +45,12 @@ func UpdateFrequency(auth *auth.Client, database *mongo.Database) gin.HandlerFun
 			return
 		}
 
+		if err := UpdateSubscriptionLength(database, userid, newlength); err != nil {
+			log.Printf("Error in actually updating the db user frequency: %s", err.Error())
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Error in actually updating the db user frequency"})
+			return
+		}
+
 		c.JSON(http.StatusOK, gin.H{"New length": newlength})
 	}
 }

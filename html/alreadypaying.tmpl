@@ -5,12 +5,15 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Manage Membership</title>
-    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.2.3"></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/alpinejs@3.10.0/dist/cdn.min.js"
+      defer
+    ></script>
     <script src="https://js.stripe.com/v3/"></script>
   </head>
 
   <body>
-    <div x-data="{ showError: false, errorMessage: '' }">
+    <div>
       {{if eq .Length "monthly"}}
       <div>Subscription Plan: $4.99 Monthly</div>
       <button @click="swapFrequency('yearly')">Change to $49.99 Yearly</button>
@@ -19,9 +22,7 @@
       <button @click="swapFrequency('monthly')">Change to $4.99 Monthly</button>
       {{ end }}
 
-      <div x-show="showError">
-        <p x-text="errorMessage"></p>
-      </div>
+      <div id="showError"></div>
     </div>
 
     <div>*Will begin at the end of this current billing cycle</div>
@@ -39,14 +40,9 @@
     </p>
     {{ end }}
 
-    <button @click="showForm = !showForm">Update Payment Method</button>
-
-    <div
-      id="payment-update-form"
-      x-data="{ showForm: false }"
-      x-show="showForm"
-    >
-      <form id="payment-form">
+    <div id="payment-update-form" x-data="{ showForm: false }">
+      <button @click="showForm = !showForm">Update Payment Method</button>
+      <form id="payment-form" x-show="showForm">
         <div id="payment-element"></div>
         <button type="submit">Submit New Payment Method</button>
         <button type="button" @click="showForm = false">Cancel</button>
@@ -55,7 +51,7 @@
 
     <div id="error-message"></div>
 
-    <div x-data="{ showConfirm: false, showError: false }">
+    <div x-data="{ showConfirm: false}">
       <button x-show="!showConfirm" @click="showConfirm = true">
         Cancel Membership
       </button>
@@ -66,7 +62,7 @@
         <button @click="showConfirm = false">Go Back</button>
       </div>
 
-      <div x-show="showError">
+      <div id="cancelError">
         <p>Error cancelling membership. Please try again.</p>
       </div>
     </div>
@@ -85,13 +81,15 @@
             if (response.ok) {
               window.location.reload();
             } else {
-              this.showError = true;
-              this.showConfirm = false;
+              response.text().then((text) => {
+                console.log(text);
+                document.getElementById("cancelError").textContent = text;
+              });
             }
           })
           .catch(() => {
-            this.showError = true;
-            this.showConfirm = false;
+            console.log(error);
+            document.getElementById("cancelError").textContent = error;
           });
       }
 
@@ -109,14 +107,14 @@
               window.location.reload();
             } else {
               response.text().then((text) => {
-                this.showError = true;
-                this.errorMessage = text;
+                console.log(text);
+                document.getElementById("showError").textContent = text;
               });
             }
           })
           .catch((error) => {
-            this.showError = true;
-            this.errorMessage = "An error occurred. Please try again.";
+            console.log(error);
+            document.getElementById("showError").textContent = error;
           });
       }
 
@@ -172,6 +170,5 @@
         });
       });
     </script>
-
   </body>
 </html>

@@ -227,3 +227,12 @@ func getUserName(database *mongo.Database, userID string) (string, error) {
 
 	return result.Name, nil
 }
+
+func UpdateSubscriptionLength(db *mongo.Database, userid, frequency string) error {
+	collection := db.Collection("userpayment")
+	filter := bson.M{"userid": userid}
+	update := bson.M{"$set": bson.M{"length": frequency}}
+
+	_, err := collection.UpdateOne(context.Background(), filter, update)
+	return err
+}
