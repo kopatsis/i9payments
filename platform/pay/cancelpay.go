@@ -57,21 +57,12 @@ func CancelPayment(auth *auth.Client, database *mongo.Database, scheduler *gocro
 			return
 		}
 
-		cancelID, err := backupCancellation(database, subID, userid, endTime)
+		_, err = backupCancellation(database, subID, userid, endTime)
 		if err != nil {
 			log.Printf("Error in pushing backup post for sub ID: %s; for user: %s; %s", subID, userid, err.Error())
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save cancellation backup"})
 			return
 		}
-
-		err = scheduleCancellation(scheduler, database, subID, userid, cancelID, endTime)
-		if err != nil {
-			log.Printf("Error in scheduling cancel: %s; for user: %s; %s", subID, userid, err.Error())
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to schedule cancel"})
-			return
-		}
-
-		scheduler.StartAsync()
 
 		userRecord, err := auth.GetUser(context.Background(), uid)
 		if err != nil {

@@ -10,6 +10,7 @@ import (
 	"i9pay/db"
 	"i9pay/platform"
 	"i9pay/platform/login"
+	"i9pay/platform/pay"
 
 	"github.com/go-co-op/gocron"
 	"github.com/joho/godotenv"
@@ -33,6 +34,11 @@ func main() {
 		log.Fatalf("Error while connecting to mongoDB: %s.\nExiting.", err)
 	}
 	defer db.DisConnectDB(client)
+
+	_, err = scheduler.Every(1).Hour().Do(pay.DoneCancels, database)
+	if err != nil {
+		log.Fatalf("Error scheduling fixCancels: %s\n", err.Error())
+	}
 
 	fmt.Println(os.Getenv("STRIPE_SECRET"))
 	stripe.Key = os.Getenv("STRIPE_SECRET")

@@ -1,55 +1,44 @@
 package pay
 
 import (
-	"errors"
-	"fmt"
+	"context"
 	"log"
 	"time"
 
-	"github.com/go-co-op/gocron"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func scheduleCancellation(scheduler *gocron.Scheduler, database *mongo.Database, subID, userID, cancelID string, endTime time.Time) error {
-	duration := time.Until(endTime)
-	if duration <= 0 {
-		return errors.New("endTime must be in the future")
+func DoneCancels(database *mongo.Database) {
+	collection := database.Collection("cancellations")
+
+	filter := bson.M{"end_time": bson.M{"$gt": time.Now()}}
+	options := options.Find().SetSort(bson.D{{Key: "end_time", Value: 1}})
+
+	cursor, err := collection.Find(context.Background(), filter, options)
+	if err != nil {
+		log.Printf("Can't get jobs")
+		return
+	}
+	defer cursor.Close(context.Background())
+
+	var cancellations []SubscriptionCancellation
+	if err = cursor.All(context.Background(), &cancellations); err != nil {
+		log.Printf("Can't get jobs")
+		return
 	}
 
-	fmt.Println(duration)
-
-	job, err := scheduler.Every(duration).SingletonMode().Do(func() {
-		fmt.Println("run????")
-		if err := setUserNotPaying(database, userID); err == nil {
-			err = deleteCancellation(database, cancelID)
-			if err != nil {
-				log.Printf("Error in uncancelling backup for user: %s; subID: %s; cancelID: %s; %s", userID, subID, cancelID, err.Error())
-			}
-			return
+	for _, cancellation := range cancellations {
+		err := setUserNotPaying(database, cancellation.UserID)
+		if err != nil {
+			log.Printf("Error setting user not paying for userID: %s, error: %v", cancellation.UserID, err)
+			continue
 		}
-	})
 
-	if err != nil {
-		return err
+		err = deleteCancellation(database, cancellation.ID.Hex())
+		if err != nil {
+			log.Printf("Error deleting cancellation for cancelID: %s, error: %v", cancellation.ID.Hex(), err)
+		}
 	}
-
-	job.Tag(cancelID)
-
-	return nil
-}
-
-func deleteScheduledJob(scheduler *gocron.Scheduler, cancelID string) error {
-	jobs, err := scheduler.FindJobsByTag(cancelID)
-	if err != nil {
-		return err
-	}
-
-	if len(jobs) == 0 {
-		return fmt.Errorf("no job found with cancel ID: %s", cancelID)
-	}
-
-	for _, job := range jobs {
-		scheduler.RemoveByReference(job)
-	}
-	return nil
 }

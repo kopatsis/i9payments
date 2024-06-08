@@ -62,12 +62,6 @@ func PostUncancel(auth *auth.Client, database *mongo.Database, scheduler *gocron
 			return
 		}
 
-		if err = deleteScheduledJob(scheduler, cancelID); err != nil {
-			log.Printf("Failed to cancel cancellation schduler for user: %s; %s", userID, err.Error())
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to cancel cancellation schduler"})
-			return
-		}
-
 		userRecord, err := auth.GetUser(context.Background(), uid)
 		if err != nil {
 			log.Printf("Error in getting user for cancel: %s; for user: %s; %s", subID, userID, err.Error())
