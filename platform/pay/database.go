@@ -145,8 +145,8 @@ func setUserPaymentEnding(database *mongo.Database, userID string, status bool, 
 	filter := bson.M{"userid": userID}
 	update := bson.M{
 		"$set": bson.M{
-			"ending":  status,
-			"expires": primitive.NewDateTimeFromTime(ending),
+			"ending": status,
+			"end":    primitive.NewDateTimeFromTime(ending),
 		},
 	}
 

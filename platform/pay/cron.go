@@ -1,24 +1,25 @@
 package pay
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"time"
 
 	"github.com/go-co-op/gocron"
-	// "github.com/stripe/stripe-go/v72/sub"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
 func scheduleCancellation(scheduler *gocron.Scheduler, database *mongo.Database, subID, userID, cancelID string, endTime time.Time) error {
-	job, err := scheduler.At(endTime).Do(func() {
+	duration := time.Until(endTime)
+	if duration <= 0 {
+		return errors.New("endTime must be in the future")
+	}
 
-		// _, err := sub.Cancel(subID, nil)
-		// if err != nil {
-		// 	log.Printf("Error in actual cancellation for user: %s; subID: %s; cancelID: %s; %s", userID, subID, cancelID, err.Error())
-		// 	return
-		// }
+	fmt.Println(duration)
 
+	job, err := scheduler.Every(duration).SingletonMode().Do(func() {
+		fmt.Println("run????")
 		if err := setUserNotPaying(database, userID); err == nil {
 			err = deleteCancellation(database, cancelID)
 			if err != nil {
@@ -26,14 +27,14 @@ func scheduleCancellation(scheduler *gocron.Scheduler, database *mongo.Database,
 			}
 			return
 		}
-		// log.Printf("Error in cancelling actual for user: %s; subID: %s; cancelID: %s; %s", userID, subID, cancelID, err.Error())
 	})
-
-	job.Tag(cancelID)
 
 	if err != nil {
 		return err
 	}
+
+	job.Tag(cancelID)
+
 	return nil
 }
 

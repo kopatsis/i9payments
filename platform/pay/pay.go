@@ -82,9 +82,10 @@ func Subscription(auth *auth.Client, database *mongo.Database) gin.HandlerFunc {
 			}
 
 			if userpayment.Ending {
-				c.HTML(200, "ending.html", gin.H{
+				c.HTML(200, "ending.tmpl", gin.H{
 					"Date": userpayment.EndDate.Time().Format("01/02/2006"),
 				})
+				return
 			}
 
 			paymentType, cardBrand, lastFour, err := getPaymentMethodDetails(userpayment.SubscriptionID)
