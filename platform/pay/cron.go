@@ -7,13 +7,14 @@ import (
 	"time"
 
 	"firebase.google.com/go/auth"
+	"github.com/sendgrid/sendgrid-go"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func DoneCancels(database *mongo.Database, auth *auth.Client) {
+func DoneCancels(client *sendgrid.Client, database *mongo.Database, auth *auth.Client) {
 	collection := database.Collection("cancellations")
 
 	filter := bson.M{"end_time": bson.M{"$gt": time.Now()}}
@@ -33,7 +34,7 @@ func DoneCancels(database *mongo.Database, auth *auth.Client) {
 	}
 
 	for _, cancellation := range cancellations {
-		err := setUserNotPaying(auth, database, cancellation.UserID)
+		err := setUserNotPaying(client, auth, database, cancellation.UserID)
 		if err != nil {
 			log.Printf("Error setting user not paying for userID: %s, error: %v", cancellation.UserID, err)
 			continue
@@ -64,7 +65,7 @@ func DoneCancels(database *mongo.Database, auth *auth.Client) {
 	}
 
 	for _, payment := range expiredPayments {
-		err := setUserNotPaying(auth, database, payment.UserMongoID)
+		err := setUserNotPaying(client, auth, database, payment.UserMongoID)
 		if err != nil {
 			log.Printf("Error setting user not paying for userID: %s, error: %v", payment.UserMongoID, err)
 			continue

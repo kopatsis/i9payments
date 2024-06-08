@@ -12,6 +12,7 @@ import (
 
 	"firebase.google.com/go/auth"
 	"github.com/gin-gonic/gin"
+	"github.com/sendgrid/sendgrid-go"
 	"github.com/stripe/stripe-go/v72"
 	"github.com/stripe/stripe-go/v72/customer"
 	"github.com/stripe/stripe-go/v72/paymentintent"
@@ -22,7 +23,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func WebhookConfirm(auth *auth.Client, database *mongo.Database) gin.HandlerFunc {
+func WebhookConfirm(client *sendgrid.Client, auth *auth.Client, database *mongo.Database) gin.HandlerFunc {
 	return func(c *gin.Context) {
 
 		const MaxBodyBytes = int64(65536)
@@ -105,7 +106,7 @@ func WebhookConfirm(auth *auth.Client, database *mongo.Database) gin.HandlerFunc
 				return
 			}
 
-			if err := emails.SendConfirmation(userRecord.Email, user.Name); err != nil {
+			if err := emails.SendConfirmation(client, userRecord.Email, user.Name); err != nil {
 				log.Printf("Error in emailing user: %s; %s", invoice.CustomerEmail, err.Error())
 				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to email user for cancel"})
 				return
@@ -117,7 +118,7 @@ func WebhookConfirm(auth *auth.Client, database *mongo.Database) gin.HandlerFunc
 	}
 }
 
-func WebhookFail(auth *auth.Client, database *mongo.Database) gin.HandlerFunc {
+func WebhookFail(client *sendgrid.Client, auth *auth.Client, database *mongo.Database) gin.HandlerFunc {
 	return func(c *gin.Context) {
 
 		const MaxBodyBytes = int64(65536)
@@ -190,7 +191,7 @@ func WebhookFail(auth *auth.Client, database *mongo.Database) gin.HandlerFunc {
 				return
 			}
 
-			if err := emails.SendFailureNotification(userRecord.Email, user.Name); err != nil {
+			if err := emails.SendFailureNotification(client, userRecord.Email, user.Name); err != nil {
 				log.Printf("Error in emailing user: %s; %s", userRecord.Email, err.Error())
 				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to email user for payment failure"})
 				return

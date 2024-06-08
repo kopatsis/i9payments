@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"firebase.google.com/go/auth"
+	"github.com/sendgrid/sendgrid-go"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -79,7 +80,7 @@ func setUserPayingPartial(database *mongo.Database, subscriptionID, firebaseID, 
 	return nil
 }
 
-func setUserNotPaying(auth *auth.Client, database *mongo.Database, userID string) error {
+func setUserNotPaying(client *sendgrid.Client, auth *auth.Client, database *mongo.Database, userID string) error {
 	objID, err := primitive.ObjectIDFromHex(userID)
 	if err != nil {
 		return err
@@ -117,7 +118,7 @@ func setUserNotPaying(auth *auth.Client, database *mongo.Database, userID string
 		return err
 	}
 
-	if err := emails.SendOver(userRecord.Email, user.Name); err != nil {
+	if err := emails.SendOver(client, userRecord.Email, user.Name); err != nil {
 		return err
 	}
 

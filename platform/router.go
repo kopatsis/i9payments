@@ -9,11 +9,11 @@ import (
 
 	"firebase.google.com/go/auth"
 	"github.com/gin-gonic/gin"
-	"github.com/go-co-op/gocron"
+	"github.com/sendgrid/sendgrid-go"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func New(auth *auth.Client, database *mongo.Database, scheduler *gocron.Scheduler) *gin.Engine {
+func New(auth *auth.Client, database *mongo.Database, client *sendgrid.Client) *gin.Engine {
 	router := gin.Default()
 
 	router.Use(middleware.CORSMiddleware())
@@ -36,13 +36,13 @@ func New(auth *auth.Client, database *mongo.Database, scheduler *gocron.Schedule
 
 	router.POST("/verifyToken", login.VerifyToken(auth, database))
 	router.POST("/process", pay.PostPayment(auth, database))
-	router.POST("/cancel", pay.CancelPayment(auth, database, scheduler))
+	router.POST("/cancel", pay.CancelPayment(client, auth, database))
 	router.POST("/update", pay.UpdateSubscriptionPaymentMethod(auth, database))
-	router.POST("/uncancel", pay.PostUncancel(auth, database, scheduler))
+	router.POST("/uncancel", pay.PostUncancel(client, auth, database))
 	router.POST("/swap", pay.UpdateFrequency(auth, database))
 
-	router.POST("/confirmationwh", pay.WebhookConfirm(auth, database))
-	router.POST("/failedwh", pay.WebhookFail(auth, database))
+	router.POST("/confirmationwh", pay.WebhookConfirm(client, auth, database))
+	router.POST("/failedwh", pay.WebhookFail(client, auth, database))
 
 	return router
 }

@@ -10,13 +10,13 @@ import (
 
 	"firebase.google.com/go/auth"
 	"github.com/gin-gonic/gin"
-	"github.com/go-co-op/gocron"
+	"github.com/sendgrid/sendgrid-go"
 	"github.com/stripe/stripe-go/v72"
 	"github.com/stripe/stripe-go/v72/sub"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func CancelPayment(auth *auth.Client, database *mongo.Database, scheduler *gocron.Scheduler) gin.HandlerFunc {
+func CancelPayment(client *sendgrid.Client, auth *auth.Client, database *mongo.Database) gin.HandlerFunc {
 	return func(c *gin.Context) {
 
 		uid, userid, err := multipass.BothIDsFromCookie(c, auth, database)
@@ -71,7 +71,7 @@ func CancelPayment(auth *auth.Client, database *mongo.Database, scheduler *gocro
 			return
 		}
 
-		if err := emails.SendCancelled(userRecord.Email, userRecord.DisplayName); err != nil {
+		if err := emails.SendCancelled(client, userRecord.Email, userRecord.DisplayName); err != nil {
 			log.Printf("Error in emailing user for cancel: %s; for user: %s; %s", subID, userid, err.Error())
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to email user for cancel"})
 			return

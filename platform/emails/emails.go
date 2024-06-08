@@ -7,7 +7,7 @@ import (
 	"github.com/sendgrid/sendgrid-go/helpers/mail"
 )
 
-func SendConfirmation(email, name string) error {
+func SendConfirmation(client *sendgrid.Client, email, name string) error {
 	from := mail.NewEmail("i9 Team", "noreply@i9fit.co")
 	to := mail.NewEmail(name, email)
 
@@ -36,7 +36,6 @@ func SendConfirmation(email, name string) error {
 	textContent := "Congrats\nYour i9 Giga Membership has officially begun!"
 
 	message := mail.NewSingleEmail(from, "Confirmation: Your Membership Has Started", to, textContent, htmlContent)
-	client := sendgrid.NewSendClient("SENDGRID_KEY")
 	response, err := client.Send(message)
 	if err != nil {
 		return err
@@ -47,7 +46,7 @@ func SendConfirmation(email, name string) error {
 	return nil
 }
 
-func SendCancelled(email, name string) error {
+func SendCancelled(client *sendgrid.Client, email, name string) error {
 	from := mail.NewEmail("i9 Team", "noreply@i9fit.co")
 	to := mail.NewEmail(name, email)
 
@@ -77,7 +76,6 @@ func SendCancelled(email, name string) error {
 	textContent := "Aw\nYour i9 Giga Membership has officially been cancelled. We're sorry to see you go.\nYou will be able to use the same features until the end of your billing cycle and will not be charged again."
 
 	message := mail.NewSingleEmail(from, "Confirmation: Your Membership Been Cancelled", to, textContent, htmlContent)
-	client := sendgrid.NewSendClient("SENDGRID_KEY")
 	response, err := client.Send(message)
 	if err != nil {
 		return err
@@ -88,7 +86,7 @@ func SendCancelled(email, name string) error {
 	return nil
 }
 
-func SendUnCancelled(email, name string) error {
+func SendUnCancelled(client *sendgrid.Client, email, name string) error {
 	from := mail.NewEmail("i9 Team", "noreply@i9fit.co")
 	to := mail.NewEmail(name, email)
 
@@ -117,7 +115,6 @@ func SendUnCancelled(email, name string) error {
 	textContent := "Nice\nYour i9 Giga Membership has officially been un-cancelled. We are so back."
 
 	message := mail.NewSingleEmail(from, "Confirmation: Your Membership Been Un-cancelled", to, textContent, htmlContent)
-	client := sendgrid.NewSendClient("SENDGRID_KEY")
 	response, err := client.Send(message)
 	if err != nil {
 		return err
@@ -128,7 +125,7 @@ func SendUnCancelled(email, name string) error {
 	return nil
 }
 
-func SendOver(email, name string) error {
+func SendOver(client *sendgrid.Client, email, name string) error {
 	from := mail.NewEmail("i9 Team", "noreply@i9fit.co")
 	to := mail.NewEmail(name, email)
 
@@ -157,7 +154,6 @@ func SendOver(email, name string) error {
 	textContent := "All Done\nYour i9 Giga Membership has officially ended. Feel free to restart it or reach out to us."
 
 	message := mail.NewSingleEmail(from, "Confirmation: Your Membership Ended", to, textContent, htmlContent)
-	client := sendgrid.NewSendClient("SENDGRID_KEY")
 	response, err := client.Send(message)
 	if err != nil {
 		return err
@@ -168,7 +164,7 @@ func SendOver(email, name string) error {
 	return nil
 }
 
-func SendFailureNotification(email, name string) error {
+func SendFailureNotification(client *sendgrid.Client, email, name string) error {
 	from := mail.NewEmail("i9 Team", "noreply@i9fit.co")
 	to := mail.NewEmail(name, email)
 
@@ -197,7 +193,6 @@ func SendFailureNotification(email, name string) error {
 	textContent := "Uh Oh\nYour payment has failed for your i9 Giga Membership. In the next 4 days update your information so we can retry, or your benefits will be cancelled."
 
 	message := mail.NewSingleEmail(from, "Urgent: i9 Giga Membership Payment Failed", to, textContent, htmlContent)
-	client := sendgrid.NewSendClient("SENDGRID_KEY")
 	response, err := client.Send(message)
 	if err != nil {
 		return err

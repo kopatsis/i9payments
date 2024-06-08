@@ -13,6 +13,7 @@ import (
 
 	"github.com/go-co-op/gocron"
 	"github.com/joho/godotenv"
+	"github.com/sendgrid/sendgrid-go"
 	"github.com/stripe/stripe-go/v72"
 	"github.com/stripe/stripe-go/v72/account"
 )
@@ -48,11 +49,18 @@ func main() {
 	}
 	log.Printf("Stripe API key test succeeded: Account ID = %s, Email = %s", acct.ID, acct.Email)
 
-	rtr := platform.New(auth, database, scheduler)
+	apiKey := os.Getenv("SENDGRID_KEY")
+	if apiKey == "" {
+		log.Fatal("SENDGRID_API_KEY environment variable is not set")
+	}
+
+	sendclient := sendgrid.NewSendClient(apiKey)
+
+	rtr := platform.New(auth, database, sendclient)
 
 	port := os.Getenv("PORT")
 	if port == "" {
-		port = "4040"
+		port = "8080"
 	}
 
 	if err := http.ListenAndServe(":"+port, rtr); err != nil {
