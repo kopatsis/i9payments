@@ -35,12 +35,6 @@ func main() {
 	}
 	defer db.DisConnectDB(client)
 
-	_, err = scheduler.Every(1).Hour().Do(pay.DoneCancels, database, auth)
-	if err != nil {
-		log.Fatalf("Error scheduling fixCancels: %s\n", err.Error())
-	}
-	scheduler.StartAsync()
-
 	stripe.Key = os.Getenv("STRIPE_SECRET")
 
 	acct, err := account.Get()
@@ -55,6 +49,12 @@ func main() {
 	}
 
 	sendclient := sendgrid.NewSendClient(apiKey)
+
+	_, err = scheduler.Every(1).Hour().Do(sendclient, pay.DoneCancels, database, auth)
+	if err != nil {
+		log.Fatalf("Error scheduling done cancels: %s\n", err.Error())
+	}
+	scheduler.StartAsync()
 
 	rtr := platform.New(auth, database, sendclient)
 
