@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -35,13 +34,12 @@ func main() {
 	}
 	defer db.DisConnectDB(client)
 
-	_, err = scheduler.Every(1).Hour().Do(pay.DoneCancels, database)
+	_, err = scheduler.Every(1).Hour().Do(pay.DoneCancels, database, auth)
 	if err != nil {
 		log.Fatalf("Error scheduling fixCancels: %s\n", err.Error())
 	}
 	scheduler.StartAsync()
 
-	fmt.Println(os.Getenv("STRIPE_SECRET"))
 	stripe.Key = os.Getenv("STRIPE_SECRET")
 
 	acct, err := account.Get()

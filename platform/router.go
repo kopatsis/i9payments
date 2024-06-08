@@ -19,8 +19,6 @@ func New(auth *auth.Client, database *mongo.Database, scheduler *gocron.Schedule
 	router.Use(middleware.CORSMiddleware())
 	router.Use(middleware.AuthMiddleware(auth))
 
-	// router.Static("/static", "./static")
-
 	router.LoadHTMLGlob("html/*")
 	router.GET("/multipass", multipass.Multipass(auth, database))
 	router.GET("/sub", pay.Subscription(auth, database))

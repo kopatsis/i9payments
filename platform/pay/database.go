@@ -3,8 +3,10 @@ package pay
 import (
 	"context"
 	"i9pay/db"
+	"i9pay/platform/emails"
 	"time"
 
+	"firebase.google.com/go/auth"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -77,7 +79,7 @@ func setUserPayingPartial(database *mongo.Database, subscriptionID, firebaseID, 
 	return nil
 }
 
-func setUserNotPaying(database *mongo.Database, userID string) error {
+func setUserNotPaying(auth *auth.Client, database *mongo.Database, userID string) error {
 	objID, err := primitive.ObjectIDFromHex(userID)
 	if err != nil {
 		return err
@@ -101,6 +103,21 @@ func setUserNotPaying(database *mongo.Database, userID string) error {
 	userPaymentCollection := database.Collection("userpaying")
 	_, err = userPaymentCollection.DeleteOne(context.TODO(), userPaymentFilter)
 	if err != nil {
+		return err
+	}
+
+	var user db.User
+	err = collection.FindOne(context.TODO(), filter).Decode(&user)
+	if err != nil {
+		return err
+	}
+
+	userRecord, err := auth.GetUser(context.Background(), user.Username)
+	if err != nil {
+		return err
+	}
+
+	if err := emails.SendOver(userRecord.Email, user.Name); err != nil {
 		return err
 	}
 
