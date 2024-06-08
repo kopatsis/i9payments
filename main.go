@@ -50,7 +50,7 @@ func main() {
 
 	sendclient := sendgrid.NewSendClient(apiKey)
 
-	_, err = scheduler.Every(1).Hour().Do(sendclient, pay.DoneCancels, database, auth)
+	_, err = scheduler.Every(1).Hour().Do(pay.DoneCancels, sendclient, database, auth)
 	if err != nil {
 		log.Fatalf("Error scheduling done cancels: %s\n", err.Error())
 	}
