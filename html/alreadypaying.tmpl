@@ -13,6 +13,11 @@
   </head>
 
   <body>
+
+    {{if .Past}}
+      <div style="color:red;">Please update your payment information</div>
+    {{end}}
+
     <div x-data>
       {{if eq .Length "monthly"}}
       <div>Subscription Plan: $4.99 Monthly</div>
