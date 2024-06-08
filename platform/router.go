@@ -41,5 +41,8 @@ func New(auth *auth.Client, database *mongo.Database, scheduler *gocron.Schedule
 	router.POST("/uncancel", pay.PostUncancel(auth, database, scheduler))
 	router.POST("/swap", pay.UpdateFrequency(auth, database))
 
+	router.POST("/confirmationwh", pay.WebhookConfirm(auth, database))
+	router.POST("/failedwh", pay.WebhookFail(auth, database))
+
 	return router
 }
