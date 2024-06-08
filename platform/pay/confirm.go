@@ -1,7 +1,9 @@
 package pay
 
 import (
+	"context"
 	"encoding/json"
+	"i9pay/db"
 	"i9pay/platform/emails"
 	"log"
 	"net/http"
@@ -15,10 +17,12 @@ import (
 	"github.com/stripe/stripe-go/v72/paymentintent"
 	"github.com/stripe/stripe-go/v72/sub"
 	"github.com/stripe/stripe-go/v72/webhook"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func Webhook(auth *auth.Client, database *mongo.Database) gin.HandlerFunc {
+func WebhookConfirm(auth *auth.Client, database *mongo.Database) gin.HandlerFunc {
 	return func(c *gin.Context) {
 
 		const MaxBodyBytes = int64(65536)
@@ -62,8 +66,14 @@ func Webhook(auth *auth.Client, database *mongo.Database) gin.HandlerFunc {
 			}
 
 			if userId == "" {
-				c.JSON(http.StatusBadRequest, gin.H{"error": "Error user id doesn't exist in either metafield"})
-				return
+				var userPayment db.UserPayment
+				filter := bson.M{"subid": subscription.ID}
+				err := database.Collection("userpayment").FindOne(context.TODO(), filter).Decode(&userPayment)
+				if err != nil {
+					c.JSON(http.StatusBadRequest, gin.H{"error": "Error user id doesn't exist in either metafield or userpayment collection"})
+					return
+				}
+				userId = userPayment.UserMongoID
 			}
 
 			if err := setUserPaying(database, subscription.ID, userId, time.Unix(subscription.CurrentPeriodEnd, 0)); err != nil {
@@ -76,7 +86,26 @@ func Webhook(auth *auth.Client, database *mongo.Database) gin.HandlerFunc {
 			}
 			sub.Update(subscription.ID, params)
 
-			if err := emails.SendConfirmation(invoice.CustomerEmail, *invoice.CustomerName); err != nil {
+			objID, err := primitive.ObjectIDFromHex(userId)
+			if err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{"error": "Error converting user id to ObjectID"})
+				return
+			}
+			var user db.User
+			userFilter := bson.M{"_id": objID}
+			err = database.Collection("user").FindOne(context.TODO(), userFilter).Decode(&user)
+			if err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{"error": "Error retrieving user from user collection"})
+				return
+			}
+
+			userRecord, err := auth.GetUser(context.Background(), user.Username)
+			if err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{"error": "Error retrieving user from firebase"})
+				return
+			}
+
+			if err := emails.SendConfirmation(userRecord.Email, user.Name); err != nil {
 				log.Printf("Error in emailing user: %s; %s", invoice.CustomerEmail, err.Error())
 				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to email user for cancel"})
 				return
