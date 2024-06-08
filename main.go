@@ -39,6 +39,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("Error scheduling fixCancels: %s\n", err.Error())
 	}
+	scheduler.StartAsync()
 
 	fmt.Println(os.Getenv("STRIPE_SECRET"))
 	stripe.Key = os.Getenv("STRIPE_SECRET")
