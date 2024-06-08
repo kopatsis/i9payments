@@ -112,9 +112,7 @@ func Subscription(auth *auth.Client, database *mongo.Database) gin.HandlerFunc {
 					"Date":         time.Unix(s.CurrentPeriodEnd, 0).Format("01/02/2006"),
 					"Email":        email,
 					"External":     paymentType,
-					"Customer":     s.Customer.ID,
 					"Length":       userpayment.SubLength,
-					"Subscription": userpayment.SubscriptionID,
 				})
 				return
 			}
@@ -125,9 +123,7 @@ func Subscription(auth *auth.Client, database *mongo.Database) gin.HandlerFunc {
 				"Email":        email,
 				"Brand":        cardBrand,
 				"Four":         lastFour,
-				"Customer":     s.Customer.ID,
 				"Length":       userpayment.SubLength,
-				"Subscription": userpayment.SubscriptionID,
 			})
 			return
 		}
