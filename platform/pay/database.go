@@ -42,6 +42,7 @@ func setUserPaying(database *mongo.Database, subscriptionID, userID string, expi
 		return err
 	}
 
+	fmt.Println(expires)
 	fmt.Println(primitive.NewDateTimeFromTime(expires))
 	userPaymentFilter := bson.M{"userid": userID}
 	userPaymentUpdate := bson.M{

@@ -3,6 +3,7 @@ package pay
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"i9pay/db"
 	"i9pay/platform/emails"
 	"log"
@@ -77,6 +78,7 @@ func WebhookConfirm(client *sendgrid.Client, auth *auth.Client, database *mongo.
 				userId = userPayment.UserMongoID
 			}
 
+			fmt.Println(subscription.CurrentPeriodEnd)
 			if err := setUserPaying(database, subscription.ID, userId, time.Unix(subscription.CurrentPeriodEnd, 0)); err != nil {
 				c.JSON(http.StatusBadRequest, gin.H{"error": "Error updating the user"})
 				return
