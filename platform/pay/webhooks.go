@@ -35,7 +35,7 @@ func WebhookConfirm(client *sendgrid.Client, auth *auth.Client, database *mongo.
 			return
 		}
 
-		endpointSecret := os.Getenv("ENDPOINT_SECR")
+		endpointSecret := os.Getenv("END_SECR_CONF")
 
 		event, err := webhook.ConstructEvent(payload, c.GetHeader("Stripe-Signature"), endpointSecret)
 		if err != nil {
@@ -130,7 +130,7 @@ func WebhookFail(client *sendgrid.Client, auth *auth.Client, database *mongo.Dat
 			return
 		}
 
-		endpointSecret := os.Getenv("ENDPOINT_SECR")
+		endpointSecret := os.Getenv("END_SECR_FAIL")
 
 		event, err := webhook.ConstructEvent(payload, c.GetHeader("Stripe-Signature"), endpointSecret)
 		if err != nil {
