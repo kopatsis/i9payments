@@ -31,8 +31,7 @@ func setUserPaying(database *mongo.Database, subscriptionID, userID string, expi
 	update := bson.M{
 		"$set": bson.M{
 			"paying":   true,
-			"provider": subscriptionID,
-			"expires":  primitive.NewDateTimeFromTime(expires),
+			"provider": "Stripe",
 		},
 	}
 
@@ -46,6 +45,7 @@ func setUserPaying(database *mongo.Database, subscriptionID, userID string, expi
 	userPaymentUpdate := bson.M{
 		"$set": bson.M{
 			"processing": false,
+			"expires":    primitive.NewDateTimeFromTime(expires),
 		},
 	}
 
