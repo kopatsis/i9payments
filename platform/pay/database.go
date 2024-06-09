@@ -2,6 +2,7 @@ package pay
 
 import (
 	"context"
+	"fmt"
 	"i9pay/db"
 	"i9pay/platform/emails"
 	"time"
@@ -41,6 +42,7 @@ func setUserPaying(database *mongo.Database, subscriptionID, userID string, expi
 		return err
 	}
 
+	fmt.Println(primitive.NewDateTimeFromTime(expires))
 	userPaymentFilter := bson.M{"userid": userID}
 	userPaymentUpdate := bson.M{
 		"$set": bson.M{
