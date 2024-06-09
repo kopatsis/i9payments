@@ -51,7 +51,12 @@ func WebhookConfirm(client *sendgrid.Client, auth *auth.Client, database *mongo.
 				return
 			}
 
-			subscription := invoice.Subscription
+			subscription, err := sub.Get(invoice.Subscription.ID, nil)
+			if err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{"error": "Error retrieving subscription"})
+				return
+			}
+
 			customerID := invoice.Customer.ID
 
 			customerReal, err := customer.Get(customerID, nil)
