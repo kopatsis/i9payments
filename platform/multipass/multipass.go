@@ -14,6 +14,7 @@ func Multipass(authClient *auth.Client, database *mongo.Database) gin.HandlerFun
 	return func(c *gin.Context) {
 		refresh := c.Query("multipass")
 		code := c.Query("code")
+		destination := c.Query("dest")
 
 		if status := checkSpecialCode(code, database); !status || refresh == "" {
 			fmt.Println("failed on code")
@@ -46,7 +47,13 @@ func Multipass(authClient *auth.Client, database *mongo.Database) gin.HandlerFun
 			deleteSpecialCode(code, database)
 		}()
 
-		c.Redirect(http.StatusFound, "/pay")
+		if destination == "pay" {
+			c.Redirect(http.StatusFound, "/pay")
+		} else if destination == "mobile" {
+			c.Redirect(http.StatusFound, "/mobile")
+		} else {
+			c.Redirect(http.StatusFound, "/")
+		}
 
 	}
 }
