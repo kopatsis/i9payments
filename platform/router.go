@@ -34,7 +34,7 @@ func New(auth *auth.Client, database *mongo.Database, client *sendgrid.Client) *
 	router.GET("/pay", pay.Subscription(auth, database))
 
 	router.POST("/updateName", home.Name(auth, database))
-	router.POST("/delete", home.Delete(auth, database))
+	router.POST("/delete", home.Delete(client, auth, database))
 
 	router.POST("/verifyToken", login.VerifyToken(auth, database))
 	router.POST("/process", pay.PostPayment(auth, database))

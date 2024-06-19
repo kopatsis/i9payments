@@ -3,21 +3,23 @@ package home
 import (
 	"context"
 	"i9pay/db"
+	"i9pay/platform/emails"
 	"i9pay/platform/multipass"
 	"i9pay/platform/pay"
 	"net/http"
 
 	"firebase.google.com/go/auth"
 	"github.com/gin-gonic/gin"
+	"github.com/sendgrid/sendgrid-go"
 	"github.com/stripe/stripe-go/v72/sub"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func Delete(auth *auth.Client, database *mongo.Database) gin.HandlerFunc {
+func Delete(client *sendgrid.Client, auth *auth.Client, database *mongo.Database) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		_, id, err := multipass.BothIDsFromCookie(c, auth, database)
+		uid, id, err := multipass.BothIDsFromCookie(c, auth, database)
 		if err != nil {
 			c.HTML(200, "error.tmpl", gin.H{"Error": err.Error()})
 			return
@@ -36,6 +38,13 @@ func Delete(auth *auth.Client, database *mongo.Database) gin.HandlerFunc {
 			c.HTML(200, "error.tmpl", gin.H{"Error": err.Error()})
 			return
 		}
+
+		userRecord, err := auth.GetUser(context.Background(), uid)
+		if err != nil {
+			c.HTML(200, "error.tmpl", gin.H{"Error": err.Error()})
+			return
+		}
+		email := userRecord.Email
 
 		err = auth.DeleteUser(context.TODO(), user.Username)
 		if err != nil {
@@ -56,7 +65,7 @@ func Delete(auth *auth.Client, database *mongo.Database) gin.HandlerFunc {
 				return
 			}
 
-			if err := pay.SetUserNotPaying(nil, auth, database, id, false); err != nil {
+			if err := pay.SetUserNotPaying(client, auth, database, id, false); err != nil {
 				c.HTML(200, "error.tmpl", gin.H{"Error": err.Error()})
 				return
 			}
@@ -74,6 +83,11 @@ func Delete(auth *auth.Client, database *mongo.Database) gin.HandlerFunc {
 
 		for _, cookie := range c.Request.Cookies() {
 			c.SetCookie(cookie.Name, "", -1, "/", "", false, true)
+		}
+
+		if err := emails.SendDeleted(client, email, user.Name); err != nil {
+			c.HTML(200, "error.tmpl", gin.H{"Error": err.Error()})
+			return
 		}
 
 		c.Redirect(http.StatusFound, "/login")

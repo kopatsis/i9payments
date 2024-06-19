@@ -71,7 +71,14 @@ func CancelPayment(client *sendgrid.Client, auth *auth.Client, database *mongo.D
 			return
 		}
 
-		if err := emails.SendCancelled(client, userRecord.Email, userRecord.DisplayName); err != nil {
+		name, err := getUserName(database, userid)
+		if err != nil {
+			log.Printf("Error in getting db user for cancel: %s; for user: %s; %s", subID, userid, err.Error())
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get db user for cancel"})
+			return
+		}
+
+		if err := emails.SendCancelled(client, userRecord.Email, name); err != nil {
 			log.Printf("Error in emailing user for cancel: %s; for user: %s; %s", subID, userid, err.Error())
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to email user for cancel"})
 			return
