@@ -9,8 +9,16 @@ import (
 	"firebase.google.com/go/auth"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
+
+type DBToken struct {
+	ID     primitive.ObjectID `bson:"_id,omitempty"`
+	UserID string             `bson:"user"`
+	Token  string             `bson:"token"`
+}
 
 func VerifyToken(authClient *auth.Client, database *mongo.Database) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -35,7 +43,7 @@ func VerifyToken(authClient *auth.Client, database *mongo.Database) gin.HandlerF
 		}
 		username := token.UID
 
-		if err := postToDBUser(username, request.Name, database); err != nil {
+		if err := postToDBUser(username, request.Name, request.RefreshToken, database); err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Failed to post user to db for cookie"})
 			return
 		}
@@ -51,14 +59,16 @@ func VerifyToken(authClient *auth.Client, database *mongo.Database) gin.HandlerF
 	}
 }
 
-func postToDBUser(username, name string, database *mongo.Database) error {
+func postToDBUser(username, name, refresh string, database *mongo.Database) error {
 
 	filter := bson.M{"username": username}
 
 	collection := database.Collection("user")
+	var exuser db.User
 
-	err := collection.FindOne(context.TODO(), filter).Err()
+	err := collection.FindOne(context.TODO(), filter).Decode(&exuser)
 	if err == nil {
+		refreshTokenDB(exuser.ID.Hex(), refresh, database)
 		return nil
 	}
 	if err != mongo.ErrNoDocuments {
@@ -80,9 +90,34 @@ func postToDBUser(username, name string, database *mongo.Database) error {
 		TimeEndurance:     map[int]float32{},
 	}
 
-	_, err = collection.InsertOne(context.Background(), user)
+	res, err := collection.InsertOne(context.Background(), user)
 	if err != nil {
 		return err
+	}
+
+	refreshTokenDB(res.InsertedID.(primitive.ObjectID).Hex(), refresh, database)
+	return nil
+}
+
+func refreshTokenDB(userid, refreshToken string, database *mongo.Database) error {
+	collection := database.Collection("usertoken")
+
+	filter := bson.M{"user": userid}
+	update := bson.M{
+		"$set": bson.M{
+			"token": refreshToken,
+		},
+		"$setOnInsert": bson.M{
+			"_id":  primitive.NewObjectID(),
+			"user": userid,
+		},
+	}
+
+	opts := options.Update().SetUpsert(true)
+	_, err := collection.UpdateOne(context.TODO(), filter, update, opts)
+
+	if err != nil {
+		return fmt.Errorf("failed to update or insert token: %v", err)
 	}
 
 	return nil
