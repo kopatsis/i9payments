@@ -11,7 +11,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func AdminPanel(auth *auth.Client, database *mongo.Database) gin.HandlerFunc {
+func AdminPanel(frommobile bool, auth *auth.Client, database *mongo.Database) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		uid, err := login.ExtractUIDFromSession(c, auth)
 		if err != nil {
@@ -33,9 +33,10 @@ func AdminPanel(auth *auth.Client, database *mongo.Database) gin.HandlerFunc {
 		}
 
 		c.HTML(200, "admin.tmpl", gin.H{
-			"Email":  email,
-			"Paying": user.Paying,
-			"Name":   user.Name,
+			"NotMobile": !frommobile,
+			"Email":     email,
+			"Paying":    user.Paying,
+			"Name":      user.Name,
 		})
 	}
 }
