@@ -34,7 +34,7 @@ func DoneCancels(client *sendgrid.Client, database *mongo.Database, auth *auth.C
 	}
 
 	for _, cancellation := range cancellations {
-		err := setUserNotPaying(client, auth, database, cancellation.UserID)
+		err := SetUserNotPaying(client, auth, database, cancellation.UserID, true)
 		if err != nil {
 			log.Printf("Error setting user not paying for userID: %s, error: %v", cancellation.UserID, err)
 			continue
@@ -65,7 +65,7 @@ func DoneCancels(client *sendgrid.Client, database *mongo.Database, auth *auth.C
 	}
 
 	for _, payment := range expiredPayments {
-		err := setUserNotPaying(client, auth, database, payment.UserMongoID)
+		err := SetUserNotPaying(client, auth, database, payment.UserMongoID, true)
 		if err != nil {
 			log.Printf("Error setting user not paying for userID: %s, error: %v", payment.UserMongoID, err)
 			continue

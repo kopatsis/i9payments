@@ -26,7 +26,7 @@ func CancelPayment(client *sendgrid.Client, auth *auth.Client, database *mongo.D
 			return
 		}
 
-		subID, err := userIdToSubscriptionId(database, userid)
+		subID, err := UserIdToSubscriptionId(database, userid)
 		if err != nil || subID == "" {
 			log.Printf("Error in getting subID for user: %s; %s", userid, err.Error())
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Some issue with user"})

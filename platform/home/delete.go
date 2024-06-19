@@ -4,6 +4,7 @@ import (
 	"context"
 	"i9pay/db"
 	"i9pay/platform/multipass"
+	"i9pay/platform/pay"
 	"net/http"
 
 	"firebase.google.com/go/auth"
@@ -42,18 +43,33 @@ func Delete(auth *auth.Client, database *mongo.Database) gin.HandlerFunc {
 			return
 		}
 
-		_, err = collection.DeleteOne(context.TODO(), bson.M{"_id": objectID})
-		if err != nil {
-			c.HTML(200, "error.tmpl", gin.H{"Error": err.Error()})
-			return
-		}
-
 		if user.Paying && user.Provider != "" && user.Provider != "Apple" && user.Provider != "Android" {
-			_, err := sub.Cancel(user.Provider, nil)
+
+			subID, err := pay.UserIdToSubscriptionId(database, id)
 			if err != nil {
 				c.HTML(200, "error.tmpl", gin.H{"Error": err.Error()})
 				return
 			}
+
+			if _, err = sub.Cancel(subID, nil); err != nil {
+				c.HTML(200, "error.tmpl", gin.H{"Error": err.Error()})
+				return
+			}
+
+			if err := pay.SetUserNotPaying(nil, auth, database, id, false); err != nil {
+				c.HTML(200, "error.tmpl", gin.H{"Error": err.Error()})
+				return
+			}
+		}
+
+		if _, err := collection.DeleteOne(context.TODO(), bson.M{"_id": objectID}); err != nil {
+			c.HTML(200, "error.tmpl", gin.H{"Error": err.Error()})
+			return
+		}
+
+		if _, err := database.Collection("usertoken").DeleteOne(context.TODO(), bson.M{"userid": id}); err != nil {
+			c.HTML(200, "error.tmpl", gin.H{"Error": err.Error()})
+			return
 		}
 
 		for _, cookie := range c.Request.Cookies() {

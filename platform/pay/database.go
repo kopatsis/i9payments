@@ -22,7 +22,7 @@ type SubscriptionCancellation struct {
 	EndTime time.Time          `bson:"end_time"`
 }
 
-func setUserPaying(database *mongo.Database, subscriptionID, userID string, expires time.Time) error {
+func setUserPaying(database *mongo.Database, userID string, expires time.Time) error {
 	objID, err := primitive.ObjectIDFromHex(userID)
 	if err != nil {
 		return err
@@ -83,7 +83,7 @@ func setUserPayingPartial(database *mongo.Database, subscriptionID, firebaseID, 
 	return nil
 }
 
-func setUserNotPaying(client *sendgrid.Client, auth *auth.Client, database *mongo.Database, userID string) error {
+func SetUserNotPaying(client *sendgrid.Client, auth *auth.Client, database *mongo.Database, userID string, email bool) error {
 	objID, err := primitive.ObjectIDFromHex(userID)
 	if err != nil {
 		return err
@@ -121,14 +121,16 @@ func setUserNotPaying(client *sendgrid.Client, auth *auth.Client, database *mong
 		return err
 	}
 
-	if err := emails.SendOver(client, userRecord.Email, user.Name); err != nil {
-		return err
+	if email {
+		if err := emails.SendOver(client, userRecord.Email, user.Name); err != nil {
+			return err
+		}
 	}
 
 	return nil
 }
 
-func userIdToSubscriptionId(database *mongo.Database, userID string) (string, error) {
+func UserIdToSubscriptionId(database *mongo.Database, userID string) (string, error) {
 	filter := bson.M{"userid": userID}
 	projection := bson.M{"subid": 1}
 

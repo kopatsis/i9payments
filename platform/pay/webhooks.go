@@ -84,7 +84,7 @@ func WebhookConfirm(client *sendgrid.Client, auth *auth.Client, database *mongo.
 			}
 
 			fmt.Println(subscription.CurrentPeriodEnd)
-			if err := setUserPaying(database, subscription.ID, userId, time.Unix(subscription.CurrentPeriodEnd, 0)); err != nil {
+			if err := setUserPaying(database, userId, time.Unix(subscription.CurrentPeriodEnd, 0)); err != nil {
 				c.JSON(http.StatusBadRequest, gin.H{"error": "Error updating the user"})
 				return
 			}

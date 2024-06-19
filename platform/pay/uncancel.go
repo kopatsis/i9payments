@@ -30,7 +30,7 @@ func PostUncancel(client *sendgrid.Client, auth *auth.Client, database *mongo.Da
 			CancelAtPeriodEnd: stripe.Bool(false),
 		}
 
-		subID, err := userIdToSubscriptionId(database, userID)
+		subID, err := UserIdToSubscriptionId(database, userID)
 		if err != nil {
 			log.Printf("Failed to retrieve subscription from Stripe user: %s; %s", userID, err.Error())
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve subscription from Stripe"})
