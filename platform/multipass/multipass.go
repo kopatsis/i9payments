@@ -18,7 +18,13 @@ func Multipass(authClient *auth.Client, database *mongo.Database) gin.HandlerFun
 
 		if status := checkSpecialCode(code, database); !status || refresh == "" {
 			fmt.Println("failed on code")
-			c.Redirect(http.StatusFound, "/pay")
+			if destination == "pay" {
+				c.Redirect(http.StatusFound, "/pay")
+			} else if destination == "mobile" {
+				c.Redirect(http.StatusFound, "/mobile")
+			} else {
+				c.Redirect(http.StatusFound, "/")
+			}
 			go func() {
 				deleteSpecialCode(code, database)
 			}()
@@ -28,7 +34,13 @@ func Multipass(authClient *auth.Client, database *mongo.Database) gin.HandlerFun
 		token, refresh, err := login.GetNewIDToken(refresh)
 		if err != nil {
 			fmt.Println("failed on get tokens")
-			c.Redirect(http.StatusFound, "/pay")
+			if destination == "pay" {
+				c.Redirect(http.StatusFound, "/pay")
+			} else if destination == "mobile" {
+				c.Redirect(http.StatusFound, "/mobile")
+			} else {
+				c.Redirect(http.StatusFound, "/")
+			}
 			go func() {
 				deleteSpecialCode(code, database)
 			}()
@@ -40,7 +52,13 @@ func Multipass(authClient *auth.Client, database *mongo.Database) gin.HandlerFun
 
 		if err := login.Cookie(token, refresh, authClient, c); err != nil {
 			fmt.Println("failed on cookie create")
-			c.Redirect(http.StatusFound, "/pay")
+			if destination == "pay" {
+				c.Redirect(http.StatusFound, "/pay")
+			} else if destination == "mobile" {
+				c.Redirect(http.StatusFound, "/mobile")
+			} else {
+				c.Redirect(http.StatusFound, "/")
+			}
 		}
 
 		go func() {

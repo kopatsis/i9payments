@@ -36,6 +36,11 @@
 
 <body>
   <h1>Admin Dashboard</h1>
+
+  {{ if .Verify}}
+    <h1>In order to start a paid membership, you MUST verify your email</h1>
+  {{ end }}
+
   <div>Email Address: {{.Email}}</div>
 
   <div x-data="{ editing: false, name: '{{.Name}}' }">
@@ -50,7 +55,7 @@
     </form>
   </div>
 
-  {{ if .NotMobile}}
+  {{ if and .NotMobile (not .Verify) }}
   <div>
     {{ if .Paying }}
     <button><a href="/pay">Manage Payments</a></button>

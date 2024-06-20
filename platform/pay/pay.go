@@ -44,22 +44,27 @@ func Subscription(auth *auth.Client, database *mongo.Database) gin.HandlerFunc {
 
 		if userpayment == nil {
 
-			params := &stripe.SetupIntentParams{
-				PaymentMethodTypes: stripe.StringSlice([]string{
-					"card",
-				}),
-			}
-			si, err := setupintent.New(params)
-			if err != nil {
-				c.HTML(200, "error.tmpl", gin.H{"Error": err.Error()})
+			if userRecord.EmailVerified {
+				params := &stripe.SetupIntentParams{
+					PaymentMethodTypes: stripe.StringSlice([]string{
+						"card",
+					}),
+				}
+				si, err := setupintent.New(params)
+				if err != nil {
+					c.HTML(200, "error.tmpl", gin.H{"Error": err.Error()})
+					return
+				}
+
+				c.HTML(200, "pay.tmpl", gin.H{
+					"ClientSecret": si.ClientSecret,
+					"Email":        email,
+				})
 				return
+			} else {
+				c.Redirect(http.StatusFound, "/ver")
 			}
 
-			c.HTML(200, "pay.tmpl", gin.H{
-				"ClientSecret": si.ClientSecret,
-				"Email":        email,
-			})
-			return
 		}
 
 		if userpayment.Processing {
