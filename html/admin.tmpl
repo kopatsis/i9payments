@@ -72,13 +72,26 @@
     <div x-show="successMessage" style="color: green" x-text="successMessage"></div>
   </div>
 
-  <div x-data="{ showConfirmation: false }">
+  <div x-data="{ showConfirmation: false, email: '' }">
     <button @click="showConfirmation = true">Delete Account</button>
+    <form
+      x-show="showConfirmation"
+      action="/delete"
+      method="POST"
+      @submit="showConfirmation = false"
+    >
+      <h3>Warning: This action is permanent and cannot be undone, no matter how much you email us to undo it.</h3>
+      <p>If you are sure you want to delete your account, please enter your email exactly as it appears above.</p>
 
-    <form x-show="showConfirmation" action="/delete" method="POST" @submit="showConfirmation = false">
-      <p>Are you sure you want to delete your account?</p>
-      <button type="submit">Yes, Delete</button>
-      <button type="button" @click="showConfirmation = false">Cancel</button>
+      <input
+        type="email"
+        x-model="email"
+        placeholder="Email"
+      />
+      <button type="submit" :disabled="email !== '{{.Email}}'">
+        Delete
+      </button>
+      <button type="button" @click="showConfirmation = false; email = ''">Cancel</button>
     </form>
   </div>
 
