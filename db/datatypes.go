@@ -22,6 +22,8 @@ type User struct {
 	LastMinutes       float32            `bson:"lastmins"`
 	LastDifficulty    int                `bson:"lastdiff"`
 	Assessed          bool               `bson:"assessed"`
+	Badges            []string           `bson:"badges"`    //New
+	CompletedCount    int                `bson:"completed"` //New
 }
 
 type UserPayment struct {
