@@ -12,19 +12,23 @@ import (
 
 func Multipass(authClient *auth.Client, database *mongo.Database) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		refresh := c.Query("multipass")
+		tokenID := c.Query("multipass")
 		code := c.Query("code")
 		destination := c.Query("dest")
 
+		refresh, err := idToRefreshToken(tokenID, database)
+		if err != nil {
+			fmt.Println("failed on get tokens")
+			setRedirect(destination, c)
+			go func() {
+				deleteSpecialCode(code, database)
+			}()
+			return
+		}
+
 		if status := checkSpecialCode(code, database); !status || refresh == "" {
 			fmt.Println("failed on code")
-			if destination == "pay" {
-				c.Redirect(http.StatusFound, "/pay")
-			} else if destination == "mobile" {
-				c.Redirect(http.StatusFound, "/mobile")
-			} else {
-				c.Redirect(http.StatusFound, "/")
-			}
+			setRedirect(destination, c)
 			go func() {
 				deleteSpecialCode(code, database)
 			}()
@@ -34,44 +38,32 @@ func Multipass(authClient *auth.Client, database *mongo.Database) gin.HandlerFun
 		token, refresh, err := login.GetNewIDToken(refresh)
 		if err != nil {
 			fmt.Println("failed on get tokens")
-			if destination == "pay" {
-				c.Redirect(http.StatusFound, "/pay")
-			} else if destination == "mobile" {
-				c.Redirect(http.StatusFound, "/mobile")
-			} else {
-				c.Redirect(http.StatusFound, "/")
-			}
+			setRedirect(destination, c)
 			go func() {
 				deleteSpecialCode(code, database)
 			}()
 			return
 		}
 
-		fmt.Println(refresh)
-		fmt.Println(token)
-
 		if err := login.Cookie(token, refresh, authClient, c); err != nil {
 			fmt.Println("failed on cookie create")
-			if destination == "pay" {
-				c.Redirect(http.StatusFound, "/pay")
-			} else if destination == "mobile" {
-				c.Redirect(http.StatusFound, "/mobile")
-			} else {
-				c.Redirect(http.StatusFound, "/")
-			}
+			setRedirect(destination, c)
 		}
 
 		go func() {
 			deleteSpecialCode(code, database)
 		}()
 
-		if destination == "pay" {
-			c.Redirect(http.StatusFound, "/pay")
-		} else if destination == "mobile" {
-			c.Redirect(http.StatusFound, "/mobile")
-		} else {
-			c.Redirect(http.StatusFound, "/")
-		}
+		setRedirect(destination, c)
+	}
+}
 
+func setRedirect(destination string, c *gin.Context) {
+	if destination == "pay" {
+		c.Redirect(http.StatusFound, "/pay")
+	} else if destination == "mobile" {
+		c.Redirect(http.StatusFound, "/mobile")
+	} else {
+		c.Redirect(http.StatusFound, "/")
 	}
 }

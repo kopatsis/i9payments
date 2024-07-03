@@ -96,3 +96,27 @@ func BothIDsFromCookie(c *gin.Context, authClient *auth.Client, database *mongo.
 	return uid, user.ID.Hex(), nil
 
 }
+
+func idToRefreshToken(id string, database *mongo.Database) (string, error) {
+	collection := database.Collection("usertoken")
+
+	objectID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return "", fmt.Errorf("invalid ID format: %v", err)
+	}
+
+	filter := bson.M{"_id": objectID}
+	var result bson.M
+
+	err = collection.FindOne(context.Background(), filter).Decode(&result)
+	if err != nil {
+		return "", err
+	}
+
+	token, ok := result["token"].(string)
+	if !ok {
+		return "", fmt.Errorf("token not found or not a string")
+	}
+
+	return token, nil
+}
