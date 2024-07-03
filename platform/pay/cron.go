@@ -14,6 +14,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
+// Exists as a backup despite not being run...
 func DoneCancels(client *sendgrid.Client, database *mongo.Database, auth *auth.Client) {
 	collection := database.Collection("cancellations")
 

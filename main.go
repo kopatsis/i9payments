@@ -4,14 +4,11 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"time"
 
 	"i9pay/db"
 	"i9pay/platform"
 	"i9pay/platform/login"
-	"i9pay/platform/pay"
 
-	"github.com/go-co-op/gocron"
 	"github.com/joho/godotenv"
 	"github.com/sendgrid/sendgrid-go"
 	"github.com/stripe/stripe-go/v72"
@@ -26,8 +23,6 @@ func main() {
 	}
 
 	auth := login.InitFirebase()
-
-	scheduler := gocron.NewScheduler(time.UTC)
 
 	client, database, err := db.ConnectDB()
 	if err != nil {
@@ -49,12 +44,6 @@ func main() {
 	}
 
 	sendclient := sendgrid.NewSendClient(apiKey)
-
-	_, err = scheduler.Every(1).Hour().Do(pay.DoneCancels, sendclient, database, auth)
-	if err != nil {
-		log.Fatalf("Error scheduling done cancels: %s\n", err.Error())
-	}
-	scheduler.StartAsync()
 
 	rtr := platform.New(auth, database, sendclient)
 
