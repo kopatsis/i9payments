@@ -24,6 +24,8 @@ type User struct {
 	Assessed          bool               `bson:"assessed"`
 	Badges            []string           `bson:"badges"`       //New
 	StrWOStartedCt    int                `bson:"strwostartct"` //New
+	StrWOGeneratedCt  int                `bson:"strwogenct"`   //New
+	WOGeneratedCt     int                `bson:"wogenct"`      //New
 	WOStartedCt       int                `bson:"wostartct"`    //New
 	WORatedCt         int                `bson:"completed"`    //New
 	DisplayLevel      int                `bson:"displevel"`    //New
