@@ -38,18 +38,18 @@ func InitFirebase() *auth.Client {
 	return auth
 }
 
-func ExtractUIDFromSession(c *gin.Context, auth *auth.Client) (string, error) {
+func ExtractUIDFromSession(c *gin.Context, auth *auth.Client) (string, int64, error) {
 	cookie, err := c.Cookie("session")
 	if err != nil {
 		fmt.Println("no cookie")
-		return "", fmt.Errorf("no session cookie found: %w", err)
+		return "", 0, fmt.Errorf("no session cookie found: %w", err)
 	}
 
 	token, err := auth.VerifySessionCookie(context.Background(), cookie)
 	if err != nil {
 		fmt.Println("invalid cookie")
-		return "", fmt.Errorf("invalid session cookie: %w", err)
+		return "", 0, fmt.Errorf("invalid session cookie: %w", err)
 	}
 
-	return token.UID, nil
+	return token.UID, token.IssuedAt, nil
 }

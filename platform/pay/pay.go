@@ -17,7 +17,7 @@ import (
 
 func Subscription(auth *auth.Client, database *mongo.Database) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		uid, err := login.ExtractUIDFromSession(c, auth)
+		uid, iat, err := login.ExtractUIDFromSession(c, auth)
 		if err != nil {
 			c.Redirect(http.StatusFound, "/login")
 			return
@@ -33,6 +33,14 @@ func Subscription(auth *auth.Client, database *mongo.Database) gin.HandlerFunc {
 		user, err := multipass.UserFromUID(uid, database)
 		if err != nil {
 			c.Redirect(http.StatusFound, "/login")
+			return
+		}
+
+		issuedTime := time.Unix(iat, 0)
+		resetTime := user.ResetDate.Time()
+
+		if issuedTime.Before(resetTime) {
+			login.CookieLogout(c)
 			return
 		}
 

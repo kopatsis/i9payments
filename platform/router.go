@@ -29,8 +29,8 @@ func New(auth *auth.Client, database *mongo.Database, client *sendgrid.Client) *
 
 	router.GET("/code", multipass.SpecialCode(database))
 
-	router.GET("/login", login.LoginPage(auth))
-	router.GET("/new", login.SignUpPage(auth))
+	router.GET("/login", login.LoginPage(auth, database))
+	router.GET("/new", login.SignUpPage(auth, database))
 	router.GET("/logout", login.Logout(auth))
 	router.GET("/pay", pay.Subscription(auth, database))
 

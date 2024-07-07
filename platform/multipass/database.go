@@ -83,7 +83,7 @@ func UserFromUID(sub string, database *mongo.Database) (*db.User, error) {
 }
 
 func BothIDsFromCookie(c *gin.Context, authClient *auth.Client, database *mongo.Database) (uid string, userid string, reterror error) {
-	uid, err := login.ExtractUIDFromSession(c, authClient)
+	uid, _, err := login.ExtractUIDFromSession(c, authClient)
 	if err != nil {
 		return "", "", err
 	}
