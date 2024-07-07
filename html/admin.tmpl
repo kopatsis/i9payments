@@ -1,143 +1,152 @@
 {{/* page.tmpl */}}
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Dashboard</title>
+    <script
+      src="https://cdn.jsdelivr.net/npm/alpinejs@3.10.0/dist/cdn.min.js"
+      defer
+    ></script>
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
+      import {
+        getAuth,
+        sendPasswordResetEmail,
+        sendEmailVerification,
+      } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Admin Dashboard</title>
-  <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.10.0/dist/cdn.min.js" defer></script>
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
-    import {
-      getAuth,
-      sendPasswordResetEmail,
-      sendEmailVerification
-    } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyBOksfyE0unI87E533LWTKV6jpW-F1dqDA",
-      authDomain: "i9auth.firebaseapp.com",
-      projectId: "i9auth",
-      storageBucket: "i9auth.appspot.com",
-      messagingSenderId: "284108905250",
-      appId: "1:284108905250:web:b866b21949e149af7ca37b",
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-
-    // Expose the necessary Firebase functions globally
-    window.sendPasswordResetEmail = sendPasswordResetEmail;
-    window.sendEmailVerification = sendEmailVerification;
-    window.auth = auth;
-  </script>
-</head>
-
-<body>
-  <h1>Admin Dashboard</h1>
-
-  {{ if .Verify}}
-    <h1>In order to start a paid membership, you MUST verify your email</h1>
-  {{ end }}
-
-  <div>Email Address: {{.Email}}</div>
-
-  <div x-data="{ editing: false, name: '{{.Name}}' }">
-    <div x-show="!editing">
-      Display Name: <span x-text="name"></span>
-      <button @click="editing = true">Edit</button>
-    </div>
-    <form x-show="editing" action="/updateName" method="POST">
-      Display Name: <input type="text" name="name" x-model="name">
-      <button type="submit">Save</button>
-      <button type="button" @click="editing = false">Cancel</button>
-    </form>
-  </div>
-
-  {{ if and .NotMobile (not .Verify) }}
-  <div>
-    {{ if .Paying }}
-    <button><a href="/pay">Manage Payments</a></button>
-    {{ else }}
-    <button><a href="/pay">Start Giga Membership</a></button>
-    {{ end }}
-  </div>
-  {{ end }}
-
-  <div x-data="firebaseHandler('{{.Email}}')">
-    <button @click="sendReset">Send password reset email</button>
-    <button @click="sendVerificationEmail">Send verification email</button>
-    <div x-show="errorMessage" style="color: red" x-text="errorMessage"></div>
-    <div x-show="successMessage" style="color: green" x-text="successMessage"></div>
-  </div>
-
-  <div x-data="{ showConfirmation: false, email: '' }">
-    <button @click="showConfirmation = true">Delete Account</button>
-    <form
-      x-show="showConfirmation"
-      action="/delete"
-      method="POST"
-      @submit="showConfirmation = false"
-    >
-      <h3>Warning: This action is permanent and cannot be undone, no matter how much you email us to undo it.</h3>
-      <p>If you are sure you want to delete your account, please enter your email exactly as it appears above.</p>
-
-      <input
-        type="email"
-        x-model="email"
-        placeholder="Email"
-      />
-      <button type="submit" :disabled="email !== '{{.Email}}'">
-        Delete
-      </button>
-      <button type="button" @click="showConfirmation = false; email = ''">Cancel</button>
-    </form>
-  </div>
-
-  <div>
-    <button><a href="/logout">Logout</a></button>
-  </div>
-
-  <script>
-    function firebaseHandler(email) {
-      return {
-        errorMessage: "",
-        successMessage: "",
-        email: email,
-
-        async sendReset() {
-          this.errorMessage = "";
-          this.successMessage = "";
-          try {
-            console.log(window.auth.currentUser, this.email)
-            await window.sendPasswordResetEmail(window.auth, this.email);
-            this.successMessage = "Password reset email sent!";
-          } catch (error) {
-            this.errorMessage =
-              "Error sending password reset email: " + error.message;
-          }
-        },
-
-        async sendVerificationEmail() {
-          this.errorMessage = "";
-          this.successMessage = "";
-          try {
-            console.log(window.auth.currentUser);
-            await window.sendEmailVerification(window.auth.currentUser);
-            this.successMessage = "Verification email sent!";
-          } catch (error) {
-            this.errorMessage =
-              "Error sending verification email: " + error.message;
-          }
-        },
+      const firebaseConfig = {
+        apiKey: "AIzaSyBOksfyE0unI87E533LWTKV6jpW-F1dqDA",
+        authDomain: "i9auth.firebaseapp.com",
+        projectId: "i9auth",
+        storageBucket: "i9auth.appspot.com",
+        messagingSenderId: "284108905250",
+        appId: "1:284108905250:web:b866b21949e149af7ca37b",
       };
-    }
 
-    document.addEventListener("alpine:init", () => {
-      Alpine.data("firebaseHandler", firebaseHandler);
-    });
-  </script>
-</body>
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
 
+      // Expose the necessary Firebase functions globally
+      window.sendPasswordResetEmail = sendPasswordResetEmail;
+      window.sendEmailVerification = sendEmailVerification;
+      window.auth = auth;
+    </script>
+  </head>
+
+  <body>
+    <h1>Admin Dashboard</h1>
+
+    {{ if .Verify}}
+    <h1>In order to start a paid membership, you MUST verify your email</h1>
+    {{ end }}
+
+    <div>Email Address: {{.Email}}</div>
+
+    <div x-data="{ editing: false, name: '{{.Name}}' }">
+      <div x-show="!editing">
+        Display Name: <span x-text="name"></span>
+        <button @click="editing = true">Edit</button>
+      </div>
+      <form x-show="editing" action="/updateName" method="POST">
+        Display Name: <input type="text" name="name" x-model="name" />
+        <button type="submit">Save</button>
+        <button type="button" @click="editing = false">Cancel</button>
+      </form>
+    </div>
+
+    {{ if and .NotMobile (not .Verify) }}
+    <div>
+      {{ if .Paying }}
+      <button><a href="/pay">Manage Payments</a></button>
+      {{ else }}
+      <button><a href="/pay">Start Giga Membership</a></button>
+      {{ end }}
+    </div>
+    {{ end }}
+
+    <div x-data="firebaseHandler('{{.Email}}')">
+      <button @click="sendReset">Send password reset email</button>
+      <button @click="sendVerificationEmail">Send verification email</button>
+      <div x-show="errorMessage" style="color: red" x-text="errorMessage"></div>
+      <div
+        x-show="successMessage"
+        style="color: green"
+        x-text="successMessage"
+      ></div>
+    </div>
+
+    <div x-data="{ showConfirmation: false, email: '' }">
+      <button @click="showConfirmation = true">Delete Account</button>
+      <form
+        x-show="showConfirmation"
+        action="/delete"
+        method="POST"
+        @submit="showConfirmation = false"
+      >
+        <h3>
+          Warning: This action is permanent and cannot be undone, no matter how
+          much you email us to undo it.
+        </h3>
+        <p>
+          If you are sure you want to delete your account, please enter your
+          email exactly as it appears above.
+        </p>
+
+        <input type="email" x-model="email" placeholder="Email" />
+        <button type="submit" :disabled="email !== '{{.Email}}'">Delete</button>
+        <button type="button" @click="showConfirmation = false; email = ''">
+          Cancel
+        </button>
+      </form>
+    </div>
+
+    <div>
+      <button><a href="/logout">Logout</a></button>
+    </div>
+
+    <script>
+      function firebaseHandler(email) {
+        return {
+          errorMessage: "",
+          successMessage: "",
+          email: email,
+
+          async sendReset() {
+            this.errorMessage = "";
+            this.successMessage = "";
+            try {
+              console.log(window.auth.currentUser, this.email);
+              await window.sendPasswordResetEmail(window.auth, this.email);
+              this.successMessage = "Password reset email sent!";
+            } catch (error) {
+              this.errorMessage =
+                "Error sending password reset email: " + error.message;
+            }
+          },
+
+          async sendVerificationEmail() {
+            this.errorMessage = "";
+            this.successMessage = "";
+            try {
+              console.log(window.auth.currentUser);
+              await window.sendEmailVerification(window.auth.currentUser);
+              this.successMessage = "Verification email sent!";
+            } catch (error) {
+              this.errorMessage =
+                "Error sending verification email: " + error.message;
+            }
+          },
+        };
+      }
+
+      document.addEventListener("alpine:init", () => {
+        Alpine.data("firebaseHandler", firebaseHandler);
+      });
+    </script>
+  </body>
 </html>
+
+<style></style>

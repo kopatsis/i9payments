@@ -4,12 +4,16 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Login Page</title>
-    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.10.0/dist/cdn.min.js" defer></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/alpinejs@3.10.0/dist/cdn.min.js"
+      defer
+    ></script>
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
       import {
         getAuth,
         signInWithEmailAndPassword,
+        sendPasswordResetEmail,
       } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
 
       const firebaseConfig = {
@@ -26,41 +30,153 @@
 
       // Expose the necessary Firebase functions globally
       window.signInWithEmailAndPassword = signInWithEmailAndPassword;
+      window.sendPasswordResetEmail = sendPasswordResetEmail;
       window.auth = auth;
     </script>
   </head>
   <body x-data="loginHandler">
-    <h1>Login</h1>
-    {{ if .Email }}
-    <div style="margin-top: 20px">
-      <p>
-        You are logged in as <strong>{{ .Email }}</strong>
-      </p>
-      <a href="/" style="text-decoration: none">
-        <button type="button">Proceed</button>
-      </a>
+    <div class="centerpage">
+      <div class="wholepage">
+        <div class="loghead header">
+          <b class="logheadtxt">i9 Admin Dashboard</b>
+        </div>
+
+        <div class="innercontent">
+          {{ if .Email }}
+          <div class="isloggedin">
+            <div>You are already logged in with email {{ .Email }}</div>
+            <div>Would you like to stay signed in?</div>
+            <div class="isloggedbuttons">
+              <button class="submit">
+                <a href="/" style="text-decoration: none; color: inherit"
+                  >Stay Signed In</a
+                >
+              </button>
+              <button class="submit">
+                <a href="/logout" style="text-decoration: none; color: inherit"
+                  >Sign Out</a
+                >
+              </button>
+            </div>
+          </div>
+          {{else}}
+          <div class="loginouter">
+            <div class="logintxt">Sign in</div>
+            <div class="signinopt">
+              or
+              <button class="link-button" type="button">
+                <a href="/new" style="text-decoration: none; color: inherit"
+                  >create an account</a
+                >
+              </button>
+            </div>
+          </div>
+          <div class="form">
+            <div
+              x-show="errorMessage"
+              class="error"
+              x-text="errorMessage"
+            ></div>
+            <div>
+              <label class="hide" for="email">Email:</label>
+              <input
+                id="email"
+                type="email"
+                x-model="email"
+                placeholder="Email"
+                required
+              />
+            </div>
+            <div>
+              <label class="hide" for="password">Password:</label>
+              <input
+                id="password"
+                type="password"
+                x-model="password"
+                placeholder="Password"
+                required
+              />
+            </div>
+            <div>
+              <button class="submit" @click="login">Sign In</button>
+            </div>
+            <div>
+              <div x-data="{ showModal: false }">
+                <button
+                  class="link-button"
+                  type="button"
+                  @click="showModal = true"
+                >
+                  Forgot Password?
+                </button>
+
+                <div
+                  x-show="showModal"
+                  class="modal"
+                  @keydown.window.escape="showModal = false"
+                >
+                  <div class="modal-content" @click.away="showModal = false">
+                    <div class="closeline">
+                      <button class="link-button" @click="showModal = false">
+                        &times;
+                      </button>
+                    </div>
+                    <div class="form" x-data="resetHandler">
+                      <div class="resethead">Password Reset</div>
+                      <div>
+                        <label class="hide" for="resetemail">Email:</label>
+                        <input
+                          id="resetemail"
+                          type="email"
+                          x-model="resetemail"
+                          placeholder="Email"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <button class="submit" @click="reset">
+                          Send Reset Email
+                        </button>
+                      </div>
+                      <div
+                        x-show="errorMessage"
+                        class="error"
+                        x-text="errorMessage"
+                      ></div>
+                      <div
+                        x-show="successMessage"
+                        class="success"
+                        x-text="successMessage"
+                      ></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          {{ end }}
+        </div>
+      </div>
     </div>
-    {{ end }}
-
-    <input type="email" x-model="email" placeholder="Email" />
-    <input type="password" x-model="password" placeholder="Password" />
-    <button @click="login">Login</button>
-
-    <a href="/new" style="text-decoration: none">
-      <button>Create New Account</button>
-    </a>
 
     <script>
       function loginHandler() {
         return {
           email: "",
           password: "",
+          errorMessage: "",
           login() {
+            this.errorMessage = "";
             console.log(window.auth, window.signInWithEmailAndPassword);
             console.log(window.auth, this.email, this.password);
-            window.signInWithEmailAndPassword(window.auth, this.email, this.password)
+            window
+              .signInWithEmailAndPassword(
+                window.auth,
+                this.email,
+                this.password
+              )
               .then((userCredential) => {
-                console.log("??????")
+                console.log("??????");
                 const idTokenPromise = userCredential.user.getIdToken();
                 const refreshToken = userCredential.user.refreshToken;
                 console.log(idTokenPromise, refreshToken);
@@ -81,11 +197,35 @@
                   console.log("Token verified");
                   window.location.assign("/");
                 } else {
-                  response.json().then((data) => console.error("Token verification failed", data));
+                  response.json().then((data) => {
+                    console.error("Token verification failed", data);
+                    this.errorMessage = "Token verification failed";
+                  });
                 }
               })
               .catch((error) => {
                 console.error("Login failed:", error.code, error.message);
+                this.errorMessage = "Token verification failed: " + error.message;
+              });
+          },
+        };
+      }
+
+      function resetHandler() {
+        return {
+          resetemail: "",
+          errorMessage: "",
+          successMessage: "",
+          reset() {
+            this.errorMessage = "";
+            this.successMessage = "";
+            window
+              .sendPasswordResetEmail(window.auth, this.resetemail)
+              .then(() => {
+                this.successMessage = "Password reset email sent successfully.";
+              })
+              .catch((error) => {
+                this.errorMessage = error.message;
               });
           },
         };
@@ -93,3 +233,229 @@
     </script>
   </body>
 </html>
+
+<style>
+  @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap");
+
+  * {
+    font-family: "Poppins", sans-serif;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+  }
+
+  .centerpage {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    display: flex;
+    position: fixed;
+    background-color: rgb(97, 97, 97);
+    width: 100dvw;
+    height: 100dvh;
+  }
+
+  .wholepage {
+    height: 100dvh;
+    width: min(100dvw, 960px);
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    background: white;
+  }
+
+  .header {
+    width: 100%;
+  }
+
+  .innercontent {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    width: 100%;
+    align-items: center;
+    margin-bottom: -20px;
+    padding-bottom: 25px;
+  }
+
+  .loghead {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .logheadtxt {
+    font-size: clamp(16px, 8dvw, 48px);
+    user-select: none;
+  }
+
+  .link-button {
+    background: none;
+    border: none;
+    color: rgb(59, 59, 59);
+    text-decoration: underline;
+    cursor: pointer;
+    padding: 0;
+    font-family: inherit;
+    font-size: inherit;
+  }
+
+  .link-button:hover,
+  .link-button:focus {
+    text-decoration: none;
+  }
+
+  .logintxt {
+    font-size: 48px;
+  }
+
+  .loginouter {
+    display: flex;
+    min-height: 40dvh;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  @media (max-height: 700px) {
+    .loginouter {
+      min-height: 34.2857dvh;
+    }
+  }
+
+  @media (max-height: 600px) {
+    .loginouter {
+      min-height: 28.5714dvh;
+    }
+  }
+
+  @media (max-height: 500px) {
+    .loginouter {
+      min-height: 25dvh;
+    }
+  }
+
+  @media (max-height: 400px) {
+    .loginouter {
+      min-height: fit-content;
+    }
+  }
+
+  .submit {
+    border-radius: 0px;
+    transition: border-color 150ms ease-in-out 0s;
+    outline: none;
+    font-size: 16px;
+    margin: 10px;
+    padding-top: 6px;
+    padding-bottom: 6px;
+    padding-left: 12px;
+    padding-right: 12px;
+    border: 1px solid rgb(137, 151, 155);
+    color: inherit;
+    background-color: transparent;
+    font-weight: normal;
+  }
+
+  .submit:hover {
+    background-color: aliceblue;
+  }
+
+  button {
+    cursor: pointer;
+  }
+
+  .hide {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    border: 0;
+    clip: rect(0, 0, 0, 0);
+  }
+
+  input {
+    border: 1px solid rgb(137, 151, 155);
+    border-radius: 0px;
+    transition: border-color 150ms ease-in-out 0s;
+    outline: none;
+    font-size: 16px;
+    margin: 4px;
+    padding-left: 10px;
+    padding-right: 10px;
+    min-width: min(444px, calc(100dvw - 50px));
+  }
+
+  .form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .isloggedin {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .isloggedbuttons {
+    display: flex;
+  }
+
+  .modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.44);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+    cursor: pointer;
+  }
+
+  .modal-content {
+    padding: 20px;
+    background: white;
+    border-radius: 5px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    z-index: 2001;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-width: 90%;
+    max-height: 90%;
+    overflow-y: auto;
+    cursor: default;
+    max-height: 80dvh;
+    max-width: 87.5dvw;
+  }
+
+  .resethead {
+    font-size: 24px;
+  }
+
+  .closeline {
+    display: flex;
+    justify-content: right;
+    width: 100%;
+  }
+
+  .error {
+    color: red;
+  }
+
+  .success {
+    color: green;
+  }
+</style>
