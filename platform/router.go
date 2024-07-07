@@ -46,6 +46,7 @@ func New(auth *auth.Client, database *mongo.Database, client *sendgrid.Client) *
 
 	router.POST("/confirmationwh", pay.WebhookConfirm(client, auth, database))
 	router.POST("/failedwh", pay.WebhookFail(client, auth, database))
+	router.PATCH("/resetdate", login.ResetPasswordDate(auth, database))
 
 	return router
 }
