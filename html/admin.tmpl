@@ -97,7 +97,7 @@
             <div x-show="errorMessage" style="color: red" x-text="errorMessage"></div>
             <div x-show="successMessage" style="color: green" x-text="successMessage"></div>
             <div class="buttonRow">
-              <button x-show="successMessage" @click="location.reload()">
+              <button class="submit" x-show="successMessage" @click="location.reload()">
                 Refresh Page
               </button>
             </div>
