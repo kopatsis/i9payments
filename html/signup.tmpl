@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Register Page</title>
+    <title>Sign Up</title>
     <script
       src="https://cdn.jsdelivr.net/npm/alpinejs@3.10.0/dist/cdn.min.js"
       defer
@@ -30,57 +30,121 @@
       window.createUserWithEmailAndPassword = createUserWithEmailAndPassword;
     </script>
   </head>
-  <body x-data="registerHandler()">
-    <h1>Register</h1>
-    {{ if .Email }}
-    <div style="margin-top: 20px">
-      <p>
-        You are logged in as <strong>{{ .Email }}</strong>
-      </p>
-      <a href="/" style="text-decoration: none">
-        <button type="button">Proceed</button>
-      </a>
-    </div>
-    {{ end }}
 
-    <div>
-      <input type="text" x-model="name" placeholder="Name" />
-    </div>
-    <input type="email" x-model="email" placeholder="Email" />
-    <input type="password" x-model="password" placeholder="Password" />
-    <div>
-      <p
-        :class="{'met': password.length >= 10, 'not-met': password.length < 10}"
-      >
-        At least 10 characters
-      </p>
-      <p :class="{'met': /\d/.test(password), 'not-met': !/\d/.test(password)}">
-        At least one number
-      </p>
-      <p
-        :class="{'met': /[A-Za-z]/.test(password), 'not-met': !/[A-Za-z]/.test(password)}"
-      >
-        At least one letter
-      </p>
-    </div>
-    <input
-      type="password"
-      x-model="confirmPassword"
-      placeholder="Confirm Password"
-    />
-    <div>
-      <p
-        :class="{'met': password === confirmPassword, 'not-met': password !== confirmPassword}"
-      >
-        Passwords match
-      </p>
-    </div>
-    <button @click="register">Register</button>
-    <div id="error-message" style="display: none; color: red"></div>
+  <body x-data="registerHandler">
+    <div class="centerpage">
+      <div class="wholepage">
+        <div class="loghead header">
+          <b class="logheadtxt">i9 Admin Dashboard</b>
+        </div>
 
-    <a href="/login" style="text-decoration: none">
-      <button type="button">Login to existing Account</button>
-    </a>
+        <div class="innercontent">
+          {{ if .Email }}
+          <div class="isloggedin">
+            <div>You are already logged in with email {{ .Email }}</div>
+            <div>Would you like to stay signed in?</div>
+            <div class="isloggedbuttons">
+              <button class="submit">
+                <a href="/" style="text-decoration: none; color: inherit"
+                  >Stay Signed In</a
+                >
+              </button>
+              <button class="submit">
+                <a href="/logout" style="text-decoration: none; color: inherit"
+                  >Sign Out</a
+                >
+              </button>
+            </div>
+          </div>
+          {{else}}
+          <div class="loginouter">
+            <div class="logintxt">Sign Up</div>
+            <div class="signinopt">
+              or
+              <button class="link-button" type="button">
+                <a href="/login" style="text-decoration: none; color: inherit"
+                  >use an existing account</a
+                >
+              </button>
+            </div>
+          </div>
+
+          <div class="form">
+            <label class="hide" for="name">Name:</label>
+            <input
+              type="text"
+              id="name"
+              x-model="name"
+              placeholder="Name"
+              required
+            />
+
+            <label class="hide" for="email">Email:</label>
+            <input
+              type="email"
+              id="email"
+              x-model="email"
+              placeholder="Email"
+              required
+            />
+
+            <label class="hide" for="password">Password:</label>
+            <input
+              type="password"
+              id="password"
+              x-model="password"
+              placeholder="Password"
+              required
+            />
+
+            <div class="verif" :class="{ 'complete': hasMinimumLength }">
+              <span x-html="hasMinimumLength ? '&check;' : '&times;'"></span>
+              &nbsp;Password must be at least 10 characters
+            </div>
+            <div class="verif" :class="{ 'complete': containsLetter }">
+              <span x-html="containsLetter ? '&check;' : '&times;'"></span>
+              &nbsp;Password must contain at least one letter
+            </div>
+            <div class="verif" :class="{ 'complete': containsNumber }">
+              <span x-html="containsNumber ? '&check;' : '&times;'"></span>
+              &nbsp;Password must contain at least one number
+            </div>
+
+            <label class="hide" for="confirmPassword">Confirm Password:</label>
+            <input
+              type="password"
+              id="confirmPassword"
+              x-model="confirmPassword"
+              placeholder="Confirm Password"
+              required
+            />
+
+            <div class="verif" :class="{ 'invis': passwordsMatch }">
+              Passwords do not match
+            </div>
+
+            <button
+              class="submit"
+              @click="register"
+              :disabled="!isValidPassword"
+            >
+              Sign Up
+            </button>
+
+            <div
+              class="verif"
+              :class="{ 'complete': isValidPassword }"
+              x-text="isValidPassword ? 'Ready to submit!' : (!allButEmailValid ? 'Please complete all required fields' : 'Please enter a valid email address')"
+            >
+              Please complete all required fields
+            </div>
+            <div class="verif" id="error-message" style="display: none"></div>
+          </div>
+
+          {{ end }}
+        </div>
+      </div>
+    </div>
 
     <script>
       function registerHandler() {
@@ -90,7 +154,7 @@
           password: "",
           confirmPassword: "",
           register() {
-            if (!this.isValidPassword(this.password)) {
+            if (!this.passwordAllowed(this.password)) {
               document.getElementById("error-message").textContent =
                 "Password must be at least 10 characters long, include at least one letter and one number.";
               document.getElementById("error-message").style.display = "block";
@@ -144,7 +208,7 @@
                 );
               });
           },
-          isValidPassword(password) {
+          passwordAllowed(password) {
             if (password.length < 10) return false;
 
             let hasLetter = false;
@@ -160,17 +224,227 @@
 
             return false;
           },
+          get hasMinimumLength() {
+            return this.password.length >= 10;
+          },
+          get containsLetter() {
+            return /[a-zA-Z]/.test(this.password);
+          },
+          get containsNumber() {
+            return /\d/.test(this.password);
+          },
+          get passwordsMatch() {
+            return this.password === this.confirmPassword;
+          },
+          get isValidPassword() {
+            return (
+              this.password === this.confirmPassword &&
+              /\d/.test(this.password) &&
+              /[a-zA-Z]/.test(this.password) &&
+              this.password.length >= 10 &&
+              this.name !== "" &&
+              /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.email)
+            );
+          },
+          get allButEmailValid() {
+            return (
+              this.password === this.confirmPassword &&
+              /\d/.test(this.password) &&
+              /[a-zA-Z]/.test(this.password) &&
+              this.password.length >= 10 &&
+              this.name !== ""
+            );
+          },
         };
       }
     </script>
-
-    <style>
-      .met {
-        color: green;
-      }
-      .not-met {
-        color: red;
-      }
-    </style>
   </body>
 </html>
+
+<style>
+  @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap");
+
+  * {
+    font-family: "Poppins", sans-serif;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+  }
+
+  .centerpage {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    display: flex;
+    position: fixed;
+    background-color: rgb(97, 97, 97);
+    width: 100dvw;
+    height: 100dvh;
+  }
+
+  .wholepage {
+    height: 100dvh;
+    width: min(100dvw, 960px);
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    background: white;
+  }
+
+  .header {
+    width: 100%;
+  }
+
+  .innercontent {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    width: 100%;
+    align-items: center;
+    margin-bottom: -20px;
+    padding-bottom: 25px;
+  }
+
+  .loghead {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .logheadtxt {
+    font-size: clamp(16px, 8dvw, 48px);
+    user-select: none;
+  }
+
+  .link-button {
+    background: none;
+    border: none;
+    color: rgb(59, 59, 59);
+    text-decoration: underline;
+    cursor: pointer;
+    padding: 0;
+    font-family: inherit;
+    font-size: inherit;
+  }
+
+  .link-button:hover,
+  .link-button:focus {
+    text-decoration: none;
+  }
+
+  .logintxt {
+    font-size: 48px;
+  }
+
+  .loginouter {
+    display: flex;
+    min-height: 40dvh;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  @media (max-height: 700px) {
+    .loginouter {
+      min-height: 34.2857dvh;
+    }
+  }
+
+  @media (max-height: 600px) {
+    .loginouter {
+      min-height: 28.5714dvh;
+    }
+  }
+
+  @media (max-height: 500px) {
+    .loginouter {
+      min-height: 25dvh;
+    }
+  }
+
+  @media (max-height: 400px) {
+    .loginouter {
+      min-height: fit-content;
+    }
+  }
+
+  .submit {
+    border-radius: 0px;
+    transition: border-color 150ms ease-in-out 0s;
+    outline: none;
+    font-size: 16px;
+    margin: 10px;
+    padding-top: 6px;
+    padding-bottom: 6px;
+    padding-left: 12px;
+    padding-right: 12px;
+    border: 1px solid rgb(137, 151, 155);
+    color: inherit;
+    background-color: transparent;
+    font-weight: normal;
+  }
+
+  .submit:hover {
+    background-color: aliceblue;
+  }
+
+  button {
+    cursor: pointer;
+  }
+
+  .hide {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    border: 0;
+    clip: rect(0, 0, 0, 0);
+  }
+
+  input {
+    border: 1px solid rgb(137, 151, 155);
+    border-radius: 0px;
+    transition: border-color 150ms ease-in-out 0s;
+    outline: none;
+    font-size: 16px;
+    margin: 4px;
+    padding-left: 10px;
+    padding-right: 10px;
+    min-width: min(444px, calc(100dvw - 50px));
+  }
+
+  .form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .isloggedin {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .isloggedbuttons {
+    display: flex;
+  }
+
+  .verif {
+    font-size: 14px;
+    margin-top: -1px;
+    margin-bottom: -1px;
+    color: red;
+  }
+
+  .verif.complete {
+    color: green;
+  }
+</style>
