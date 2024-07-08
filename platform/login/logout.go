@@ -39,4 +39,12 @@ func CookieReset(c *gin.Context) {
 		HttpOnly: true,
 		Secure:   false,
 	})
+
+	http.SetCookie(c.Writer, &http.Cookie{
+		Name:     "properLogin",
+		Value:    "FALSE",
+		HttpOnly: true,
+		Secure:   false,
+		Path:     "/",
+	})
 }

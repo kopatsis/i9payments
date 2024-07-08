@@ -55,6 +55,14 @@ func VerifyToken(authClient *auth.Client, database *mongo.Database) gin.HandlerF
 			return
 		}
 
+		http.SetCookie(c.Writer, &http.Cookie{
+			Name:     "properLogin",
+			Value:    "TRUE",
+			HttpOnly: true,
+			Secure:   false,
+			Path:     "/",
+		})
+
 		c.JSON(http.StatusOK, gin.H{"message": "Session cookie set successfully"})
 	}
 }

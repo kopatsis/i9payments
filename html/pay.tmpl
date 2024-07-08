@@ -3,6 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script
+      src="https://cdn.jsdelivr.net/npm/alpinejs@3.10.0/dist/cdn.min.js"
+      defer
+    ></script>
     <title>Subscribe</title>
     <script src="https://js.stripe.com/v3/"></script>
   </head>
@@ -20,6 +24,7 @@
         </label>
       </div>
       <div id="payment-element"></div>
+      <div style="display: none" id="loader">loading...</div>
       <button type="submit">Subscribe</button>
     </form>
     <div id="error-message"></div>
@@ -40,6 +45,8 @@
           event.preventDefault();
 
           const startTime = Date.now();
+
+          document.getElementById("loader").style.display = "block";
 
           const subscriptionType = document.querySelector(
             'input[name="subscription"]:checked'
@@ -62,6 +69,7 @@
           if (error) {
             document.getElementById("error-message").textContent =
               error.message;
+            document.getElementById("loader").style.display = "none";
           } else {
             const paymentMethodId = setupIntent.payment_method;
 
@@ -84,6 +92,7 @@
               const errorData = await response.json();
               document.getElementById("error-message").textContent =
                 errorData.error;
+              document.getElementById("loader").style.display = "none";
             }
           }
         });

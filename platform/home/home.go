@@ -41,12 +41,24 @@ func AdminPanel(frommobile bool, auth *auth.Client, database *mongo.Database) gi
 			return
 		}
 
+		properLogin := true
+
+		cookie, err := c.Cookie("properLogin")
+		if err != nil {
+			properLogin = false
+		} else {
+			if cookie != "TRUE" {
+				properLogin = false
+			}
+		}
+
 		c.HTML(200, "admin.tmpl", gin.H{
-			"Mobile": frommobile,
-			"Verify": userRecord.EmailVerified,
-			"Email":  email,
-			"Paying": user.Paying,
-			"Name":   user.Name,
+			"ClientOn": properLogin,
+			"Mobile":   frommobile,
+			"Verify":   userRecord.EmailVerified,
+			"Email":    email,
+			"Paying":   user.Paying,
+			"Name":     user.Name,
 		})
 	}
 }

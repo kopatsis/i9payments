@@ -36,7 +36,8 @@
     </script>
   </head>
 
-  <body x-data="separateLoginCheck()" x-init="initializeAuth">
+  <!-- <body x-data="separateLoginCheck()" x-init="initializeAuth"> -->
+  <body>
     <h1>Admin Dashboard</h1>
 
     <div>Email Address: {{.Email}}</div>
@@ -62,12 +63,15 @@
       <button><a href="/pay">Start Giga Membership</a></button>
       {{else}}
       <div>Please verify your email address to start a Giga Membership</div>
-      <p x-show="notLoggedIn">
+      <!-- <p x-show="notLoggedIn"> -->
+      {{if not .ClientOn}}
+      <p>
         When you created an account, you were sent an email to verify your email
         address. If you can't find it, check your spam folder. To send another,
         log into the i9 app to access the settings (gear icon) on the upper
         right corner and click 'Send Verification Email'.
       </p>
+      {{ end }}
       {{ end }}
     </div>
     {{ end }}
@@ -75,9 +79,12 @@
     <div x-data="firebaseHandler('{{.Email}}')">
       <button @click="sendReset">Send password reset email</button>
       {{if not .Verify}}
-      <button x-show="!notLoggedIn" @click="sendVerificationEmail">
-        Send verification email
+      {{if .ClientOn}}
+      <!-- <button x-show="!notLoggedIn" @click="sendVerificationEmail"> -->
+        <button @click="sendVerificationEmail">
+          Send verification email
       </button>
+      {{ end }}
       {{ end }}
       <div x-show="errorMessage" style="color: red" x-text="errorMessage"></div>
       <div
@@ -85,6 +92,11 @@
         style="color: green"
         x-text="successMessage"
       ></div>
+      <div>
+        <button x-show="successMessage" @click="location.reload()">
+          Refresh Page
+        </button>
+      </div>
     </div>
 
     <div x-data="{ showConfirmation: false, email: '' }">
@@ -117,30 +129,30 @@
     </div>
 
     <script>
-      function separateLoginCheck() {
-        return {
-          currentUser: null,
-          initializeAuth() {
-            let ct = 0;
-            const intervalId = setInterval(() => {
-              console.log("run");
-              if (window.auth) {
-                ct++;
-                console.log("????");
-                this.currentUser = window.auth.currentUser;
-                console.log(this.currentUser);
-                if (ct > 5) {
-                  clearInterval(intervalId);
-                }
-              }
-            }, 100);
-          },
-          get notLoggedIn() {
-            console.log("nig", this.currentUser);
-            return this.currentUser === null;
-          },
-        };
-      }
+      // function separateLoginCheck() {
+      //   return {
+      //     currentUser: null,
+      //     initializeAuth() {
+      //       let ct = 0;
+      //       const intervalId = setInterval(() => {
+      //         console.log("run");
+      //         if (window.auth) {
+      //           ct++;
+      //           console.log("????");
+      //           this.currentUser = window.auth.currentUser;
+      //           console.log(this.currentUser);
+      //           if (ct > 5) {
+      //             clearInterval(intervalId);
+      //           }
+      //         }
+      //       }, 100);
+      //     },
+      //     get notLoggedIn() {
+      //       console.log("nig", this.currentUser);
+      //       return this.currentUser === null;
+      //     },
+      //   };
+      // }
 
       function firebaseHandler(email) {
         return {
