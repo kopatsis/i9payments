@@ -34,7 +34,6 @@
   </script>
 </head>
 
-<!-- <body x-data="separateLoginCheck()" x-init="initializeAuth"> -->
 
 <body>
   <div class="centerpage">
@@ -62,7 +61,7 @@
 
         {{ if not .Mobile }}
         <div class="gigaSection">
-          <div class="partialHead">Giga Membership:</div>
+          <div class="partialHead">Giga Membership</div>
           <div>
             {{ if .Paying }}
             <button><a href="/pay">Manage Membership</a></button>
@@ -81,104 +80,103 @@
             {{ end }}
           </div>
           {{ end }}
+        </div>
 
-          <div x-data="firebaseHandler('{{.Email}}')">
-            <div class="buttonRow">
-              <button class="submit" @click="sendReset">Send Password Reset Email</button>
-              {{if not .Verify}}
-              {{if .ClientOn}}
-              <button class="submit" @click="sendVerificationEmail">
-                Send Verification Email
-              </button>
-              {{ end }}
-              {{ end }}
-            </div>
-
-            <div x-show="errorMessage" style="color: red" x-text="errorMessage"></div>
-            <div x-show="successMessage" style="color: green" x-text="successMessage"></div>
-            <div class="buttonRow">
-              <button class="submit" x-show="successMessage" @click="location.reload()">
-                Refresh Page
-              </button>
-            </div>
+        <div x-data="firebaseHandler('{{.Email}}')">
+          <div class="buttonRow">
+            <button class="submit" @click="sendReset">Send Password Reset Email</button>
+            {{if not .Verify}}
+            {{if .ClientOn}}
+            <button class="submit" @click="sendVerificationEmail">
+              Send Verification Email
+            </button>
+            {{ end }}
+            {{ end }}
           </div>
 
-          <div x-data="{ showConfirmation: false, email: '' }">
-            <div class="partialHead">
-              Danger Zone
+          <div x-show="errorMessage" style="color: red" x-text="errorMessage"></div>
+          <div x-show="successMessage" style="color: green" x-text="successMessage"></div>
+          <div class="buttonRow">
+            <button class="submit" x-show="successMessage" @click="location.reload()">
+              Refresh Page
+            </button>
+          </div>
+        </div>
+
+        <div x-data="{ showConfirmation: false, email: '' }">
+          <div class="partialHead">
+            Danger Zone
+          </div>
+          <div class="dangerZone">
+            <div class="buttonRow">
+              <button class="submit danger" @click="showConfirmation = true">Delete Account</button>
             </div>
-            <div class="dangerZone">
-              <div class="buttonRow">
-                <button @click="showConfirmation = true">Delete Account</button>
+            <form class="form" x-show="showConfirmation" action="/delete" method="POST"
+              @submit="showConfirmation = false">
+              <div class="miniHead">
+                Warning: This action is permanent and cannot be undone, no matter how
+                much you email us to undo it.
               </div>
-              <form class="form" x-show="showConfirmation" action="/delete" method="POST"
-                @submit="showConfirmation = false">
-                <div class="miniHead">
-                  Warning: This action is permanent and cannot be undone, no matter how
-                  much you email us to undo it.
-                </div>
-                <div>
-                  If you are sure you want to delete your account, please enter your
-                  email exactly as it appears at the top of this page.
-                </div>
+              <div>
+                If you are sure you want to delete your account, please enter your
+                email exactly as it appears at the top of this page.
+              </div>
 
-                <input type="email" x-model="email" placeholder="Email" />
-                <div class="buttonRow">
-                  <button class="submit danger" type="submit" :disabled="email !== '{{.Email}}'">Delete</button>
-                  <button class="submit" type="button" @click="showConfirmation = false; email = ''">
-                    Cancel
-                  </button>
-                </div>
-
-              </form>
-            </div>
-
+              <input type="email" x-model="email" placeholder="Email" />
+              <div class="buttonRow">
+                <button class="submit danger" type="submit" :disabled="email !== '{{.Email}}'">Delete</button>
+                <button class="submit" type="button" @click="showConfirmation = false; email = ''">
+                  Cancel
+                </button>
+              </div>
+            </form>
           </div>
+        </div>
 
-        </div>
-        <div class="footer">
-          <button><a href="/logout" style="text-decoration: none; color: inherit">Sign Out</a></button>
-        </div>
+      </div>
+      <div class="footer">
+        <button class="submit"><a href="/logout" style="text-decoration: none; color: inherit">Sign Out</a></button>
       </div>
     </div>
+  </div>
 
-    <script>
+  <script>
 
-      function firebaseHandler(email) {
-        return {
-          errorMessage: "",
-          successMessage: "",
-          email: email,
+    function firebaseHandler(email) {
+      return {
+        errorMessage: "",
+        successMessage: "",
+        email: email,
 
-          async sendReset() {
-            this.errorMessage = "";
-            this.successMessage = "";
-            try {
-              console.log(window.auth.currentUser, this.email);
-              await window.sendPasswordResetEmail(window.auth, this.email);
-              this.successMessage = "Password reset email sent!";
-            } catch (error) {
-              this.errorMessage =
-                "Error sending password reset email: " + error.message;
-            }
-          },
+        async sendReset() {
+          this.errorMessage = "";
+          this.successMessage = "";
+          try {
+            console.log(window.auth.currentUser, this.email);
+            await window.sendPasswordResetEmail(window.auth, this.email);
+            this.successMessage = "Password reset email sent!";
+          } catch (error) {
+            this.errorMessage =
+              "Error sending password reset email: " + error.message;
+          }
+        },
 
-          async sendVerificationEmail() {
-            this.errorMessage = "";
-            this.successMessage = "";
-            try {
-              console.log(window.auth.currentUser);
-              await window.sendEmailVerification(window.auth.currentUser);
-              this.successMessage = "Verification email sent!";
-            } catch (error) {
-              this.errorMessage =
-                "Error sending verification email: " + error.message;
-            }
-          },
-        };
-      }
+        async sendVerificationEmail() {
+          this.errorMessage = "";
+          this.successMessage = "";
+          try {
+            console.log(window.auth.currentUser);
+            await window.sendEmailVerification(window.auth.currentUser);
+            this.successMessage = "Verification email sent!";
+          } catch (error) {
+            this.errorMessage =
+              "Error sending verification email: " + error.message;
+          }
+        },
+      };
+    }
 
-    </script>
+  </script>
 </body>
 
 </html>
@@ -271,12 +269,12 @@
     border: 2px solid red;
   }
 
-  .miniHead {
+  .partialHead {
     font-size: 1.6em;
     font-weight: bold;
   }
 
-  .partialHead {
+  .miniHead {
     font-size: 1.3em;
     font-weight: bold;
   }
