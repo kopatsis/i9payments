@@ -2,6 +2,7 @@ package home
 
 import (
 	"context"
+	"html"
 	"i9pay/platform/login"
 	"i9pay/platform/multipass"
 	"net/http"
@@ -56,9 +57,9 @@ func AdminPanel(frommobile bool, auth *auth.Client, database *mongo.Database) gi
 			"ClientOn": properLogin,
 			"Mobile":   frommobile,
 			"Verify":   userRecord.EmailVerified,
-			"Email":    email,
+			"Email":    html.EscapeString(email),
 			"Paying":   user.Paying,
-			"Name":     user.Name,
+			"Name":     html.EscapeString(user.Name),
 		})
 	}
 }

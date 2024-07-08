@@ -28,8 +28,6 @@ func VerifyToken(authClient *auth.Client, database *mongo.Database) gin.HandlerF
 			Name         string `json:"name"`
 		}
 
-		fmt.Println(request.RefreshToken)
-
 		if err := c.ShouldBindJSON(&request); err != nil {
 			fmt.Println("wrong req")
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Bad request"})

@@ -1,158 +1,148 @@
 {{/* page.tmpl */}}
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Admin Dashboard</title>
-    <script
-      src="https://cdn.jsdelivr.net/npm/alpinejs@3.10.0/dist/cdn.min.js"
-      defer
-    ></script>
-    <script type="module">
-      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
-      import {
-        getAuth,
-        sendPasswordResetEmail,
-        sendEmailVerification,
-      } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
 
-      const firebaseConfig = {
-        apiKey: "AIzaSyBOksfyE0unI87E533LWTKV6jpW-F1dqDA",
-        authDomain: "i9auth.firebaseapp.com",
-        projectId: "i9auth",
-        storageBucket: "i9auth.appspot.com",
-        messagingSenderId: "284108905250",
-        appId: "1:284108905250:web:b866b21949e149af7ca37b",
-      };
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.10.0/dist/cdn.min.js" defer></script>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
+    import {
+      getAuth,
+      sendPasswordResetEmail,
+      sendEmailVerification,
+    } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
 
-      const app = initializeApp(firebaseConfig);
-      const auth = getAuth(app);
+    const firebaseConfig = {
+      apiKey: "AIzaSyBOksfyE0unI87E533LWTKV6jpW-F1dqDA",
+      authDomain: "i9auth.firebaseapp.com",
+      projectId: "i9auth",
+      storageBucket: "i9auth.appspot.com",
+      messagingSenderId: "284108905250",
+      appId: "1:284108905250:web:b866b21949e149af7ca37b",
+    };
 
-      // Expose the necessary Firebase functions globally
-      window.sendPasswordResetEmail = sendPasswordResetEmail;
-      window.sendEmailVerification = sendEmailVerification;
-      window.auth = auth;
-    </script>
-  </head>
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
 
-  <!-- <body x-data="separateLoginCheck()" x-init="initializeAuth"> -->
-  <body>
-    <h1>Admin Dashboard</h1>
+    // Expose the necessary Firebase functions globally
+    window.sendPasswordResetEmail = sendPasswordResetEmail;
+    window.sendEmailVerification = sendEmailVerification;
+    window.auth = auth;
+  </script>
+</head>
 
-    <div>Email Address: {{.Email}}</div>
+<!-- <body x-data="separateLoginCheck()" x-init="initializeAuth"> -->
 
-    <div x-data="{ editing: false, name: '{{.Name}}' }">
-      <div x-show="!editing">
-        Display Name: <span x-text="name"></span>
-        <button @click="editing = true">Edit</button>
+<body>
+  <div class="centerpage">
+    <div class="wholepage">
+      <div class="loghead header">
+        <b class="logheadtxt">i9 Admin Dashboard</b>
+
       </div>
-      <form x-show="editing" action="/updateName" method="POST">
-        Display Name: <input type="text" name="name" x-model="name" />
-        <button type="submit">Save</button>
-        <button type="button" @click="editing = false">Cancel</button>
-      </form>
-    </div>
+      <div class="innercontent">
+        <div>For Email: <b>{{.Email}}</b></div>
 
-    {{ if not .Mobile }}
-    <div>Giga Membership:</div>
-    <div>
-      {{ if .Paying }}
-      <button><a href="/pay">Manage Membership</a></button>
-      {{ else if .Verify }}
-      <button><a href="/pay">Start Giga Membership</a></button>
-      {{else}}
-      <div>Please verify your email address to start a Giga Membership</div>
-      <!-- <p x-show="notLoggedIn"> -->
-      {{if not .ClientOn}}
-      <p>
-        When you created an account, you were sent an email to verify your email
-        address. If you can't find it, check your spam folder. To send another,
-        log into the i9 app to access the settings (gear icon) on the upper
-        right corner and click 'Send Verification Email'.
-      </p>
-      {{ end }}
-      {{ end }}
-    </div>
-    {{ end }}
+        <div x-data="{ editing: false, name: '{{.Name}}' }">
+          <div x-show="!editing">
+            Display Name: <b x-text="name"></b>
+            <button class="submit" @click="editing = true">Edit</button>
+          </div>
+          <form x-show="editing" action="/updateName" method="POST">
+            Display Name: <input class="smallerInput" type="text" name="name" x-model="name" />
+            <div class="buttonRow">
+              <button class="submit" type="submit">Save</button>
+              <button class="submit" type="button" @click="editing = false">Cancel</button>
+            </div>
+          </form>
+        </div>
 
-    <div x-data="firebaseHandler('{{.Email}}')">
-      <button @click="sendReset">Send password reset email</button>
-      {{if not .Verify}}
-      {{if .ClientOn}}
-      <!-- <button x-show="!notLoggedIn" @click="sendVerificationEmail"> -->
-        <button @click="sendVerificationEmail">
-          Send verification email
-      </button>
-      {{ end }}
-      {{ end }}
-      <div x-show="errorMessage" style="color: red" x-text="errorMessage"></div>
-      <div
-        x-show="successMessage"
-        style="color: green"
-        x-text="successMessage"
-      ></div>
-      <div>
-        <button x-show="successMessage" @click="location.reload()">
-          Refresh Page
-        </button>
+        {{ if not .Mobile }}
+        <div class="gigaSection">
+          <div class="partialHead">Giga Membership:</div>
+          <div>
+            {{ if .Paying }}
+            <button><a href="/pay">Manage Membership</a></button>
+            {{ else if .Verify }}
+            <button><a href="/pay">Start Giga Membership</a></button>
+            {{else}}
+            <div>Please verify your email address to start a Giga Membership</div>
+            {{if not .ClientOn}}
+            <p>
+              When you created an account, you were sent an email to verify your email
+              address. If you can't find it, check your spam folder. To send another,
+              log into the i9 app to access the settings (gear icon) on the upper
+              right corner and click 'Send Verification Email'.
+            </p>
+            {{ end }}
+            {{ end }}
+          </div>
+          {{ end }}
+
+          <div x-data="firebaseHandler('{{.Email}}')">
+            <div class="buttonRow">
+              <button class="submit" @click="sendReset">Send Password Reset Email</button>
+              {{if not .Verify}}
+              {{if .ClientOn}}
+              <button class="submit" @click="sendVerificationEmail">
+                Send Verification Email
+              </button>
+              {{ end }}
+              {{ end }}
+            </div>
+
+            <div x-show="errorMessage" style="color: red" x-text="errorMessage"></div>
+            <div x-show="successMessage" style="color: green" x-text="successMessage"></div>
+            <div class="buttonRow">
+              <button x-show="successMessage" @click="location.reload()">
+                Refresh Page
+              </button>
+            </div>
+          </div>
+
+          <div x-data="{ showConfirmation: false, email: '' }">
+            <div class="partialHead">
+              Danger Zone
+            </div>
+            <div class="dangerZone">
+              <div class="buttonRow">
+                <button @click="showConfirmation = true">Delete Account</button>
+              </div>
+              <form class="form" x-show="showConfirmation" action="/delete" method="POST"
+                @submit="showConfirmation = false">
+                <div class="miniHead">
+                  Warning: This action is permanent and cannot be undone, no matter how
+                  much you email us to undo it.
+                </div>
+                <div>
+                  If you are sure you want to delete your account, please enter your
+                  email exactly as it appears at the top of this page.
+                </div>
+
+                <input type="email" x-model="email" placeholder="Email" />
+                <div class="buttonRow">
+                  <button class="submit danger" type="submit" :disabled="email !== '{{.Email}}'">Delete</button>
+                  <button class="submit" type="button" @click="showConfirmation = false; email = ''">
+                    Cancel
+                  </button>
+                </div>
+
+              </form>
+            </div>
+
+          </div>
+
+        </div>
+        <div class="footer">
+          <button><a href="/logout" style="text-decoration: none; color: inherit">Sign Out</a></button>
+        </div>
       </div>
-    </div>
-
-    <div x-data="{ showConfirmation: false, email: '' }">
-      <button @click="showConfirmation = true">Delete Account</button>
-      <form
-        x-show="showConfirmation"
-        action="/delete"
-        method="POST"
-        @submit="showConfirmation = false"
-      >
-        <h3>
-          Warning: This action is permanent and cannot be undone, no matter how
-          much you email us to undo it.
-        </h3>
-        <p>
-          If you are sure you want to delete your account, please enter your
-          email exactly as it appears above.
-        </p>
-
-        <input type="email" x-model="email" placeholder="Email" />
-        <button type="submit" :disabled="email !== '{{.Email}}'">Delete</button>
-        <button type="button" @click="showConfirmation = false; email = ''">
-          Cancel
-        </button>
-      </form>
-    </div>
-
-    <div>
-      <button><a href="/logout">Logout</a></button>
     </div>
 
     <script>
-      // function separateLoginCheck() {
-      //   return {
-      //     currentUser: null,
-      //     initializeAuth() {
-      //       let ct = 0;
-      //       const intervalId = setInterval(() => {
-      //         console.log("run");
-      //         if (window.auth) {
-      //           ct++;
-      //           console.log("????");
-      //           this.currentUser = window.auth.currentUser;
-      //           console.log(this.currentUser);
-      //           if (ct > 5) {
-      //             clearInterval(intervalId);
-      //           }
-      //         }
-      //       }, 100);
-      //     },
-      //     get notLoggedIn() {
-      //       console.log("nig", this.currentUser);
-      //       return this.currentUser === null;
-      //     },
-      //   };
-      // }
 
       function firebaseHandler(email) {
         return {
@@ -188,11 +178,152 @@
         };
       }
 
-      // document.addEventListener("alpine:init", () => {
-      //   Alpine.data("firebaseHandler", firebaseHandler);
-      // });
     </script>
-  </body>
+</body>
+
 </html>
 
-<style></style>
+<style>
+  @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap");
+
+  * {
+    font-family: "Poppins", sans-serif;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+  }
+
+  .centerpage {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    display: flex;
+    position: fixed;
+    background-color: rgb(97, 97, 97);
+    width: 100dvw;
+    height: 100dvh;
+  }
+
+  .wholepage {
+    height: 100dvh;
+    width: min(100dvw, 960px);
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    background: white;
+  }
+
+  .header {
+    width: 100%;
+  }
+
+  .footer {
+    border-top: 1px solid grey;
+    margin-top: 5px;
+    padding: 5px;
+  }
+
+  .innercontent {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    width: 100%;
+    align-items: center;
+  }
+
+  .loghead,
+  .footer {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .logheadtxt {
+    font-size: clamp(16px, 8dvw, 48px);
+    user-select: none;
+  }
+
+  .buttonRow {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .gigaSection {
+    margin: 5px;
+    border-top: 1px solid grey;
+    border-bottom: 1px solid grey;
+    padding: 5px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .dangerZone {
+    padding: 5px;
+    border: 2px solid red;
+  }
+
+  .miniHead {
+    font-size: 1.6em;
+    font-weight: bold;
+  }
+
+  .partialHead {
+    font-size: 1.3em;
+    font-weight: bold;
+  }
+
+  input {
+    border: 1px solid rgb(137, 151, 155);
+    border-radius: 0px;
+    transition: border-color 150ms ease-in-out 0s;
+    outline: none;
+    font-size: 16px;
+    margin: 4px;
+    padding-left: 10px;
+    padding-right: 10px;
+    min-width: min(444px, calc(100dvw - 50px));
+  }
+
+  .smallerInput {
+    min-width: min(285px, calc(80dvw - 50px));
+  }
+
+  .submit {
+    border-radius: 0px;
+    transition: border-color 150ms ease-in-out 0s;
+    outline: none;
+    font-size: 16px;
+    margin: 10px;
+    padding-top: 6px;
+    padding-bottom: 6px;
+    padding-left: 12px;
+    padding-right: 12px;
+    border: 1px solid rgb(137, 151, 155);
+    color: inherit;
+    background-color: transparent;
+    font-weight: normal;
+  }
+
+  .submit:hover {
+    background-color: aliceblue;
+  }
+
+  .submit.danger {
+    color: red;
+    border: 1px solid red;
+  }
+
+  .submit.danger:hover {
+    background-color: red;
+    color: white;
+  }
+</style>
