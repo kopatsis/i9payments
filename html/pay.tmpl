@@ -31,14 +31,14 @@
         const clientSecret = "{{ .ClientSecret }}";
 
         const elements = stripe.elements({ clientSecret });
-        const paymentElement = elements.create("payment", {
-          layout: "accordion",
-        });
+        const paymentElement = elements.create("payment");
         paymentElement.mount("#payment-element");
 
         const form = document.getElementById("payment-form");
         form.addEventListener("submit", async (event) => {
           event.preventDefault();
+
+          const startTime = Date.now();
 
           const subscriptionType = document.querySelector(
             'input[name="subscription"]:checked'
@@ -74,7 +74,11 @@
             });
 
             if (response.ok) {
-              location.reload(); // Refresh the page on success
+              const elapsedTime = Date.now() - startTime;
+              const remainingTime = Math.max(4000 - elapsedTime, 0);
+              setTimeout(() => {
+                location.reload(); // Refresh the page on success
+              }, remainingTime);
             } else {
               const errorData = await response.json();
               document.getElementById("error-message").textContent =
