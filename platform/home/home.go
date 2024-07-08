@@ -12,7 +12,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func AdminPanel(frommobile, verifmessage bool, auth *auth.Client, database *mongo.Database) gin.HandlerFunc {
+func AdminPanel(frommobile bool, auth *auth.Client, database *mongo.Database) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		uid, iat, err := login.ExtractUIDFromSession(c, auth)
 		if err != nil {
@@ -42,11 +42,11 @@ func AdminPanel(frommobile, verifmessage bool, auth *auth.Client, database *mong
 		}
 
 		c.HTML(200, "admin.tmpl", gin.H{
-			"NotMobile": !frommobile,
-			"Verify":    verifmessage,
-			"Email":     email,
-			"Paying":    user.Paying,
-			"Name":      user.Name,
+			"Mobile": frommobile,
+			"Verify": userRecord.EmailVerified,
+			"Email":  email,
+			"Paying": user.Paying,
+			"Name":   user.Name,
 		})
 	}
 }
