@@ -1,80 +1,88 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
+  <head>
+    <meta charset="UTF-8" />
     <title>Subscribe</title>
     <script src="https://js.stripe.com/v3/"></script>
-</head>
-<body>
+  </head>
+  <body>
     <h1>Email: {{.Email}}</h1>
     <form id="payment-form">
-        <div>
-            <label>
-                <input type="radio" name="subscription" value="monthly" checked>
-                Monthly ($4.99/month)
-            </label>
-            <label>
-                <input type="radio" name="subscription" value="yearly">
-                Yearly ($49.99/year)
-            </label>
-        </div>
-        <div id="payment-element"></div>
-        <button type="submit">Subscribe</button>
+      <div>
+        <label>
+          <input type="radio" name="subscription" value="monthly" checked />
+          Monthly ($4.99/month)
+        </label>
+        <label>
+          <input type="radio" name="subscription" value="yearly" />
+          Yearly ($49.99/year)
+        </label>
+      </div>
+      <div id="payment-element"></div>
+      <button type="submit">Subscribe</button>
     </form>
     <div id="error-message"></div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', async () => {
-            const stripe = Stripe('pk_test_51PJLOAIstWH7VBmuSbipom0Z6Gy1Wj6wOjFtApmfGspxtTCywa9WEhP1UjB5XheYdCVXnUScy1zChx4lagbeZYvE002At1oIiP');
-            const clientSecret = "{{ .ClientSecret }}";
+      document.addEventListener("DOMContentLoaded", async () => {
+        const stripe = Stripe(
+          "pk_test_51PJLOAIstWH7VBmuSbipom0Z6Gy1Wj6wOjFtApmfGspxtTCywa9WEhP1UjB5XheYdCVXnUScy1zChx4lagbeZYvE002At1oIiP"
+        );
+        const clientSecret = "{{ .ClientSecret }}";
 
-            const elements = stripe.elements({ clientSecret });
-            const paymentElement = elements.create('payment');
-            paymentElement.mount('#payment-element');
-
-            const form = document.getElementById('payment-form');
-            form.addEventListener('submit', async (event) => {
-                event.preventDefault();
-
-                const subscriptionType = document.querySelector('input[name="subscription"]:checked').value;
-                let priceId;
-                if (subscriptionType === 'yearly') {
-                    priceId = 'price_1PJfbpIstWH7VBmu1nToVdC9';
-                } else {
-                    priceId = 'price_1PJfbQIstWH7VBmuNNsoLTN2';
-                }
-
-                const { setupIntent, error } = await stripe.confirmSetup({
-                    elements,
-                    confirmParams: {
-                        return_url: window.location.href,
-                    },
-                    redirect: 'if_required'
-                });
-
-                if (error) {
-                    document.getElementById('error-message').textContent = error.message;
-                } else {
-                    const paymentMethodId = setupIntent.payment_method;
-
-                    const response = await fetch('/process', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        credentials: 'include',
-                        body: JSON.stringify({ paymentMethodId, priceId }),
-                    });
-
-                    if (response.ok) {
-                        location.reload(); // Refresh the page on success
-                    } else {
-                        const errorData = await response.json();
-                        document.getElementById('error-message').textContent = errorData.error;
-                    }
-                }
-            });
+        const elements = stripe.elements({ clientSecret });
+        const paymentElement = elements.create("payment", {
+          layout: "accordion",
         });
+        paymentElement.mount("#payment-element");
+
+        const form = document.getElementById("payment-form");
+        form.addEventListener("submit", async (event) => {
+          event.preventDefault();
+
+          const subscriptionType = document.querySelector(
+            'input[name="subscription"]:checked'
+          ).value;
+          let priceId;
+          if (subscriptionType === "yearly") {
+            priceId = "price_1PJfbpIstWH7VBmu1nToVdC9";
+          } else {
+            priceId = "price_1PJfbQIstWH7VBmuNNsoLTN2";
+          }
+
+          const { setupIntent, error } = await stripe.confirmSetup({
+            elements,
+            confirmParams: {
+              return_url: window.location.href,
+            },
+            redirect: "if_required",
+          });
+
+          if (error) {
+            document.getElementById("error-message").textContent =
+              error.message;
+          } else {
+            const paymentMethodId = setupIntent.payment_method;
+
+            const response = await fetch("/process", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              credentials: "include",
+              body: JSON.stringify({ paymentMethodId, priceId }),
+            });
+
+            if (response.ok) {
+              location.reload(); // Refresh the page on success
+            } else {
+              const errorData = await response.json();
+              document.getElementById("error-message").textContent =
+                errorData.error;
+            }
+          }
+        });
+      });
     </script>
-</body>
+  </body>
 </html>
