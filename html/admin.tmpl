@@ -54,7 +54,10 @@
               <button class="submit" @click="editing = true">Edit</button>
             </div>
             <form class="form" x-show="editing" action="/updateName" method="POST">
-              <span>Display Name:</span> <input class="smallerInput" type="text" name="name" x-model="name" />
+              <div class="form">
+                <span>Name:</span> <input class="smallerInput" type="text" name="name" x-model="name" />
+              </div>
+              
               <div class="buttonRow">
                 <button class="submit" type="submit">Save</button>
                 <button class="submit" type="button" @click="editing = false">Cancel</button>
@@ -266,6 +269,7 @@
     display: flex;
     flex-direction: row;
     align-items: center;
+    justify-content: center;
   }
 
   .gigaSection {
@@ -285,6 +289,8 @@
     border: 2px solid red;
     min-width: 250px;
     min-height: 100px;
+    margin-left: 5px;
+    margin-right: 5px;
   }
 
   .partialHead {
@@ -310,7 +316,7 @@
   }
 
   .smallerInput {
-    min-width: min(285px, calc(80dvw - 50px));
+    min-width: min(250px, calc(75dvw - 50px));
   }
 
   .submit {
