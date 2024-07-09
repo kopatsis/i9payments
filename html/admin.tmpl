@@ -40,29 +40,34 @@
     <div class="wholepage">
       <div class="loghead header">
         <b class="logheadtxt">i9 Admin Dashboard</b>
-
       </div>
-      <div class="innercontent">
-        <div>For Email: <b>{{.Email}}</b></div>
 
-        <div x-data="{ editing: false, name: '{{.Name}}' }">
-          <div x-show="!editing">
-            Display Name: <b x-text="name"></b>
-            <button class="submit" @click="editing = true">Edit</button>
-          </div>
-          <form x-show="editing" action="/updateName" method="POST">
-            Display Name: <input class="smallerInput" type="text" name="name" x-model="name" />
-            <div class="buttonRow">
-              <button class="submit" type="submit">Save</button>
-              <button class="submit" type="button" @click="editing = false">Cancel</button>
+      <div class="innercontent">
+
+        <div class="gigaSection">
+          <div class="partialHead">Basic Info</div>
+          <div>Email: <b>{{.Email}}</b></div>
+
+          <div class="justcenter" x-data="{ editing: false, name: '{{.Name}}' }">
+            <div x-show="!editing">
+              <span>Name:</span> <b x-text="name"></b>
+              <button class="submit" @click="editing = true">Edit</button>
             </div>
-          </form>
+            <form class="form" x-show="editing" action="/updateName" method="POST">
+              <span>Display Name:</span> <input class="smallerInput" type="text" name="name" x-model="name" />
+              <div class="buttonRow">
+                <button class="submit" type="submit">Save</button>
+                <button class="submit" type="button" @click="editing = false">Cancel</button>
+              </div>
+            </form>
+          </div>
         </div>
+
 
         {{ if not .Mobile }}
         <div class="gigaSection">
           <div class="partialHead">Giga Membership</div>
-          <div>
+          <div class="justcenter">
             {{ if .Paying }}
             <button><a href="/pay">Manage Membership</a></button>
             {{ else if .Verify }}
@@ -82,8 +87,8 @@
           {{ end }}
         </div>
 
-        <div x-data="firebaseHandler('{{.Email}}')">
-          <div class="buttonRow">
+        <div class="justcenter" x-data="firebaseHandler('{{.Email}}')">
+          <div class="buttonRow" style="flex-wrap: wrap;">
             <button class="submit" @click="sendReset">Send Password Reset Email</button>
             {{if not .Verify}}
             {{if .ClientOn}}
@@ -103,12 +108,12 @@
           </div>
         </div>
 
-        <div x-data="{ showConfirmation: false, email: '' }">
+        <div class="justcenter" x-data="{ showConfirmation: false, email: '' }">
           <div class="partialHead">
             Danger Zone
           </div>
-          <div class="dangerZone">
-            <div class="buttonRow">
+          <div class="dangerZone justcenter">
+            <div class="buttonRow" x-show="!showConfirmation">
               <button class="submit danger" @click="showConfirmation = true">Delete Account</button>
             </div>
             <form class="form" x-show="showConfirmation" action="/delete" method="POST"
@@ -122,9 +127,12 @@
                 email exactly as it appears at the top of this page.
               </div>
 
-              <input type="email" x-model="email" placeholder="Email" />
+              <div>
+                <input type="email" x-model="email" placeholder="Email" />
+              </div>
+
               <div class="buttonRow">
-                <button class="submit danger" type="submit" :disabled="email !== '{{.Email}}'">Delete</button>
+                <button class="submit danger" type="submit" :disabled="email !== '{{.Email}}'">Delete Account</button>
                 <button class="submit" type="button" @click="showConfirmation = false; email = ''">
                   Cancel
                 </button>
@@ -224,6 +232,13 @@
     padding: 5px;
   }
 
+  .form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
   .innercontent {
     flex: 1;
     display: flex;
@@ -255,9 +270,10 @@
 
   .gigaSection {
     margin: 5px;
-    border-top: 1px solid grey;
     border-bottom: 1px solid grey;
     padding: 5px;
+    padding-left: 15px;
+    padding-right: 15px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -267,6 +283,8 @@
   .dangerZone {
     padding: 5px;
     border: 2px solid red;
+    min-width: 250px;
+    min-height: 100px;
   }
 
   .partialHead {
@@ -275,7 +293,7 @@
   }
 
   .miniHead {
-    font-size: 1.3em;
+    font-size: 1.2em;
     font-weight: bold;
   }
 
@@ -309,6 +327,7 @@
     color: inherit;
     background-color: transparent;
     font-weight: normal;
+    cursor: pointer;
   }
 
   .submit:hover {
@@ -323,5 +342,12 @@
   .submit.danger:hover {
     background-color: red;
     color: white;
+  }
+
+  .justcenter {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
   }
 </style>
