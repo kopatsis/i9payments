@@ -15,11 +15,12 @@
         </div>
 
         <div class="innercontent">
+          <div class="miniHead">i9 Giga Membership Subscription Form</div>
           <div>
             Email: <b>{{.Email}}</b>
           </div>
           <form class="form" id="payment-form">
-            <div>
+            <div class="options">
               <label>
                 <input
                   type="radio"
@@ -27,11 +28,11 @@
                   value="monthly"
                   checked
                 />
-                Monthly ($4.99/month)
+                Monthly
               </label>
               <label>
                 <input type="radio" name="subscription" value="yearly" />
-                Yearly ($49.99/year)
+                Yearly
               </label>
             </div>
             <div class="total" id="total">Total: $4.99</div>
@@ -191,10 +192,10 @@
   }
 
   .innercontent {
-    flex: 1;
+    /* flex: 1; */
     display: flex;
     flex-direction: column;
-    overflow-y: auto;
+    /* overflow-y: auto; */
     width: 100%;
     align-items: center;
   }
@@ -235,6 +236,20 @@
   }
 
   .total {
-    font-family: 'Courier New', Courier, monospace;
+    font-family: "Courier New", Courier, monospace;
+    font-size: 1.5em;
+    background-color: aliceblue;
+  }
+
+  .miniHead {
+    font-size: 1.25em;
+    text-align: center;
+  }
+
+  .options {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
   }
 </style>
