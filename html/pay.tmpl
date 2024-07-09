@@ -3,31 +3,52 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <script
-      src="https://cdn.jsdelivr.net/npm/alpinejs@3.10.0/dist/cdn.min.js"
-      defer
-    ></script>
     <title>Subscribe</title>
     <script src="https://js.stripe.com/v3/"></script>
   </head>
   <body>
-    <h1>Email: {{.Email}}</h1>
-    <form id="payment-form">
-      <div>
-        <label>
-          <input type="radio" name="subscription" value="monthly" checked />
-          Monthly ($4.99/month)
-        </label>
-        <label>
-          <input type="radio" name="subscription" value="yearly" />
-          Yearly ($49.99/year)
-        </label>
+    <div style="display: none" id="loader">loading...</div>
+    <div class="centerpage">
+      <div class="wholepage">
+        <div class="loghead header">
+          <b class="logheadtxt">i9 Admin Dashboard</b>
+        </div>
+
+        <div class="innercontent">
+          <div>
+            Email: <b>{{.Email}}</b>
+          </div>
+          <form class="form" id="payment-form">
+            <div>
+              <label>
+                <input
+                  type="radio"
+                  name="subscription"
+                  value="monthly"
+                  checked
+                />
+                Monthly ($4.99/month)
+              </label>
+              <label>
+                <input type="radio" name="subscription" value="yearly" />
+                Yearly ($49.99/year)
+              </label>
+            </div>
+            <div class="total" id="total">Total: $4.99</div>
+            <div id="payment-element"></div>
+            <button class="submit" type="submit">Subscribe</button>
+          </form>
+          <div style="color: red" id="error-message"></div>
+        </div>
+        <div class="footer">
+          <button class="submit">
+            <a href="/logout" style="text-decoration: none; color: inherit"
+              >Sign Out</a
+            >
+          </button>
+        </div>
       </div>
-      <div id="payment-element"></div>
-      <div style="display: none" id="loader">loading...</div>
-      <button type="submit">Subscribe</button>
-    </form>
-    <div id="error-message"></div>
+    </div>
 
     <script>
       document.addEventListener("DOMContentLoaded", async () => {
@@ -39,6 +60,24 @@
         const elements = stripe.elements({ clientSecret });
         const paymentElement = elements.create("payment");
         paymentElement.mount("#payment-element");
+
+        const updateTotal = () => {
+          const subscriptionType = document.querySelector(
+            'input[name="subscription"]:checked'
+          ).value;
+          const totalElement = document.getElementById("total");
+          if (subscriptionType === "yearly") {
+            totalElement.textContent = "Total: $49.99";
+          } else {
+            totalElement.textContent = "Total: $4.99";
+          }
+        };
+
+        document
+          .querySelectorAll('input[name="subscription"]')
+          .forEach((input) => {
+            input.addEventListener("change", updateTotal);
+          });
 
         const form = document.getElementById("payment-form");
         form.addEventListener("submit", async (event) => {
@@ -100,3 +139,102 @@
     </script>
   </body>
 </html>
+
+<style>
+  @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap");
+
+  * {
+    font-family: "Poppins", sans-serif;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+  }
+
+  .centerpage {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    display: flex;
+    position: fixed;
+    background-color: rgb(97, 97, 97);
+    width: 100dvw;
+    height: 100dvh;
+  }
+
+  .wholepage {
+    height: 100dvh;
+    width: min(100dvw, 960px);
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    background: white;
+  }
+
+  .header {
+    width: 100%;
+  }
+
+  .footer {
+    border-top: 1px solid grey;
+    margin-top: 5px;
+    padding: 5px;
+  }
+
+  .form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .innercontent {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    width: 100%;
+    align-items: center;
+  }
+
+  .loghead,
+  .footer {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .logheadtxt {
+    font-size: clamp(16px, 8dvw, 48px);
+    user-select: none;
+  }
+
+  .submit {
+    border-radius: 0px;
+    transition: border-color 150ms ease-in-out 0s;
+    outline: none;
+    font-size: 16px;
+    margin: 10px;
+    padding-top: 6px;
+    padding-bottom: 6px;
+    padding-left: 12px;
+    padding-right: 12px;
+    border: 1px solid rgb(137, 151, 155);
+    color: inherit;
+    background-color: transparent;
+    font-weight: normal;
+    cursor: pointer;
+  }
+
+  .submit:hover {
+    background-color: aliceblue;
+  }
+
+  .total {
+    font-family: 'Courier New', Courier, monospace;
+  }
+</style>
