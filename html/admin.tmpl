@@ -54,7 +54,7 @@
               <button class="submit" @click="editing = true">Edit</button>
             </div>
             <form class="form" x-show="editing" action="/updateName" method="POST">
-              <div class="form">
+              <div class="buttonRow" style="flex-wrap: wrap;">
                 <span>Name:</span> <input class="smallerInput" type="text" name="name" x-model="name" />
               </div>
               
