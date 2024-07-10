@@ -10,8 +10,9 @@
 <body>
 
 <div x-data="undoHandler()">
-    <div>Your subscription is still active, but has been cancelled and will be ending on {{.Date}}</div>
-    <button @click="undoCancellation">Undo Cancellation</button>
+    <div class="partialHead">Your subscription is still active</div>
+    <div>but has been cancelled and will be ending on {{.Date}}</div>
+    <div>You can always <button @click="undoCancellation">Undo Cancellation</button></div>
     <div x-show="errorMessage" x-text="errorMessage" style="color: red;"></div>
 </div>
 

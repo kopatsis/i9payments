@@ -5,6 +5,7 @@ import (
 	"i9pay/platform/login"
 	"i9pay/platform/multipass"
 	"net/http"
+	"strings"
 	"time"
 
 	"firebase.google.com/go/auth"
@@ -139,7 +140,7 @@ func Subscription(auth *auth.Client, database *mongo.Database) gin.HandlerFunc {
 				"ClientSecret": si.ClientSecret,
 				"Date":         time.Unix(s.CurrentPeriodEnd, 0).Format("01/02/2006"),
 				"Email":        email,
-				"Brand":        cardBrand,
+				"Brand":        strings.ToTitle(cardBrand),
 				"Four":         lastFour,
 				"Length":       userpayment.SubLength,
 			})
