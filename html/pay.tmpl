@@ -1,93 +1,89 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Subscribe</title>
-    <script src="https://js.stripe.com/v3/"></script>
-  </head>
-  <body>
-    <div style="display: none" id="loader">loading...</div>
-    <div class="centerpage">
-      <div class="wholepage">
-        <div class="loghead header">
-          <b class="logheadtxt">i9 Admin Dashboard</b>
-        </div>
 
-        <div class="innercontent">
-          <div class="miniHead">i9 Giga Membership Subscription</div>
-          <div>
-            Email: <b>{{.Email}}</b>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Subscribe</title>
+  <script src="https://js.stripe.com/v3/"></script>
+</head>
+
+<body>
+  <div style="display: none" id="loader">loading...</div>
+  <div class="centerpage">
+    <div class="wholepage">
+      <div class="loghead header">
+        <b class="logheadtxt">i9 Admin Dashboard</b>
+      </div>
+
+      <div class="innercontent">
+        <div class="miniHead">i9 Giga Membership Subscription</div>
+        <div>
+          Email: <b>{{.Email}}</b>
+        </div>
+        <form class="form" id="payment-form">
+          <div class="options">
+            <label>
+              <input type="radio" name="subscription" value="monthly" checked />
+              Monthly
+            </label>
+            <label>
+              <input type="radio" name="subscription" value="yearly" />
+              Yearly
+            </label>
           </div>
-          <form class="form" id="payment-form">
-            <div class="options">
-              <label>
-                <input
-                  type="radio"
-                  name="subscription"
-                  value="monthly"
-                  checked
-                />
-                Monthly
-              </label>
-              <label>
-                <input type="radio" name="subscription" value="yearly" />
-                Yearly
-              </label>
-            </div>
-            <div class="total" id="total">Total: $4.99</div>
-            <div id="payment-element"></div>
-            <button class="submit" type="submit">Subscribe</button>
-          </form>
-          <div style="color: red" id="error-message"></div>
-        </div>
-        <div class="footer">
-          <button class="submit">
-            <a href="/logout" style="text-decoration: none; color: inherit"
-              >Sign Out</a
-            >
-          </button>
-        </div>
+          <div class="total" id="total">Total: $4.99</div>
+          <div id="payment-element"></div>
+          <button class="submit" type="submit">Subscribe</button>
+        </form>
+        <div style="color: red" id="error-message"></div>
+      </div>
+      <div class="footer">
+        <button class="submit">
+          <a href="/logout" style="text-decoration: none; color: inherit">Sign Out</a>
+        </button>
       </div>
     </div>
+  </div>
 
-    <script>
-      document.addEventListener("DOMContentLoaded", async () => {
-        const stripe = Stripe(
-          "pk_test_51PJLOAIstWH7VBmuSbipom0Z6Gy1Wj6wOjFtApmfGspxtTCywa9WEhP1UjB5XheYdCVXnUScy1zChx4lagbeZYvE002At1oIiP"
-        );
-        const clientSecret = "{{ .ClientSecret }}";
+  <script>
+    document.addEventListener("DOMContentLoaded", async () => {
+      const stripe = Stripe(
+        "pk_test_51PJLOAIstWH7VBmuSbipom0Z6Gy1Wj6wOjFtApmfGspxtTCywa9WEhP1UjB5XheYdCVXnUScy1zChx4lagbeZYvE002At1oIiP"
+      );
+      const clientSecret = "{{ .ClientSecret }}";
 
-        const elements = stripe.elements({ clientSecret });
-        const paymentElement = elements.create("payment");
-        paymentElement.mount("#payment-element");
+      const elements = stripe.elements({ clientSecret });
+      const paymentElement = elements.create("payment");
+      paymentElement.mount("#payment-element");
 
-        const updateTotal = () => {
-          const subscriptionType = document.querySelector(
-            'input[name="subscription"]:checked'
-          ).value;
-          const totalElement = document.getElementById("total");
-          if (subscriptionType === "yearly") {
-            totalElement.textContent = "Total: $49.99";
-          } else {
-            totalElement.textContent = "Total: $4.99";
-          }
-        };
+      const updateTotal = () => {
+        const subscriptionType = document.querySelector(
+          'input[name="subscription"]:checked'
+        ).value;
+        const totalElement = document.getElementById("total");
+        if (subscriptionType === "yearly") {
+          totalElement.textContent = "Total: $49.99";
+        } else {
+          totalElement.textContent = "Total: $4.99";
+        }
+      };
 
-        document
-          .querySelectorAll('input[name="subscription"]')
-          .forEach((input) => {
-            input.addEventListener("change", updateTotal);
-          });
+      document
+        .querySelectorAll('input[name="subscription"]')
+        .forEach((input) => {
+          input.addEventListener("change", updateTotal);
+        });
 
-        const form = document.getElementById("payment-form");
-        form.addEventListener("submit", async (event) => {
-          event.preventDefault();
+      const form = document.getElementById("payment-form");
+      form.addEventListener("submit", async (event) => {
+        event.preventDefault();
 
-          const startTime = Date.now();
+        const startTime = Date.now();
 
-          document.getElementById("loader").style.display = "block";
+        document.getElementById("loader").style.display = "block";
 
+        try {
           const subscriptionType = document.querySelector(
             'input[name="subscription"]:checked'
           ).value;
@@ -109,7 +105,6 @@
           if (error) {
             document.getElementById("error-message").textContent =
               error.message;
-            document.getElementById("loader").style.display = "none";
           } else {
             const paymentMethodId = setupIntent.payment_method;
 
@@ -132,13 +127,18 @@
               const errorData = await response.json();
               document.getElementById("error-message").textContent =
                 errorData.error;
-              document.getElementById("loader").style.display = "none";
             }
           }
-        });
+        } catch (err) {
+          document.getElementById("error-message").textContent = "Error processing payment, please try again.";
+        } finally {
+          document.getElementById("loader").style.display = "none"
+        }
       });
-    </script>
-  </body>
+    });
+  </script>
+</body>
+
 </html>
 
 <style>
@@ -256,6 +256,4 @@
   label {
     padding: 5px;
   }
-
-
 </style>

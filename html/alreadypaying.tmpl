@@ -1,164 +1,170 @@
 {{/* page.tmpl */}}
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Manage Membership</title>
-    <script
-      src="https://cdn.jsdelivr.net/npm/alpinejs@3.10.0/dist/cdn.min.js"
-      defer
-    ></script>
-    <script src="https://js.stripe.com/v3/"></script>
-  </head>
 
-  <body>
-    <div style="display: none" id="loader">loading...</div>
-    <div class="centerpage">
-      <div class="wholepage">
-        <div class="loghead header">
-          <b class="logheadtxt">i9 Admin Dashboard</b>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Manage Membership</title>
+  <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.10.0/dist/cdn.min.js" defer></script>
+  <script src="https://js.stripe.com/v3/"></script>
+</head>
+
+<body>
+  <div style="display: none" id="loader">loading...</div>
+  <div class="centerpage">
+    <div class="wholepage">
+      <div class="loghead header">
+        <b class="logheadtxt">i9 Admin Dashboard</b>
+      </div>
+
+      <div class="innercontent">
+        {{if .Past}}
+        <div class="partialHead">Critical Notice:</div>
+        <div class="miniHead" style="color: red">
+          Please update your payment information to avoid membership cancelation
+        </div>
+        {{ end }}
+        <div>Email: <b>{{.Email}}</b></div>
+
+        <div>Next billing cycle charge date: {{.Date}}</div>
+
+        <div x-data class="form">
+          {{if eq .Length "monthly"}}
+          <div>Current Plan: Charged <b>Monthly</b> for <b>$4.99</b></div>
+          <button class="submit" @click="swapFrequency('yearly')">
+            Change to Plan to Yearly: $49.99
+          </button>
+          {{else}}
+          <div>Current Plan: Charged <b>Yearly</b> for <b>$49.99</b></div>
+          <div><button class="link-button" @click="swapFrequency('monthly')">
+              Change to Plan to Monthly: $4.99
+            </button>*</div>
+          {{ end }}
+
+          <div>
+            *Changing membership plan takes effect <b>immediately</b>: You will be refunded a
+            prorated portion of your previous subscription and charged the new
+            fee.
+          </div>
+
+          <div id="showError"></div>
         </div>
 
-        <div class="innercontent">
-          {{if .Past}}
-          <div class="miniHead" style="color: red">
-            Please update your payment information
-          </div>
-          {{ end }}
+        {{ if .External }}
+        <div>Your payment is managed by {{.External}}.</div>
+        {{ else }}
+        <div>
+          Your default payment method is your card with the brand
+          {{.Brand}} and last four digits of {{.Four}}.
+        </div>
+        {{ end }}
 
-          <div x-data>
-            {{if eq .Length "monthly"}}
-            <div>Subscription Plan: $4.99 Monthly</div>
-            <button class="submit" @click="swapFrequency('yearly')">
-              Change to $49.99 Yearly
-            </button>
-            {{else}}
-            <div>Subscription Plan: $49.99 Yearly</div>
-            <button class="submit" @click="swapFrequency('monthly')">
-              Change to $4.99 Monthly
-            </button>
-            {{ end }}
+        <div id="payment-update-form" x-data="{ showForm: false }" class="form">
+          <button @click="showForm = !showForm" class="submit">Change Default Payment Method</button>
+          <form id="payment-form" x-show="showForm">
+            <div id="payment-element"></div>
+            <div class="buttonRow">
+              <button type="submit" class="submit">Submit</button>
+              <button type="button" @click="showForm = false" class="submit">Cancel</button>
+            </div>
+          </form>
+        </div>
 
-            <div id="showError"></div>
-          </div>
+        <div id="error-message"></div>
 
-          <div>
-            *This will take effect immediately, as you will be refunded a
-            prorated amount of your previous subscription and changed the new
-            monthly fee.
-          </div>
+        <div x-data="{ showConfirm: false}" class="form">
+          <button x-show="!showConfirm" @click="showConfirm = true" class="submit danger">
+            Cancel Membership
+          </button>
 
-          <div>Next billing cycle charge date: {{.Date}}</div>
-
-          <div>Email: {{.Email}}</div>
-
-          {{ if .External }}
-          <div>Your payment is managed by {{.External}}.</div>
-          {{ else }}
-          <div>
-            Your default payment method is your card with the brand
-            {{.Brand}} and last four digits of {{.Four}}.
-          </div>
-          {{ end }}
-
-          <div id="payment-update-form" x-data="{ showForm: false }">
-            <button @click="showForm = !showForm">Update Payment Method</button>
-            <form id="payment-form" x-show="showForm">
-              <div id="payment-element"></div>
-              <button type="submit">Submit New Payment Method</button>
-              <button type="button" @click="showForm = false">Cancel</button>
-            </form>
-          </div>
-
-          <div id="error-message"></div>
-
-          <div x-data="{ showConfirm: false}">
-            <button x-show="!showConfirm" @click="showConfirm = true">
-              Cancel Membership
-            </button>
-
-            <div x-show="showConfirm">
-              <p>Are you sure you want to cancel your membership?</p>
-              <button @click="cancelMembership">Confirm</button>
-              <button @click="showConfirm = false">Go Back</button>
+          <div x-show="showConfirm" class="form">
+            <div>Are you sure you want to cancel your membership?</div>
+            <div class="buttonRow">
+              <button @click="cancelMembership" class="submit">Cancel Membership</button>
+              <button @click="showConfirm = false" class="submit danger">Go Back</button>
             </div>
 
-            <div id="cancelError"></div>
           </div>
-        </div>
-        <div class="footer">
-          <button class="submit">
-            <a href="/logout" style="text-decoration: none; color: inherit"
-              >Sign Out</a
-            >
-          </button>
+
+          <div id="cancelError"></div>
         </div>
       </div>
+      <div class="footer">
+        <button class="submit">
+          <a href="/logout" style="text-decoration: none; color: inherit">Sign Out</a>
+        </button>
+      </div>
     </div>
+  </div>
 
-    <script>
-      function cancelMembership() {
-        fetch("/cancel", {
-          method: "POST",
-          credentials: "include",
+  <script>
+    function cancelMembership() {
+      fetch("/cancel", {
+        method: "POST",
+        credentials: "include",
+      })
+        .then((response) => {
+          if (response.ok) {
+            window.location.reload();
+          } else {
+            response.text().then((text) => {
+              console.log(text);
+              document.getElementById("cancelError").textContent = text;
+            });
+          }
         })
-          .then((response) => {
-            if (response.ok) {
-              window.location.reload();
-            } else {
-              response.text().then((text) => {
-                console.log(text);
-                document.getElementById("cancelError").textContent = text;
-              });
-            }
-          })
-          .catch(() => {
-            console.log(error);
-            document.getElementById("cancelError").textContent = error;
-          });
-      }
+        .catch(() => {
+          console.log(error);
+          document.getElementById("cancelError").textContent = error;
+        });
+    }
 
-      function swapFrequency(newFrequency) {
-        const formData = new FormData();
-        formData.append("frequency", newFrequency);
+    function swapFrequency(newFrequency) {
+      const formData = new FormData();
+      formData.append("frequency", newFrequency);
 
-        fetch("/swap", {
-          method: "POST",
-          credentials: "include",
-          body: formData,
+      fetch("/swap", {
+        method: "POST",
+        credentials: "include",
+        body: formData,
+      })
+        .then((response) => {
+          console.log("reached???");
+          if (response.ok) {
+            window.location.reload();
+          } else {
+            response.text().then((text) => {
+              console.log(text);
+              document.getElementById("showError").textContent = text;
+            });
+          }
         })
-          .then((response) => {
-            console.log("reached???");
-            if (response.ok) {
-              window.location.reload();
-            } else {
-              response.text().then((text) => {
-                console.log(text);
-                document.getElementById("showError").textContent = text;
-              });
-            }
-          })
-          .catch((error) => {
-            console.log(error);
-            document.getElementById("showError").textContent = error;
-          });
-      }
+        .catch((error) => {
+          console.log(error);
+          document.getElementById("showError").textContent = error;
+        });
+    }
 
-      document.addEventListener("DOMContentLoaded", async () => {
-        const stripe = Stripe(
-          "pk_test_51PJLOAIstWH7VBmuSbipom0Z6Gy1Wj6wOjFtApmfGspxtTCywa9WEhP1UjB5XheYdCVXnUScy1zChx4lagbeZYvE002At1oIiP"
-        );
-        const clientSecret = "{{ .ClientSecret }}";
+    document.addEventListener("DOMContentLoaded", async () => {
+      const stripe = Stripe(
+        "pk_test_51PJLOAIstWH7VBmuSbipom0Z6Gy1Wj6wOjFtApmfGspxtTCywa9WEhP1UjB5XheYdCVXnUScy1zChx4lagbeZYvE002At1oIiP"
+      );
+      const clientSecret = "{{ .ClientSecret }}";
 
-        const elements = stripe.elements({ clientSecret });
-        const paymentElement = elements.create("payment");
-        paymentElement.mount("#payment-element");
+      const elements = stripe.elements({ clientSecret });
+      const paymentElement = elements.create("payment");
+      paymentElement.mount("#payment-element");
 
-        const form = document.getElementById("payment-form");
-        form.addEventListener("submit", async (event) => {
-          event.preventDefault();
+      const form = document.getElementById("payment-form");
+      form.addEventListener("submit", async (event) => {
+        event.preventDefault();
 
+        const startTime = Date.now();
+
+        document.getElementById("loader").style.display = "block";
+
+        try {
           const { setupIntent, error } = await stripe.confirmSetup({
             elements,
             confirmParams: {
@@ -192,10 +198,18 @@
                 errorData.error;
             }
           }
-        });
+        } catch (err) {
+          document.getElementById("error-message").textContent = "Error processing payment, please try again.";
+        } finally {
+          document.getElementById("loader").style.display = "none";
+        }
+
+
       });
-    </script>
-  </body>
+    });
+  </script>
+</body>
+
 </html>
 
 <style>
