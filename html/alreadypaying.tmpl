@@ -13,67 +13,88 @@
   </head>
 
   <body>
+    <div style="display: none" id="loader">loading...</div>
+    <div class="centerpage">
+      <div class="wholepage">
+        <div class="loghead header">
+          <b class="logheadtxt">i9 Admin Dashboard</b>
+        </div>
 
-    {{if .Past}}
-      <div style="color:red;">Please update your payment information</div>
-    {{end}}
+        <div class="innercontent">
+          {{if .Past}}
+          <div class="miniHead" style="color: red">
+            Please update your payment information
+          </div>
+          {{ end }}
 
-    <div x-data>
-      {{if eq .Length "monthly"}}
-      <div>Subscription Plan: $4.99 Monthly</div>
-      <button @click="swapFrequency('yearly')">Change to $49.99 Yearly</button>
-      {{else}}
-      <div>Subscription Plan: $49.99 Yearly</div>
-      <button @click="swapFrequency('monthly')">Change to $4.99 Monthly</button>
-      {{ end }}
+          <div x-data>
+            {{if eq .Length "monthly"}}
+            <div>Subscription Plan: $4.99 Monthly</div>
+            <button class="submit" @click="swapFrequency('yearly')">
+              Change to $49.99 Yearly
+            </button>
+            {{else}}
+            <div>Subscription Plan: $49.99 Yearly</div>
+            <button class="submit" @click="swapFrequency('monthly')">
+              Change to $4.99 Monthly
+            </button>
+            {{ end }}
 
-      <div id="showError"></div>
-    </div>
+            <div id="showError"></div>
+          </div>
 
-    <div>*Will begin at the end of this current billing cycle</div>
+          <div>
+            *This will take effect immediately, as you will be refunded a
+            prorated amount of your previous subscription and changed the new
+            monthly fee.
+          </div>
 
-    <div>Next billing cycle charge date: {{.Date}}</div>
+          <div>Next billing cycle charge date: {{.Date}}</div>
 
-    <p>Email: {{.Email}}</p>
+          <div>Email: {{.Email}}</div>
 
-    {{ if .External }}
-    <p>Your payment is managed through {{.External}}.</p>
-    {{ else }}
-    <p>
-      Your payment is managed by a card with the brand {{.Brand}} and last four
-      digits of {{.Four}}.
-    </p>
-    {{ end }}
+          {{ if .External }}
+          <div>Your payment is managed by {{.External}}.</div>
+          {{ else }}
+          <div>
+            Your default payment method is your card with the brand
+            {{.Brand}} and last four digits of {{.Four}}.
+          </div>
+          {{ end }}
 
-    <div id="payment-update-form" x-data="{ showForm: false }">
-      <button @click="showForm = !showForm">Update Payment Method</button>
-      <form id="payment-form" x-show="showForm">
-        <div id="payment-element"></div>
-        <button type="submit">Submit New Payment Method</button>
-        <button type="button" @click="showForm = false">Cancel</button>
-      </form>
-    </div>
+          <div id="payment-update-form" x-data="{ showForm: false }">
+            <button @click="showForm = !showForm">Update Payment Method</button>
+            <form id="payment-form" x-show="showForm">
+              <div id="payment-element"></div>
+              <button type="submit">Submit New Payment Method</button>
+              <button type="button" @click="showForm = false">Cancel</button>
+            </form>
+          </div>
 
-    <div id="error-message"></div>
+          <div id="error-message"></div>
 
-    <div x-data="{ showConfirm: false}">
-      <button x-show="!showConfirm" @click="showConfirm = true">
-        Cancel Membership
-      </button>
+          <div x-data="{ showConfirm: false}">
+            <button x-show="!showConfirm" @click="showConfirm = true">
+              Cancel Membership
+            </button>
 
-      <div x-show="showConfirm">
-        <p>Are you sure you want to cancel your membership?</p>
-        <button @click="cancelMembership">Confirm</button>
-        <button @click="showConfirm = false">Go Back</button>
+            <div x-show="showConfirm">
+              <p>Are you sure you want to cancel your membership?</p>
+              <button @click="cancelMembership">Confirm</button>
+              <button @click="showConfirm = false">Go Back</button>
+            </div>
+
+            <div id="cancelError"></div>
+          </div>
+        </div>
+        <div class="footer">
+          <button class="submit">
+            <a href="/logout" style="text-decoration: none; color: inherit"
+              >Sign Out</a
+            >
+          </button>
+        </div>
       </div>
-
-      <div id="cancelError">
-        <p></p>
-      </div>
-    </div>
-
-    <div>
-      <button><a href="/logout">Logout</a></button>
     </div>
 
     <script>
@@ -108,7 +129,7 @@
           body: formData,
         })
           .then((response) => {
-            console.log("reached???")
+            console.log("reached???");
             if (response.ok) {
               window.location.reload();
             } else {
@@ -176,3 +197,97 @@
     </script>
   </body>
 </html>
+
+<style>
+  @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap");
+
+  * {
+    font-family: "Poppins", sans-serif;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+  }
+
+  .centerpage {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    display: flex;
+    position: fixed;
+    background-color: rgb(97, 97, 97);
+    width: 100dvw;
+    height: 100dvh;
+  }
+
+  .wholepage {
+    height: 100dvh;
+    width: min(100dvw, 960px);
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    background: white;
+    overflow-y: auto;
+  }
+
+  .header {
+    width: 100%;
+  }
+
+  .footer {
+    border-top: 1px solid grey;
+    margin-top: 5px;
+    padding: 5px;
+  }
+
+  .innercontent {
+    /* flex: 1; */
+    display: flex;
+    flex-direction: column;
+    /* overflow-y: auto; */
+    width: 100%;
+    align-items: center;
+  }
+
+  .loghead,
+  .footer {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .logheadtxt {
+    font-size: clamp(16px, 8dvw, 48px);
+    user-select: none;
+  }
+
+  .submit {
+    border-radius: 0px;
+    transition: border-color 150ms ease-in-out 0s;
+    outline: none;
+    font-size: 16px;
+    margin: 10px;
+    padding-top: 6px;
+    padding-bottom: 6px;
+    padding-left: 12px;
+    padding-right: 12px;
+    border: 1px solid rgb(137, 151, 155);
+    color: inherit;
+    background-color: transparent;
+    font-weight: normal;
+    cursor: pointer;
+  }
+
+  .submit:hover {
+    background-color: aliceblue;
+  }
+
+  .miniHead {
+    font-size: 1.25em;
+    font-weight: bold;
+  }
+</style>
