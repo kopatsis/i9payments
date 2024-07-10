@@ -1,50 +1,166 @@
 {{/* page.tmpl */}}
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Subscription Ending Soon</title>
-    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.10.0/dist/cdn.min.js" defer></script>
-</head>
-<body>
+    <script
+      src="https://cdn.jsdelivr.net/npm/alpinejs@3.10.0/dist/cdn.min.js"
+      defer
+    ></script>
+  </head>
+  <body>
+    <div class="centerpage">
+      <div class="wholepage">
+        <div class="loghead header">
+          <b class="logheadtxt">i9 Admin Dashboard</b>
+        </div>
 
-<div x-data="undoHandler()">
-    <div class="partialHead">Your subscription is still active</div>
-    <div>but has been cancelled and will be ending on {{.Date}}</div>
-    <div>You can always <button @click="undoCancellation">Undo Cancellation</button></div>
-    <div x-show="errorMessage" x-text="errorMessage" style="color: red;"></div>
-</div>
+        <div class="innercontent" x-data="undoHandler()">
+          <div class="partialHead">Your subscription is still active</div>
+          <div>but has been cancelled and will be ending on {{.Date}}</div>
+          <div>
+            You can always
+            <button class="submit" @click="undoCancellation">
+              Undo Cancellation
+            </button>
+          </div>
+          <div
+            x-show="errorMessage"
+            x-text="errorMessage"
+            style="color: red"
+          ></div>
+        </div>
+        <div class="footer">
+          <button class="submit">
+            <a href="/logout" style="text-decoration: none; color: inherit"
+              >Sign Out</a
+            >
+          </button>
+        </div>
+      </div>
+    </div>
 
-<div>
-    <button><a href="/logout">Logout</a></button>
- </div>
-
-<script>
-function undoHandler() {
-    return {
-        errorMessage: '',
-        async undoCancellation() {
+    <script>
+      function undoHandler() {
+        return {
+          errorMessage: "",
+          async undoCancellation() {
             try {
-                const response = await fetch('/uncancel', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    credentials: 'include'
-                });
-                if (response.ok) {
-                    location.reload();
-                } else {
-                    this.errorMessage = 'Failed to undo cancellation. Please try again.';
-                }
+              const response = await fetch("/uncancel", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                credentials: "include",
+              });
+              if (response.ok) {
+                location.reload();
+              } else {
+                this.errorMessage =
+                  "Failed to undo cancellation. Please try again.";
+              }
             } catch (error) {
-                this.errorMessage = 'An error occurred. Please try again.';
+              this.errorMessage = "An error occurred. Please try again.";
             }
-        }
-    }
-}
-</script>
-
-</body>
+          },
+        };
+      }
+    </script>
+  </body>
 </html>
+
+<style>
+  @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap");
+
+  * {
+    font-family: "Poppins", sans-serif;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+  }
+
+  .centerpage {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    display: flex;
+    position: fixed;
+    background-color: rgb(97, 97, 97);
+    width: 100dvw;
+    height: 100dvh;
+  }
+
+  .wholepage {
+    height: 100dvh;
+    width: min(100dvw, 960px);
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    background: white;
+    overflow-y: auto;
+  }
+
+  .header {
+    width: 100%;
+  }
+
+  .footer {
+    border-top: 1px solid grey;
+    margin-top: 5px;
+    padding: 5px;
+  }
+
+  .innercontent {
+    /* flex: 1; */
+    display: flex;
+    flex-direction: column;
+    /* overflow-y: auto; */
+    width: 100%;
+    align-items: center;
+  }
+
+  .loghead,
+  .footer {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .logheadtxt {
+    font-size: clamp(16px, 8dvw, 48px);
+    user-select: none;
+  }
+
+  .submit {
+    border-radius: 0px;
+    transition: border-color 150ms ease-in-out 0s;
+    outline: none;
+    font-size: 16px;
+    margin: 10px;
+    padding-top: 6px;
+    padding-bottom: 6px;
+    padding-left: 12px;
+    padding-right: 12px;
+    border: 1px solid rgb(137, 151, 155);
+    color: inherit;
+    background-color: transparent;
+    font-weight: normal;
+    cursor: pointer;
+  }
+
+  .submit:hover {
+    background-color: aliceblue;
+  }
+
+  .partialHead {
+    font-size: 1.6em;
+    font-weight: bold;
+  }
+</style>
