@@ -20,14 +20,21 @@
 
       <div class="innercontent">
         {{if .Past}}
-        <div class="partialHead">Critical Notice:</div>
-        <div class="miniHead" style="color: red">
-          Please update your payment information to avoid membership cancelation
+        <div class="gigaSection">
+          <div class="partialHead">Critical Notice</div>
+          <div class="miniHead" style="color: rgb(128, 0, 0)">
+            Please update your payment information to avoid membership cancelation
+          </div>
         </div>
         {{ end }}
-        <div>Email: <b>{{.Email}}</b></div>
+        <div class="gigaSection">
+          <div class="partialHead">Basic Info</div>
 
-        <div>Next billing cycle charge date: {{.Date}}</div>
+          <div>Email: <b>{{.Email}}</b></div>
+
+          <div>Next billing cycle charge date: {{.Date}}</div>
+        </div>
+
 
         <div x-data class="form">
           {{if eq .Length "monthly"}}
@@ -203,7 +210,6 @@
         } finally {
           document.getElementById("loader").style.display = "none";
         }
-
 
       });
     });

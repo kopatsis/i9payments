@@ -102,7 +102,7 @@
             {{ end }}
           </div>
 
-          <div x-show="errorMessage" style="color: red" x-text="errorMessage"></div>
+          <div x-show="errorMessage" style="color: rgb(128, 0, 0)" x-text="errorMessage"></div>
           <div x-show="successMessage" style="color: green" x-text="successMessage"></div>
           <div class="buttonRow">
             <button class="submit" x-show="successMessage" @click="location.reload()">
@@ -286,7 +286,7 @@
 
   .dangerZone {
     padding: 5px;
-    border: 2px solid red;
+    border: 2px solid rgb(128, 0, 0);
     min-width: 250px;
     min-height: 100px;
     margin-left: 5px;
@@ -341,12 +341,12 @@
   }
 
   .submit.danger {
-    color: red;
-    border: 1px solid red;
+    color: rgb(128, 0, 0);
+    border: 1px solid rgb(128, 0, 0);
   }
 
   .submit.danger:hover {
-    background-color: red;
+    background-color: rgb(128, 0, 0);
     color: white;
   }
 
