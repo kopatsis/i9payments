@@ -36,7 +36,8 @@
         </div>
 
 
-        <div x-data class="form">
+        <div x-data class="gigaSection">
+          <div class="partialHead">Giga Membership Plan</div>
           {{if eq .Length "monthly"}}
           <div>Current Plan: Charged <b>Monthly</b> for <b>$4.99</b></div>
           <button class="submit" @click="swapFrequency('yearly')">
@@ -58,40 +59,43 @@
           <div id="showError"></div>
         </div>
 
-        {{ if .External }}
-        <div>Your payment is managed by {{.External}}.</div>
-        {{ else }}
-        <div>
-          Your default payment method is your card with the brand
-          {{.Brand}} and last four digits of {{.Four}}.
-        </div>
-        {{ end }}
+        <div class="gigaSection">
+          <div class="partialHead">Payment Info</div>
+          {{ if .External }}
+          <div>Your payment is managed by {{.External}}.</div>
+          {{ else }}
+          <div>
+            Your default payment method is your card with the brand
+            {{.Brand}} and last four digits of {{.Four}}.
+          </div>
+          {{ end }}
 
-        <div id="payment-update-form" x-data="{ showForm: false }" class="form">
-          <button @click="showForm = !showForm" class="submit">Change Default Payment Method</button>
-          <form id="payment-form" x-show="showForm">
-            <div id="payment-element"></div>
-            <div class="buttonRow">
-              <button type="submit" class="submit">Submit</button>
-              <button type="button" @click="showForm = false" class="submit">Cancel</button>
+          <div id="payment-update-form" x-data="{ showForm: false }" class="form">
+            <button @click="showForm = !showForm" class="submit">Change Default Payment Method</button>
+            <form id="payment-form" x-show="showForm">
+              <div id="payment-element"></div>
+              <div class="buttonRow">
+                <button type="submit" class="submit">Submit</button>
+                <button type="button" @click="showForm = false" class="submit">Cancel</button>
+              </div>
+            </form>
+          </div>
+
+          <div id="error-message"></div>
+
+          <div x-data="{ showConfirm: false}" class="form">
+            <button x-show="!showConfirm" @click="showConfirm = true" class="submit danger">
+              Cancel Membership
+            </button>
+
+            <div x-show="showConfirm" class="form">
+              <div>Are you sure you want to cancel your membership?</div>
+              <div class="buttonRow">
+                <button @click="cancelMembership" class="submit">Cancel Membership</button>
+                <button @click="showConfirm = false" class="submit danger">Go Back</button>
+              </div>
+
             </div>
-          </form>
-        </div>
-
-        <div id="error-message"></div>
-
-        <div x-data="{ showConfirm: false}" class="form">
-          <button x-show="!showConfirm" @click="showConfirm = true" class="submit danger">
-            Cancel Membership
-          </button>
-
-          <div x-show="showConfirm" class="form">
-            <div>Are you sure you want to cancel your membership?</div>
-            <div class="buttonRow">
-              <button @click="cancelMembership" class="submit">Cancel Membership</button>
-              <button @click="showConfirm = false" class="submit danger">Go Back</button>
-            </div>
-
           </div>
 
           <div id="cancelError"></div>
@@ -306,8 +310,66 @@
     background-color: aliceblue;
   }
 
+  .submit.danger {
+    color: rgb(128, 0, 0);
+    border: 1px solid rgb(128, 0, 0);
+  }
+
+  .submit.danger:hover {
+    background-color: rgb(128, 0, 0);
+    color: white;
+  }
+
+  .partialHead {
+    font-size: 1.6em;
+    font-weight: bold;
+  }
+
   .miniHead {
     font-size: 1.25em;
     font-weight: bold;
+  }
+
+  .gigaSection {
+    margin: 5px;
+    border-bottom: 1px solid grey;
+    padding: 5px;
+    padding-left: 15px;
+    padding-right: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .buttonRow {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+  }
+
+  
+  .form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .link-button {
+    background: none;
+    border: none;
+    color: rgb(59, 59, 59);
+    text-decoration: underline;
+    cursor: pointer;
+    padding: 0;
+    font-family: inherit;
+    font-size: inherit;
+  }
+
+  .link-button:hover,
+  .link-button:focus {
+    text-decoration: none;
   }
 </style>
