@@ -59,7 +59,7 @@
           <div id="showError"></div>
         </div>
 
-        <div class="gigaSection">
+        <div class="gigaSection last">
           <div class="partialHead">Payment Info</div>
           {{ if .External }}
           <div>Your payment is managed by {{.External}}.</div>
@@ -81,7 +81,7 @@
             </form>
           </div>
 
-          <div id="error-message"></div>
+          <div id="error-message" style="color: rgb(222, 0, 0)"></div>
 
           <div x-data="{ showConfirm: false}" class="form">
             <button x-show="!showConfirm" @click="showConfirm = true" class="submit danger">
@@ -91,14 +91,14 @@
             <div x-show="showConfirm" class="form">
               <div>Are you sure you want to cancel your membership?</div>
               <div class="buttonRow">
-                <button @click="cancelMembership" class="submit">Cancel Membership</button>
-                <button @click="showConfirm = false" class="submit danger">Go Back</button>
+                <button @click="cancelMembership" class="submit danger">Cancel Membership</button>
+                <button @click="showConfirm = false" class="submit">Go Back</button>
               </div>
 
             </div>
           </div>
 
-          <div id="cancelError"></div>
+          <div id="cancelError" style="color: rgb(222, 0, 0)"></div>
         </div>
       </div>
       <div class="footer">
@@ -247,7 +247,7 @@
 
   .wholepage {
     height: 100dvh;
-    width: min(100dvw, 960px);
+    width: min(100dvw, 750px);
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
@@ -371,5 +371,9 @@
   .link-button:hover,
   .link-button:focus {
     text-decoration: none;
+  }
+  
+  .gigaSection.last {
+    border-bottom: none;
   }
 </style>
