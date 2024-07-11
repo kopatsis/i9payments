@@ -72,9 +72,9 @@
           <div class="partialHead">Giga Membership</div>
           <div class="justcenter">
             {{ if .Paying }}
-            <button class="submit"><a href="/pay">Manage Membership</a></button>
+            <button class="submit"><a href="/pay" style="text-decoration: none; color: inherit">Manage Membership</a></button>
             {{ else if .Verify }}
-            <button class="submit"><a href="/pay">Start Giga Membership</a></button>
+            <button class="submit"><a href="/pay" style="text-decoration: none; color: inherit">Start Giga Membership</a></button>
             {{else}}
             <div>Please verify your email address to start a Giga Membership</div>
             {{if not .ClientOn}}
