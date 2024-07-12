@@ -114,16 +114,6 @@
     overflow-y: auto;
   }
 
-  .header {
-    width: 100%;
-  }
-
-  .footer {
-    border-top: 1px solid grey;
-    margin-top: 5px;
-    padding: 5px;
-  }
-
   .innercontent {
     /* flex: 1; */
     display: flex;
@@ -133,13 +123,15 @@
     align-items: center;
   }
 
-  .loghead,
-  .footer {
+  .loghead {
     width: 100%;
     display: flex;
     flex-direction: row;
     align-items: center;
-    justify-content: center;
+    justify-content: space-between;
+    background: white;
+    height: clamp(24px, 10dvw, 54px);
+    z-index: 5;
   }
 
   .logheadtxt {
