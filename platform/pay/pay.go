@@ -71,7 +71,7 @@ func Subscription(auth *auth.Client, database *mongo.Database) gin.HandlerFunc {
 				})
 				return
 			} else {
-				c.Redirect(http.StatusFound, "/ver")
+				c.Redirect(http.StatusFound, "/")
 			}
 
 		}
