@@ -40,7 +40,7 @@
     <div class="wholepage" x-data="{ showModal: false }">
       <div class="loghead">
         <div class="logheadtxt icon"><a href="/" style="text-decoration: none; color: inherit">&#10224;</a></div>
-        <b class="logheadtxt">i9 Admin</b>
+        <b class="logheadtxt headname">i9 Admin</b>
         <div class="logheadtxt icon" @click="showModal = !showModal" x-text="showModal ? '&#10006;' : '&#9776;'"></div>
       </div>
 
@@ -53,7 +53,7 @@
           {{ end }}
           <button class="menu-button"><a href="/login" style="text-decoration: none; color: inherit">Login
               Page</a></button>
-          <button class="menu-button"><a href="/logout" style="text-decoration: none; color: inherit">Log
+          <button class="menu-button"><a href="/logout" style="text-decoration: none; color: inherit">Sign
               Out</a></button>
         </div>
       </div>
@@ -163,9 +163,9 @@
         </div>
 
       </div>
-      <div class="footer">
+      <!-- <div class="footer">
         <button class="submit"><a href="/logout" style="text-decoration: none; color: inherit">Sign Out</a></button>
-      </div>
+      </div> -->
     </div>
   </div>
 
@@ -434,5 +434,11 @@
 
   .icon {
     cursor: pointer;
+  }
+
+  .headname {
+    position: absolute;
+		left: 50%;
+		transform: translateX(-50%);
   }
 </style>
