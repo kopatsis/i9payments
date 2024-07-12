@@ -39,9 +39,9 @@
   <div class="centerpage">
     <div class="wholepage" x-data="{ showModal: false }">
       <div class="loghead">
-        <div class="logheadtxt">&#10224;</div>
+        <div class="logheadtxt icon"><a href="/" style="text-decoration: none; color: inherit">&#10224;</a></div>
         <b class="logheadtxt">i9 Admin</b>
-        <div class="logheadtxt" @click="showModal = !showModal" x-text="showModal ? '&#10006;' : '&#9776;'"></div>
+        <div class="logheadtxt icon" @click="showModal = !showModal" x-text="showModal ? '&#10006;' : '&#9776;'"></div>
       </div>
 
       <div x-show="showModal" class="modal" @keydown.window.escape="showModal = false">
@@ -397,7 +397,7 @@
 
   .modal-content {
     position: fixed;
-    right: 0;
+    right: calc((100dvw - min(100dvw, 750px)) / 2);;
     top: clamp(24px, 10dvw, 54px);
     margin: 0;
     padding: 15px;
@@ -430,5 +430,9 @@
   .menu-button:hover,
   .menu-button:focus {
     text-decoration: underline;
+  }
+
+  .icon {
+    cursor: pointer;
   }
 </style>
