@@ -49,7 +49,7 @@ func New(auth *auth.Client, database *mongo.Database, client *sendgrid.Client) *
 	router.PATCH("/resetdate", login.ResetPasswordDate(auth, database))
 
 	router.NoRoute(func(c *gin.Context) {
-		c.HTML(http.StatusNotFound, "404.html", gin.H{})
+		c.HTML(http.StatusNotFound, "404.tmpl", gin.H{})
 	})
 
 	return router
