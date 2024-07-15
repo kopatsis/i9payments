@@ -17,20 +17,32 @@ func AdminPanel(frommobile bool, auth *auth.Client, database *mongo.Database) gi
 	return func(c *gin.Context) {
 		uid, iat, err := login.ExtractUIDFromSession(c, auth)
 		if err != nil {
-			c.Redirect(http.StatusFound, "/login")
+			if frommobile {
+				c.Redirect(http.StatusFound, "/login?returnTo=mobile")
+			} else {
+				c.Redirect(http.StatusFound, "/login")
+			}
 			return
 		}
 
 		userRecord, err := auth.GetUser(context.Background(), uid)
 		if err != nil {
-			c.Redirect(http.StatusFound, "/login")
+			if frommobile {
+				c.Redirect(http.StatusFound, "/login?returnTo=mobile")
+			} else {
+				c.Redirect(http.StatusFound, "/login")
+			}
 			return
 		}
 
 		email := userRecord.Email
 		user, err := multipass.UserFromUID(uid, database)
 		if err != nil {
-			c.Redirect(http.StatusFound, "/login")
+			if frommobile {
+				c.Redirect(http.StatusFound, "/login?returnTo=mobile")
+			} else {
+				c.Redirect(http.StatusFound, "/login")
+			}
 			return
 		}
 

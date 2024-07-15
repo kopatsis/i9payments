@@ -20,20 +20,20 @@ func Subscription(auth *auth.Client, database *mongo.Database) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		uid, iat, err := login.ExtractUIDFromSession(c, auth)
 		if err != nil {
-			c.Redirect(http.StatusFound, "/login")
+			c.Redirect(http.StatusFound, "/login?returnTo=pay")
 			return
 		}
 
 		userRecord, err := auth.GetUser(context.Background(), uid)
 		if err != nil {
-			c.Redirect(http.StatusFound, "/login")
+			c.Redirect(http.StatusFound, "/login?returnTo=pay")
 			return
 		}
 
 		email := userRecord.Email
 		user, err := multipass.UserFromUID(uid, database)
 		if err != nil {
-			c.Redirect(http.StatusFound, "/login")
+			c.Redirect(http.StatusFound, "/login?returnTo=pay")
 			return
 		}
 

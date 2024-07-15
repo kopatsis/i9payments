@@ -65,7 +65,7 @@
             <div class="signinopt">
               or
               <button class="link-button" type="button">
-                <a href="/new" style="text-decoration: none; color: inherit"
+                <a href="/new?returnTo={{ .Return }}" style="text-decoration: none; color: inherit"
                   >create an account</a
                 >
               </button>
@@ -195,7 +195,7 @@
               .then((response) => {
                 if (response.ok) {
                   console.log("Token verified");
-                  window.location.assign("/");
+                  window.location.assign("/{{.Return}}");
                 } else {
                   response.json().then((data) => {
                     console.error("Token verification failed", data);

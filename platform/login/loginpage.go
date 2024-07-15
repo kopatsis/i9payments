@@ -14,21 +14,24 @@ import (
 
 func LoginPage(auth *auth.Client, database *mongo.Database) gin.HandlerFunc {
 	return func(c *gin.Context) {
+
+		returnTo := c.Query("returnTo")
+
 		uid, iat, err := ExtractUIDFromSession(c, auth)
 		if err != nil {
-			c.HTML(http.StatusOK, "login.tmpl", gin.H{})
+			c.HTML(http.StatusOK, "login.tmpl", gin.H{"Return": returnTo})
 			return
 		}
 
 		userRecord, err := auth.GetUser(context.Background(), uid)
 		if err != nil {
-			c.HTML(http.StatusOK, "login.tmpl", gin.H{})
+			c.HTML(http.StatusOK, "login.tmpl", gin.H{"Return": returnTo})
 			return
 		}
 
 		user, err := UserFromUID(uid, database)
 		if err != nil {
-			c.HTML(http.StatusOK, "login.tmpl", gin.H{})
+			c.HTML(http.StatusOK, "login.tmpl", gin.H{"Return": returnTo})
 			return
 		}
 
@@ -37,33 +40,36 @@ func LoginPage(auth *auth.Client, database *mongo.Database) gin.HandlerFunc {
 
 		if issuedTime.Before(resetTime) {
 			CookieReset(c)
-			c.HTML(http.StatusOK, "login.tmpl", gin.H{})
+			c.HTML(http.StatusOK, "login.tmpl", gin.H{"Return": returnTo})
 			return
 		}
 
 		email := userRecord.Email
 
-		c.HTML(http.StatusOK, "login.tmpl", gin.H{"Email": email})
+		c.HTML(http.StatusOK, "login.tmpl", gin.H{"Email": email, "Return": returnTo})
 	}
 }
 
 func SignUpPage(auth *auth.Client, database *mongo.Database) gin.HandlerFunc {
 	return func(c *gin.Context) {
+
+		returnTo := c.Query("returnTo")
+
 		uid, iat, err := ExtractUIDFromSession(c, auth)
 		if err != nil {
-			c.HTML(http.StatusOK, "signup.tmpl", gin.H{})
+			c.HTML(http.StatusOK, "signup.tmpl", gin.H{"Return": returnTo})
 			return
 		}
 
 		userRecord, err := auth.GetUser(context.Background(), uid)
 		if err != nil {
-			c.HTML(http.StatusOK, "signup.tmpl", gin.H{})
+			c.HTML(http.StatusOK, "signup.tmpl", gin.H{"Return": returnTo})
 			return
 		}
 
 		user, err := UserFromUID(uid, database)
 		if err != nil {
-			c.HTML(http.StatusOK, "login.tmpl", gin.H{})
+			c.HTML(http.StatusOK, "login.tmpl", gin.H{"Return": returnTo})
 			return
 		}
 
@@ -72,13 +78,13 @@ func SignUpPage(auth *auth.Client, database *mongo.Database) gin.HandlerFunc {
 
 		if issuedTime.Before(resetTime) {
 			CookieReset(c)
-			c.HTML(http.StatusOK, "login.tmpl", gin.H{})
+			c.HTML(http.StatusOK, "login.tmpl", gin.H{"Return": returnTo})
 			return
 		}
 
 		email := userRecord.Email
 
-		c.HTML(http.StatusOK, "signup.tmpl", gin.H{"Email": email})
+		c.HTML(http.StatusOK, "signup.tmpl", gin.H{"Email": email, "Return": returnTo})
 	}
 }
 

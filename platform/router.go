@@ -21,7 +21,7 @@ func New(auth *auth.Client, database *mongo.Database, client *sendgrid.Client) *
 
 	router.LoadHTMLGlob("html/*")
 	router.GET("/multipass", multipass.Multipass(auth, database))
-	router.GET("/sub", pay.Subscription(auth, database))
+	// router.GET("/sub", pay.Subscription(auth, database))
 
 	router.GET("/", home.AdminPanel(false, auth, database))
 	router.GET("/mobile", home.AdminPanel(true, auth, database))

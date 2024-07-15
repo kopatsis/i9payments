@@ -20,14 +20,30 @@ func AuthMiddleware(authClient *auth.Client) gin.HandlerFunc {
 
 		cookie, err := c.Cookie("session")
 		if err != nil {
-			c.Redirect(http.StatusFound, "/login")
+			if c.Request.Method == http.MethodGet {
+				returnTo := c.Request.URL.Path
+				if len(returnTo) > 0 && returnTo[0] == '/' {
+					returnTo = returnTo[1:]
+				}
+				c.Redirect(http.StatusFound, "/login?returnTo="+returnTo)
+			} else {
+				c.Redirect(http.StatusFound, "/login")
+			}
 			c.Abort()
 			return
 		}
 
 		token, err := authClient.VerifySessionCookie(context.Background(), cookie)
 		if err != nil {
-			c.Redirect(http.StatusFound, "/login")
+			if c.Request.Method == http.MethodGet {
+				returnTo := c.Request.URL.Path
+				if len(returnTo) > 0 && returnTo[0] == '/' {
+					returnTo = returnTo[1:]
+				}
+				c.Redirect(http.StatusFound, "/login?returnTo="+returnTo)
+			} else {
+				c.Redirect(http.StatusFound, "/login")
+			}
 			c.Abort()
 			return
 		}
