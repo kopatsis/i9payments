@@ -6,6 +6,7 @@ import (
 	"i9pay/platform/middleware"
 	"i9pay/platform/multipass"
 	"i9pay/platform/pay"
+	"net/http"
 
 	"firebase.google.com/go/auth"
 	"github.com/gin-gonic/gin"
@@ -46,6 +47,10 @@ func New(auth *auth.Client, database *mongo.Database, client *sendgrid.Client) *
 	router.POST("/confirmationwh", pay.WebhookConfirm(client, auth, database))
 	router.POST("/failedwh", pay.WebhookFail(client, auth, database))
 	router.PATCH("/resetdate", login.ResetPasswordDate(auth, database))
+
+	router.NoRoute(func(c *gin.Context) {
+		c.HTML(http.StatusNotFound, "404.html", gin.H{})
+	})
 
 	return router
 }
