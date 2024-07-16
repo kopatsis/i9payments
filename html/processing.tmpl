@@ -15,14 +15,27 @@
 <body>
   <div class="centerpage">
     <div class="wholepage" x-data="{ showModal: false }">
-      <div class="loghead">
+      <div
+          class="loghead"
+          x-data="dimensionHandler()"
+          x-init="updateDimensions()"
+          @resize.window="updateDimensions()"
+          x-bind:style="{ fontSize: fontSize + 'px', height: height + 'px' }"
+        >
         <div class="logheadtxt icon"><a href="/" style="text-decoration: none; color: inherit">&#10224;</a></div>
         <b class="logheadtxt headname">i9 Admin</b>
         <div class="logheadtxt icon" @click="showModal = !showModal" x-text="showModal ? '&#10006;' : '&#9776;'"></div>
       </div>
 
       <div x-show="showModal" class="modal" @keydown.window.escape="showModal = false">
-        <div class="modal-content" @click.away="showModal = false">
+        <div
+            class="modal-content"
+            @click.away="showModal = false"
+            x-data="dimensionFixHandler()"
+            x-init="updateDimensions()"
+            @resize.window="updateDimensions()"
+            x-bind:style="{ top: top + 'px' }"
+          >
           <button class="menu-button"><a href="/" style="text-decoration: none; color: inherit">Home Page</a></button>
           {{ if not .Mobile }}
           <button class="menu-button"><a href="/pay" style="text-decoration: none; color: inherit">Giga
@@ -51,6 +64,36 @@
 </body>
 
 </html>
+
+<script>
+  function dimensionHandler() {
+        return {
+          fontSize: 16,
+          height: 24,
+          updateDimensions() {
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            const size = Math.min(width, height) * 0.08;
+            this.fontSize = Math.max(16, Math.min(48, size));
+
+            const heightSize = Math.min(width, height) * 0.1;
+            this.height = Math.max(24, Math.min(54, heightSize));
+          },
+        };
+      }
+
+      function dimensionFixHandler() {
+        return {
+          top: 24,
+          updateDimensions() {
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            const heightSize = Math.min(width, height) * 0.1;
+            this.top = Math.max(24, Math.min(54, heightSize));
+          },
+        };
+      }
+</script>
 
 <style>
   @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap");
@@ -103,11 +146,12 @@
     justify-content: space-between;
     background: white;
     height: clamp(24px, 10dvw, 54px);
+    font-size: clamp(16px, 8dvw, 48px);
     z-index: 5;
   }
 
   .logheadtxt {
-    font-size: clamp(16px, 8dvw, 48px);
+    /* font-size: clamp(16px, 8dvw, 48px); */
     user-select: none;
   }
 

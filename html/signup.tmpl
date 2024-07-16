@@ -1,227 +1,290 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sign Up</title>
+    <script
+      src="https://cdn.jsdelivr.net/npm/alpinejs@3.10.0/dist/cdn.min.js"
+      defer
+    ></script>
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
+      import {
+        getAuth,
+        createUserWithEmailAndPassword,
+      } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Sign Up</title>
-  <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.10.0/dist/cdn.min.js" defer></script>
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
-    import {
-      getAuth,
-      createUserWithEmailAndPassword,
-    } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
+      const firebaseConfig = {
+        apiKey: "AIzaSyBOksfyE0unI87E533LWTKV6jpW-F1dqDA",
+        authDomain: "i9auth.firebaseapp.com",
+        projectId: "i9auth",
+        storageBucket: "i9auth.appspot.com",
+        messagingSenderId: "284108905250",
+        appId: "1:284108905250:web:b866b21949e149af7ca37b",
+      };
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyBOksfyE0unI87E533LWTKV6jpW-F1dqDA",
-      authDomain: "i9auth.firebaseapp.com",
-      projectId: "i9auth",
-      storageBucket: "i9auth.appspot.com",
-      messagingSenderId: "284108905250",
-      appId: "1:284108905250:web:b866b21949e149af7ca37b",
-    };
+      const app = initializeApp(firebaseConfig);
+      window.auth = getAuth(app);
+      console.log(window.auth);
+      window.createUserWithEmailAndPassword = createUserWithEmailAndPassword;
+    </script>
+  </head>
 
-    const app = initializeApp(firebaseConfig);
-    window.auth = getAuth(app);
-    console.log(window.auth);
-    window.createUserWithEmailAndPassword = createUserWithEmailAndPassword;
-  </script>
-</head>
-
-<body x-data="registerHandler">
-  <div class="centerpage">
-    <div class="wholepage">
-      <div class="loghead header">
-        <b class="logheadtxt">i9 Admin</b>
-      </div>
-
-      <div class="innercontent">
-        {{ if .Email }}
-        <div class="isloggedin">
-          <div>You are already logged in with email <b>{{ .Email }}</b></div>
-          <div>Would you like to stay signed in?</div>
-          <div class="isloggedbuttons">
-            <button class="submit">
-              <a href="/" style="text-decoration: none; color: inherit">Stay Signed In</a>
-            </button>
-            <button class="submit">
-              <a href="/logout" style="text-decoration: none; color: inherit">Sign Out</a>
-            </button>
-          </div>
-        </div>
-        {{else}}
-        <div class="loginouter">
-          <div class="logintxt">Sign Up</div>
-          <div class="signinopt">
-            or
-            <button class="link-button" type="button">
-              <a href="/login?returnTo={{ .Return }}" style="text-decoration: none; color: inherit">use an existing account</a>
-            </button>
-          </div>
+  <body x-data="registerHandler">
+    <div class="centerpage">
+      <div class="wholepage">
+        <div
+          class="loghead"
+          x-data="dimensionHandler()"
+          x-init="updateDimensions()"
+          @resize.window="updateDimensions()"
+          x-bind:style="{ fontSize: fontSize + 'px', height: height + 'px' }"
+        >
+          <b class="logheadtxt">i9 Admin</b>
         </div>
 
-        <div class="form">
-          <label class="hide" for="name">Name:</label>
-          <input type="text" id="name" x-model="name" placeholder="Name" required />
-
-          <label class="hide" for="email">Email:</label>
-          <input type="email" id="email" x-model="email" placeholder="Email" required />
-
-          <label class="hide" for="password">Password:</label>
-          <input type="password" id="password" x-model="password" placeholder="Password" required />
-
-          <div class="verif" :class="{ 'complete': hasMinimumLength }">
-            <span x-html="hasMinimumLength ? '&check;' : '&times;'"></span>
-            &nbsp;Password must be at least 10 characters
+        <div class="innercontent">
+          {{ if .Email }}
+          <div class="isloggedin">
+            <div>
+              You are already logged in with email <b>{{ .Email }}</b>
+            </div>
+            <div>Would you like to stay signed in?</div>
+            <div class="isloggedbuttons">
+              <button class="submit">
+                <a href="/" style="text-decoration: none; color: inherit"
+                  >Stay Signed In</a
+                >
+              </button>
+              <button class="submit">
+                <a href="/logout" style="text-decoration: none; color: inherit"
+                  >Sign Out</a
+                >
+              </button>
+            </div>
           </div>
-          <div class="verif" :class="{ 'complete': containsLetter }">
-            <span x-html="containsLetter ? '&check;' : '&times;'"></span>
-            &nbsp;Password must contain at least one letter
-          </div>
-          <div class="verif" :class="{ 'complete': containsNumber }">
-            <span x-html="containsNumber ? '&check;' : '&times;'"></span>
-            &nbsp;Password must contain at least one number
-          </div>
-
-          <label class="hide" for="confirmPassword">Confirm Password:</label>
-          <input type="password" id="confirmPassword" x-model="confirmPassword" placeholder="Confirm Password"
-            required />
-
-          <div class="verif" :class="{ 'invis': passwordsMatch }">
-            Passwords do not match
+          {{else}}
+          <div class="loginouter">
+            <div class="logintxt">Sign Up</div>
+            <div class="signinopt">
+              or
+              <button class="link-button" type="button">
+                <a
+                  href="/login?returnTo={{ .Return }}"
+                  style="text-decoration: none; color: inherit"
+                  >use an existing account</a
+                >
+              </button>
+            </div>
           </div>
 
-          <button class="submit" @click="register" :disabled="!isValidPassword">
-            Sign Up
-          </button>
+          <div class="form">
+            <label class="hide" for="name">Name:</label>
+            <input
+              type="text"
+              id="name"
+              x-model="name"
+              placeholder="Name"
+              required
+            />
 
-          <div class="verif" :class="{ 'complete': isValidPassword }"
-            x-text="isValidPassword ? 'Ready to submit!' : (!allButEmailValid ? 'Please complete all required fields' : 'Please enter a valid email address')">
-            Please complete all required fields
+            <label class="hide" for="email">Email:</label>
+            <input
+              type="email"
+              id="email"
+              x-model="email"
+              placeholder="Email"
+              required
+            />
+
+            <label class="hide" for="password">Password:</label>
+            <input
+              type="password"
+              id="password"
+              x-model="password"
+              placeholder="Password"
+              required
+            />
+
+            <div class="verif" :class="{ 'complete': hasMinimumLength }">
+              <span x-html="hasMinimumLength ? '&check;' : '&times;'"></span>
+              &nbsp;Password must be at least 10 characters
+            </div>
+            <div class="verif" :class="{ 'complete': containsLetter }">
+              <span x-html="containsLetter ? '&check;' : '&times;'"></span>
+              &nbsp;Password must contain at least one letter
+            </div>
+            <div class="verif" :class="{ 'complete': containsNumber }">
+              <span x-html="containsNumber ? '&check;' : '&times;'"></span>
+              &nbsp;Password must contain at least one number
+            </div>
+
+            <label class="hide" for="confirmPassword">Confirm Password:</label>
+            <input
+              type="password"
+              id="confirmPassword"
+              x-model="confirmPassword"
+              placeholder="Confirm Password"
+              required
+            />
+
+            <div class="verif" :class="{ 'invis': passwordsMatch }">
+              Passwords do not match
+            </div>
+
+            <button
+              class="submit"
+              @click="register"
+              :disabled="!isValidPassword"
+            >
+              Sign Up
+            </button>
+
+            <div
+              class="verif"
+              :class="{ 'complete': isValidPassword }"
+              x-text="isValidPassword ? 'Ready to submit!' : (!allButEmailValid ? 'Please complete all required fields' : 'Please enter a valid email address')"
+            >
+              Please complete all required fields
+            </div>
+            <div class="verif" id="error-message" style="display: none"></div>
           </div>
-          <div class="verif" id="error-message" style="display: none"></div>
+
+          {{ end }}
         </div>
-
-        {{ end }}
       </div>
     </div>
-  </div>
 
-  <script>
-    function registerHandler() {
-      return {
-        name: "",
-        email: "",
-        password: "",
-        confirmPassword: "",
-        register() {
-          if (!this.passwordAllowed(this.password)) {
-            document.getElementById("error-message").textContent =
-              "Password must be at least 10 characters long, include at least one letter and one number.";
-            document.getElementById("error-message").style.display = "block";
-            return;
-          }
+    <script>
+      function dimensionHandler() {
+        return {
+          fontSize: 16,
+          height: 24,
+          updateDimensions() {
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            const size = Math.min(width, height) * 0.08;
+            this.fontSize = Math.max(16, Math.min(48, size));
 
-          if (this.password !== this.confirmPassword) {
-            document.getElementById("error-message").textContent =
-              "Passwords do not match.";
-            document.getElementById("error-message").style.display = "block";
-            return;
-          }
+            const heightSize = Math.min(width, height) * 0.1;
+            this.height = Math.max(24, Math.min(54, heightSize));
+          },
+        };
+      }
 
-          window
-            .createUserWithEmailAndPassword(auth, this.email, this.password)
-            .then((userCredential) => {
-              const idTokenPromise = userCredential.user.getIdToken();
-              const refreshToken = userCredential.user.refreshToken;
-              return Promise.all([idTokenPromise, refreshToken]);
-            })
-            .then(([idToken, refreshToken]) => {
-              return fetch("/verifyToken", {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                  idToken,
-                  refreshToken,
-                  name: this.name,
-                }),
+      function registerHandler() {
+        return {
+          name: "",
+          email: "",
+          password: "",
+          confirmPassword: "",
+          register() {
+            if (!this.passwordAllowed(this.password)) {
+              document.getElementById("error-message").textContent =
+                "Password must be at least 10 characters long, include at least one letter and one number.";
+              document.getElementById("error-message").style.display = "block";
+              return;
+            }
+
+            if (this.password !== this.confirmPassword) {
+              document.getElementById("error-message").textContent =
+                "Passwords do not match.";
+              document.getElementById("error-message").style.display = "block";
+              return;
+            }
+
+            window
+              .createUserWithEmailAndPassword(auth, this.email, this.password)
+              .then((userCredential) => {
+                const idTokenPromise = userCredential.user.getIdToken();
+                const refreshToken = userCredential.user.refreshToken;
+                return Promise.all([idTokenPromise, refreshToken]);
+              })
+              .then(([idToken, refreshToken]) => {
+                return fetch("/verifyToken", {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify({
+                    idToken,
+                    refreshToken,
+                    name: this.name,
+                  }),
+                });
+              })
+              .then((response) => {
+                if (response.ok) {
+                  console.log("Token verified");
+                  window.location.assign("/{{ .Return }}");
+                } else {
+                  response
+                    .json()
+                    .then((data) =>
+                      console.error("Token verification failed", data)
+                    );
+                }
+              })
+              .catch((error) => {
+                console.error(
+                  "Registration failed:",
+                  error.code,
+                  error.message
+                );
               });
-            })
-            .then((response) => {
-              if (response.ok) {
-                console.log("Token verified");
-                window.location.assign("/{{ .Return }}");
-              } else {
-                response
-                  .json()
-                  .then((data) =>
-                    console.error("Token verification failed", data)
-                  );
-              }
-            })
-            .catch((error) => {
-              console.error(
-                "Registration failed:",
-                error.code,
-                error.message
-              );
-            });
-        },
-        passwordAllowed(password) {
-          if (password.length < 10) return false;
+          },
+          passwordAllowed(password) {
+            if (password.length < 10) return false;
 
-          let hasLetter = false;
-          let hasDigit = false;
+            let hasLetter = false;
+            let hasDigit = false;
 
-          for (let char of password) {
-            if ((char >= "A" && char <= "Z") || (char >= "a" && char <= "z"))
-              hasLetter = true;
-            if (char >= "0" && char <= "9") hasDigit = true;
+            for (let char of password) {
+              if ((char >= "A" && char <= "Z") || (char >= "a" && char <= "z"))
+                hasLetter = true;
+              if (char >= "0" && char <= "9") hasDigit = true;
 
-            if (hasLetter && hasDigit) return true;
-          }
+              if (hasLetter && hasDigit) return true;
+            }
 
-          return false;
-        },
-        get hasMinimumLength() {
-          return this.password.length >= 10;
-        },
-        get containsLetter() {
-          return /[a-zA-Z]/.test(this.password);
-        },
-        get containsNumber() {
-          return /\d/.test(this.password);
-        },
-        get passwordsMatch() {
-          return this.password === this.confirmPassword;
-        },
-        get isValidPassword() {
-          return (
-            this.password === this.confirmPassword &&
-            /\d/.test(this.password) &&
-            /[a-zA-Z]/.test(this.password) &&
-            this.password.length >= 10 &&
-            this.name !== "" &&
-            /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.email)
-          );
-        },
-        get allButEmailValid() {
-          return (
-            this.password === this.confirmPassword &&
-            /\d/.test(this.password) &&
-            /[a-zA-Z]/.test(this.password) &&
-            this.password.length >= 10 &&
-            this.name !== ""
-          );
-        },
-      };
-    }
-  </script>
-</body>
-
+            return false;
+          },
+          get hasMinimumLength() {
+            return this.password.length >= 10;
+          },
+          get containsLetter() {
+            return /[a-zA-Z]/.test(this.password);
+          },
+          get containsNumber() {
+            return /\d/.test(this.password);
+          },
+          get passwordsMatch() {
+            return this.password === this.confirmPassword;
+          },
+          get isValidPassword() {
+            return (
+              this.password === this.confirmPassword &&
+              /\d/.test(this.password) &&
+              /[a-zA-Z]/.test(this.password) &&
+              this.password.length >= 10 &&
+              this.name !== "" &&
+              /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.email)
+            );
+          },
+          get allButEmailValid() {
+            return (
+              this.password === this.confirmPassword &&
+              /\d/.test(this.password) &&
+              /[a-zA-Z]/.test(this.password) &&
+              this.password.length >= 10 &&
+              this.name !== ""
+            );
+          },
+        };
+      }
+    </script>
+  </body>
 </html>
 
 <style>
@@ -277,11 +340,15 @@
     display: flex;
     flex-direction: row;
     align-items: center;
-    justify-content: center;
+    justify-content: space-between;
+    background: white;
+    height: clamp(24px, 10dvw, 54px);
+    font-size: clamp(16px, 8dvw, 48px);
+    z-index: 5;
   }
 
   .logheadtxt {
-    font-size: clamp(16px, 8dvw, 48px);
+    /* font-size: clamp(16px, 8dvw, 48px); */
     user-select: none;
   }
 

@@ -13,23 +13,61 @@
   <body>
     <div class="centerpage">
       <div class="wholepage" x-data="{ showModal: false }">
-        <div class="loghead">
-          <div class="logheadtxt icon"><a href="/" style="text-decoration: none; color: inherit">&#10224;</a></div>
+        <div
+          class="loghead"
+          x-data="dimensionHandler()"
+          x-init="updateDimensions()"
+          @resize.window="updateDimensions()"
+          x-bind:style="{ fontSize: fontSize + 'px', height: height + 'px' }"
+        >
+          <div class="logheadtxt icon">
+            <a href="/" style="text-decoration: none; color: inherit"
+              >&#10224;</a
+            >
+          </div>
           <b class="logheadtxt headname">i9 Admin</b>
-          <div class="logheadtxt icon" @click="showModal = !showModal" x-text="showModal ? '&#10006;' : '&#9776;'"></div>
+          <div
+            class="logheadtxt icon"
+            @click="showModal = !showModal"
+            x-text="showModal ? '&#10006;' : '&#9776;'"
+          ></div>
         </div>
-  
-        <div x-show="showModal" class="modal" @keydown.window.escape="showModal = false">
-          <div class="modal-content" @click.away="showModal = false">
-            <button class="menu-button"><a href="/" style="text-decoration: none; color: inherit">Home Page</a></button>
+
+        <div
+          x-show="showModal"
+          class="modal"
+          @keydown.window.escape="showModal = false"
+        >
+          <div
+            class="modal-content"
+            @click.away="showModal = false"
+            x-data="dimensionFixHandler()"
+            x-init="updateDimensions()"
+            @resize.window="updateDimensions()"
+            x-bind:style="{ top: top + 'px' }"
+          >
+            <button class="menu-button">
+              <a href="/" style="text-decoration: none; color: inherit"
+                >Home Page</a
+              >
+            </button>
             {{ if not .Mobile }}
-            <button class="menu-button"><a href="/pay" style="text-decoration: none; color: inherit">Giga
-                Membership</a></button>
+            <button class="menu-button">
+              <a href="/pay" style="text-decoration: none; color: inherit"
+                >Giga Membership</a
+              >
+            </button>
             {{ end }}
-            <button class="menu-button"><a href="/login" style="text-decoration: none; color: inherit">Login
-                Page</a></button>
-            <button class="menu-button"><a href="/logout" style="text-decoration: none; color: inherit">Sign
-                Out</a></button>
+            <button class="menu-button">
+              <a href="/login" style="text-decoration: none; color: inherit"
+                >Login Page</a
+              >
+            </button>
+            <button class="menu-button">
+              <a href="/logout" style="text-decoration: none; color: inherit"
+                >Sign Out</a
+              >
+            </button>
           </div>
         </div>
 
@@ -52,6 +90,34 @@
     </div>
 
     <script>
+      function dimensionHandler() {
+        return {
+          fontSize: 16,
+          height: 24,
+          updateDimensions() {
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            const size = Math.min(width, height) * 0.08;
+            this.fontSize = Math.max(16, Math.min(48, size));
+
+            const heightSize = Math.min(width, height) * 0.1;
+            this.height = Math.max(24, Math.min(54, heightSize));
+          },
+        };
+      }
+
+      function dimensionFixHandler() {
+        return {
+          top: 24,
+          updateDimensions() {
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            const heightSize = Math.min(width, height) * 0.1;
+            this.top = Math.max(24, Math.min(54, heightSize));
+          },
+        };
+      }
+
       function undoHandler() {
         return {
           errorMessage: "",
@@ -131,11 +197,12 @@
     justify-content: space-between;
     background: white;
     height: clamp(24px, 10dvw, 54px);
+    font-size: clamp(16px, 8dvw, 48px);
     z-index: 5;
   }
 
   .logheadtxt {
-    font-size: clamp(16px, 8dvw, 48px);
+    /* font-size: clamp(16px, 8dvw, 48px); */
     user-select: none;
   }
 
@@ -181,7 +248,7 @@
 
   .modal-content {
     position: fixed;
-    right: calc((100dvw - min(100dvw, 750px)) / 2);;
+    right: calc((100dvw - min(100dvw, 750px)) / 2);
     top: clamp(24px, 10dvw, 54px);
     margin: 0;
     padding: 15px;
@@ -196,7 +263,7 @@
     overflow-x: auto;
     cursor: default;
     max-height: 90dvh;
-    max-width: 87.90dvw;
+    max-width: 87.9dvw;
   }
 
   .menu-button {
@@ -222,7 +289,7 @@
 
   .headname {
     position: absolute;
-		left: 50%;
-		transform: translateX(-50%);
+    left: 50%;
+    transform: translateX(-50%);
   }
 </style>

@@ -37,7 +37,13 @@
   <body x-data="loginHandler">
     <div class="centerpage">
       <div class="wholepage">
-        <div class="loghead header">
+        <div
+          class="loghead"
+          x-data="dimensionHandler()"
+          x-init="updateDimensions()"
+          @resize.window="updateDimensions()"
+          x-bind:style="{ fontSize: fontSize + 'px', height: height + 'px' }"
+        >
           <b class="logheadtxt">i9 Admin</b>
         </div>
 
@@ -65,7 +71,9 @@
             <div class="signinopt">
               or
               <button class="link-button" type="button">
-                <a href="/new?returnTo={{ .Return }}" style="text-decoration: none; color: inherit"
+                <a
+                  href="/new?returnTo={{ .Return }}"
+                  style="text-decoration: none; color: inherit"
                   >create an account</a
                 >
               </button>
@@ -160,6 +168,22 @@
     </div>
 
     <script>
+      function dimensionHandler() {
+        return {
+          fontSize: 16,
+          height: 24,
+          updateDimensions() {
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            const size = Math.min(width, height) * 0.08;
+            this.fontSize = Math.max(16, Math.min(48, size));
+
+            const heightSize = Math.min(width, height) * 0.1;
+            this.height = Math.max(24, Math.min(54, heightSize));
+          },
+        };
+      }
+
       function loginHandler() {
         return {
           email: "",
@@ -205,7 +229,8 @@
               })
               .catch((error) => {
                 console.error("Login failed:", error.code, error.message);
-                this.errorMessage = "Token verification failed: " + error.message;
+                this.errorMessage =
+                  "Token verification failed: " + error.message;
               });
           },
         };
@@ -287,11 +312,15 @@
     display: flex;
     flex-direction: row;
     align-items: center;
-    justify-content: center;
+    justify-content: space-between;
+    background: white;
+    height: clamp(24px, 10dvw, 54px);
+    font-size: clamp(16px, 8dvw, 48px);
+    z-index: 5;
   }
 
   .logheadtxt {
-    font-size: clamp(16px, 8dvw, 48px);
+    /* font-size: clamp(16px, 8dvw, 48px); */
     user-select: none;
   }
 
