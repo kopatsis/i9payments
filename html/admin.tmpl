@@ -46,10 +46,10 @@
         <div class="logheadtxt icon" @click="showModal = !showModal" x-text="showModal ? '&#10006;' : '&#9776;'"></div>
       </div>
 
-      <div x-show="showModal" :class="showModal ? 'modal modal-visible' : 'modal modal-hidden'"
-        @keydown.window.escape="showModal = false">
-        <div class="modal-content" @click.away="showModal = false" x-data="dimensionFixHandler()"
-          x-init="updateDimensions()" @resize.window="updateDimensions()" x-bind:style="{ top: top + 'px' }">
+      <div x-show="showModal" class="modal" @keydown.window.escape="showModal = false">
+        <div :class="showModal ? 'modal-content modal-visible' : 'modal-content modal-hidden'"
+          @click.away="showModal = false" x-data="dimensionFixHandler()" x-init="updateDimensions()"
+          @resize.window="updateDimensions()" x-bind:style="{ top: top + 'px' }">
           <button class="menu-button">
             <a href="/" style="text-decoration: none; color: inherit">Home Page</a>
           </button>
@@ -197,8 +197,8 @@
           const size = Math.min(width, height) * 0.08;
           this.fontSize = Math.max(16, Math.min(48, size));
 
-          const heightSize = Math.min(width, height) * 0.1;
-          this.height = Math.max(24, Math.min(54, heightSize));
+          const heightSize = Math.min(width, height) * 0.125;
+          this.height = Math.max(38, Math.min(85, heightSize));
         },
       };
     }
@@ -293,7 +293,7 @@
     align-items: center;
     justify-content: space-between;
     background: white;
-    height: clamp(24px, 10dvw, 54px);
+    height: clamp(38px, 12.5dvw, 85px);
     font-size: clamp(16px, 8dvw, 48px);
     z-index: 6;
   }
