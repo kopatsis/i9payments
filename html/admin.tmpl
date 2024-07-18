@@ -47,9 +47,11 @@
       </div>
 
       <div x-show="showModal" class="modal" @keydown.window.escape="showModal = false">
-        <div x-show="showModal" :class="showModal ? 'modal-content modal-visible' : 'modal-content modal-hidden'"
-          @click.away="showModal = false" x-data="dimensionFixHandler()" x-init="updateDimensions()"
-          @resize.window="updateDimensions()" x-bind:style="{ top: top + 'px' }">
+        <div x-show="showModal" class="modal-content" x-transition:enter="modal-enter"
+          x-transition:enter-start="modal-enter" x-transition:enter-end="modal-enter-active"
+          x-transition:leave="modal-leave-active" x-transition:leave-end="modal-enter" @click.away="showModal = false"
+          x-data="dimensionFixHandler()" x-init="updateDimensions()" @resize.window="updateDimensions()"
+          x-bind:style="{ top: top + 'px' }">
           <button class="menu-button">
             <a href="/" style="text-decoration: none; color: inherit">Home Page</a>
           </button>
@@ -210,7 +212,7 @@
           const width = window.innerWidth;
           const height = window.innerHeight;
           const heightSize = Math.min(width, height) * 0.125;
-          this.height = Math.max(38, Math.min(85, heightSize));
+          this.top = Math.max(38, Math.min(85, heightSize));
         },
       };
     }
@@ -473,15 +475,20 @@
     transform: translateX(-50%);
   }
 
-  .modal-hidden {
+  .modal-enter {
     opacity: 0;
     transform: translateY(-200px);
+  }
+
+  .modal-enter-active {
+    opacity: 1;
+    transform: translateY(0);
     transition: opacity 0.3s ease, transform 0.3s ease;
   }
 
-  .modal-visible {
-    opacity: 1;
-    transform: translateY(0);
+  .modal-leave-active {
+    opacity: 0;
+    transform: translateY(-200px);
     transition: opacity 0.3s ease, transform 0.3s ease;
   }
 </style>
