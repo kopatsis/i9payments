@@ -47,7 +47,7 @@
       </div>
 
       <div x-show="showModal" class="modal" @keydown.window.escape="showModal = false">
-        <div :class="showModal ? 'modal-content modal-visible' : 'modal-content modal-hidden'"
+        <div x-show="showModal" :class="showModal ? 'modal-content modal-visible' : 'modal-content modal-hidden'"
           @click.away="showModal = false" x-data="dimensionFixHandler()" x-init="updateDimensions()"
           @resize.window="updateDimensions()" x-bind:style="{ top: top + 'px' }">
           <button class="menu-button">
@@ -209,8 +209,8 @@
         updateDimensions() {
           const width = window.innerWidth;
           const height = window.innerHeight;
-          const heightSize = Math.min(width, height) * 0.1;
-          this.top = Math.max(24, Math.min(54, heightSize));
+          const heightSize = Math.min(width, height) * 0.125;
+          this.height = Math.max(38, Math.min(85, heightSize));
         },
       };
     }
