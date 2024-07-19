@@ -47,11 +47,14 @@
       </div>
 
       <div x-show="showModal" class="modal" @keydown.window.escape="showModal = false">
-        <div x-show="showModal" class="modal-content" x-transition:enter="modal-enter"
-          x-transition:enter-start="modal-enter-start" x-transition:enter-end="modal-enter-end"
-          x-transition:leave="modal-leave" x-transition:leave-start="modal-leave-start"
-          x-transition:leave-end="modal-leave-end" @click.away="showModal = false" x-data="dimensionFixHandler()"
-          x-init="updateDimensions()" @resize.window="updateDimensions()" x-bind:style="{ top: top + 'px' }">
+        <div x-show="showModal" class="modal-content" x-transition:enter="transition ease-out duration-300"
+          x-transition:enter-start="opacity-0 transform -translate-y-52"
+          x-transition:enter-end="opacity-100 transform translate-y-0"
+          x-transition:leave="transition ease-in duration-300"
+          x-transition:leave-start="opacity-100 transform translate-y-0"
+          x-transition:leave-end="opacity-0 transform -translate-y-52" @click.away="showModal = false"
+          x-data="dimensionFixHandler()" x-init="updateDimensions()" @resize.window="updateDimensions()"
+          x-bind:style="{ top: top + 'px' }">
           <button class="menu-button">
             <a href="/" style="text-decoration: none; color: inherit">Home Page</a>
           </button>
