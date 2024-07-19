@@ -47,8 +47,10 @@
       </div>
 
       <div x-show="showModal" class="modal" @keydown.window.escape="showModal = false">
-        <div x-show="showModal" class="modal-content" x-transition:enter="modal-enter modal-enter-active"
-          x-transition:leave="modal-leave-active" @click.away="showModal = false" x-data="dimensionFixHandler()"
+        <div x-show="showModal" class="modal-content" x-transition:enter="modal-enter"
+          x-transition:enter-start="modal-enter-start" x-transition:enter-end="modal-enter-end"
+          x-transition:leave="modal-leave" x-transition:leave-start="modal-leave-start"
+          x-transition:leave-end="modal-leave-end" @click.away="showModal = false" x-data="dimensionFixHandler()"
           x-init="updateDimensions()" @resize.window="updateDimensions()" x-bind:style="{ top: top + 'px' }">
           <button class="menu-button">
             <a href="/" style="text-decoration: none; color: inherit">Home Page</a>
@@ -473,18 +475,23 @@
     transform: translateX(-50%);
   }
 
-  .modal-enter {
+  .modal-enter-start {
     opacity: 0;
     transform: translateY(-200px);
   }
 
-  .modal-enter-active {
+  .modal-enter-end {
     opacity: 1;
     transform: translateY(0);
     transition: opacity 0.3s ease, transform 0.3s ease;
   }
 
-  .modal-leave-active {
+  .modal-leave-start {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .modal-leave-end {
     opacity: 0;
     transform: translateY(-200px);
     transition: opacity 0.3s ease, transform 0.3s ease;
