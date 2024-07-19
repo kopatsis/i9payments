@@ -8,6 +8,7 @@
   <title>Manage Membership</title>
   <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.10.0/dist/cdn.min.js" defer></script>
   <script src="https://js.stripe.com/v3/"></script>
+  <link rel="stylesheet" href="/static/styles.css">
 </head>
 
 <body>
@@ -24,14 +25,12 @@
       </div>
 
       <div x-show="showModal" class="modal" @keydown.window.escape="showModal = false">
-        <div x-show="showModal" class="modal-content" x-transition:enter="transition ease-out duration-300"
-          x-transition:enter-start="opacity-0 transform -translate-y-52"
-          x-transition:enter-end="opacity-100 transform translate-y-0"
-          x-transition:leave="transition ease-in duration-300"
-          x-transition:leave-start="opacity-100 transform translate-y-0"
-          x-transition:leave-end="opacity-0 transform -translate-y-52" @click.away="showModal = false"
-          x-data="dimensionFixHandler()" x-init="updateDimensions()" @resize.window="updateDimensions()"
-          x-bind:style="{ top: top + 'px' }">
+        <div x-show="showModal" class="modal-content" x-on:click.away="showModal = false" x-data="dimensionFixHandler()"
+          x-init="updateDimensions()" @resize.window="updateDimensions()" x-bind:style="{ top: top + 'px' }"
+          x-bind:class="{ 'enter': showModal, 'leave': !showModal }"
+          x-transition:leave="transition: opacity 0.3s ease-in, transform 0.3s ease-in;"
+          x-transition:leave-start="opacity: 1; transform: translateY(0);"
+          x-transition:leave-end="opacity: 0; transform: translateY(-200px);">
           <button class="menu-button">
             <a href="/" style="text-decoration: none; color: inherit">Home Page</a>
           </button>
@@ -286,7 +285,7 @@
 
 </html>
 
-<style>
+<!-- <style>
   @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap");
 
   * {
@@ -493,4 +492,4 @@
     left: 50%;
     transform: translateX(-50%);
   }
-</style>
+</style> -->

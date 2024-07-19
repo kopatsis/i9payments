@@ -1,88 +1,62 @@
 {{/* page.tmpl */}}
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <script
-      src="https://cdn.jsdelivr.net/npm/alpinejs@3.10.0/dist/cdn.min.js"
-      defer
-    ></script>
-    <title>Error Page</title>
-  </head>
-  <body>
-    <div class="centerpage">
-      <div class="wholepage" x-data="{ showModal: false }">
-        <div
-          class="loghead"
-          x-data="dimensionHandler()"
-          x-init="updateDimensions()"
-          @resize.window="updateDimensions()"
-          x-bind:style="{ fontSize: fontSize + 'px', height: height + 'px' }"
-        >
-          <div class="logheadtxt icon">
-            <a href="/" style="text-decoration: none; color: inherit"
-              >&#10224;</a
-            >
-          </div>
-          <b class="logheadtxt headname">i9 Admin</b>
-          <div
-            class="logheadtxt icon"
-            @click="showModal = !showModal"
-            x-text="showModal ? '&#10006;' : '&#9776;'"
-          ></div>
-        </div>
 
-        <div
-          x-show="showModal"
-          class="modal"
-          @keydown.window.escape="showModal = false"
-        >
-          <div
-            class="modal-content"
-            @click.away="showModal = false"
-            x-data="dimensionFixHandler()"
-            x-init="updateDimensions()"
-            @resize.window="updateDimensions()"
-            x-bind:style="{ top: top + 'px' }"
-          >
-            <button class="menu-button">
-              <a href="/" style="text-decoration: none; color: inherit"
-                >Home Page</a
-              >
-            </button>
-            {{ if not .Mobile }}
-            <button class="menu-button">
-              <a href="/pay" style="text-decoration: none; color: inherit"
-                >Giga Membership</a
-              >
-            </button>
-            {{ end }}
-            <button class="menu-button">
-              <a href="/login" style="text-decoration: none; color: inherit"
-                >Login Page</a
-              >
-            </button>
-            <button class="menu-button">
-              <a href="/logout" style="text-decoration: none; color: inherit"
-                >Sign Out</a
-              >
-            </button>
-          </div>
-        </div>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.10.0/dist/cdn.min.js" defer></script>
+  <link rel="stylesheet" href="/static/styles.css">
+  <title>Error Page</title>
+</head>
 
-        <div class="innercontent">
-          <div class="partialHead">It looks like you encountered an error.</div>
-          <pre>Error: {{.Error}}</pre>
-          <button class="submit">
-            <a href="/" style="text-decoration: none; color: inherit"
-              >Return Home</a
-            >
+<body>
+  <div class="centerpage">
+    <div class="wholepage" x-data="{ showModal: false }">
+      <div class="loghead" x-data="dimensionHandler()" x-init="updateDimensions()" @resize.window="updateDimensions()"
+        x-bind:style="{ fontSize: fontSize + 'px', height: height + 'px' }">
+        <div class="logheadtxt icon">
+          <a href="/" style="text-decoration: none; color: inherit">&#10224;</a>
+        </div>
+        <b class="logheadtxt headname">i9 Admin</b>
+        <div class="logheadtxt icon" @click="showModal = !showModal" x-text="showModal ? '&#10006;' : '&#9776;'"></div>
+      </div>
+
+      <div x-show="showModal" class="modal" @keydown.window.escape="showModal = false">
+        <div x-show="showModal" class="modal-content" x-on:click.away="showModal = false" x-data="dimensionFixHandler()"
+          x-init="updateDimensions()" @resize.window="updateDimensions()" x-bind:style="{ top: top + 'px' }"
+          x-bind:class="{ 'enter': showModal, 'leave': !showModal }"
+          x-transition:leave="transition: opacity 0.3s ease-in, transform 0.3s ease-in;"
+          x-transition:leave-start="opacity: 1; transform: translateY(0);"
+          x-transition:leave-end="opacity: 0; transform: translateY(-200px);">
+          <button class="menu-button">
+            <a href="/" style="text-decoration: none; color: inherit">Home Page</a>
+          </button>
+          {{ if not .Mobile }}
+          <button class="menu-button">
+            <a href="/pay" style="text-decoration: none; color: inherit">Giga Membership</a>
+          </button>
+          {{ end }}
+          <button class="menu-button">
+            <a href="/login" style="text-decoration: none; color: inherit">Login Page</a>
+          </button>
+          <button class="menu-button">
+            <a href="/logout" style="text-decoration: none; color: inherit">Sign Out</a>
           </button>
         </div>
       </div>
+
+      <div class="innercontent">
+        <div class="partialHead">It looks like you encountered an error.</div>
+        <pre>Error: {{.Error}}</pre>
+        <button class="submit">
+          <a href="/" style="text-decoration: none; color: inherit">Return Home</a>
+        </button>
+      </div>
     </div>
-  </body>
+  </div>
+</body>
+
 </html>
 
 <script>
@@ -115,7 +89,7 @@
   }
 </script>
 
-<style>
+<!-- <style>
   @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap");
 
   * {
@@ -265,4 +239,4 @@
     left: 50%;
     transform: translateX(-50%);
   }
-</style>
+</style> -->
