@@ -47,14 +47,9 @@
       </div>
 
       <div x-show="showModal" class="modal" @keydown.window.escape="showModal = false">
-        <div x-show="showModal" class="modal-content" x-transition:enter="transition ease-out duration-300"
-          x-transition:enter-start="opacity-0 transform -translate-y-52"
-          x-transition:enter-end="opacity-100 transform translate-y-0"
-          x-transition:leave="transition ease-in duration-300"
-          x-transition:leave-start="opacity-100 transform translate-y-0"
-          x-transition:leave-end="opacity-0 transform -translate-y-52" @click.away="showModal = false"
+        <div x-show="showModal" class="modal-content hidden" x-on:click.away="showModal = false"
           x-data="dimensionFixHandler()" x-init="updateDimensions()" @resize.window="updateDimensions()"
-          x-bind:style="{ top: top + 'px' }">
+          x-bind:style="{ top: top + 'px' }" x-bind:class="{ 'enter': showModal, 'leave': !showModal }">
           <button class="menu-button">
             <a href="/" style="text-decoration: none; color: inherit">Home Page</a>
           </button>
@@ -478,25 +473,41 @@
     transform: translateX(-50%);
   }
 
-  .modal-enter-start {
+  /* Define the keyframes for the transitions */
+  @keyframes flyIn {
+    from {
+      opacity: 0;
+      transform: translateY(-200px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes flyOut {
+    from {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    to {
+      opacity: 0;
+      transform: translateY(-200px);
+    }
+  }
+
+  .enter {
+    animation: flyIn 300ms ease-out forwards;
+  }
+
+  .leave {
+    animation: flyOut 300ms ease-in forwards;
+  }
+
+  .hidden {
     opacity: 0;
     transform: translateY(-200px);
-  }
-
-  .modal-enter-end {
-    opacity: 1;
-    transform: translateY(0);
-    transition: opacity 0.3s ease, transform 0.3s ease;
-  }
-
-  .modal-leave-start {
-    opacity: 1;
-    transform: translateY(0);
-  }
-
-  .modal-leave-end {
-    opacity: 0;
-    transform: translateY(-200px);
-    transition: opacity 0.3s ease, transform 0.3s ease;
   }
 </style>
