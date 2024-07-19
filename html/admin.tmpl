@@ -47,7 +47,7 @@
       </div>
 
       <div x-show="showModal" class="modal" @keydown.window.escape="showModal = false">
-        <div x-show="showModal" class="modal-content hidden" x-on:click.away="showModal = false"
+        <div x-show="showModal" class="modal-content" x-on:click.away="showModal = false"
           x-data="dimensionFixHandler()" x-init="updateDimensions()" @resize.window="updateDimensions()"
           x-bind:style="{ top: top + 'px' }" x-bind:class="{ 'enter': showModal, 'leave': !showModal }">
           <button class="menu-button">
@@ -506,8 +506,4 @@
     animation: flyOut 300ms ease-in forwards;
   }
 
-  .hidden {
-    opacity: 0;
-    transform: translateY(-200px);
-  }
 </style>
