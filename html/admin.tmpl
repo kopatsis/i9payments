@@ -47,9 +47,12 @@
       </div>
 
       <div x-show="showModal" class="modal" @keydown.window.escape="showModal = false">
-        <div x-show="showModal" class="modal-content" x-on:click.away="showModal = false"
-          x-data="dimensionFixHandler()" x-init="updateDimensions()" @resize.window="updateDimensions()"
-          x-bind:style="{ top: top + 'px' }" x-bind:class="{ 'enter': showModal, 'leave': !showModal }">
+        <div x-show="showModal" class="modal-content" x-on:click.away="showModal = false" x-data="dimensionFixHandler()"
+          x-init="updateDimensions()" @resize.window="updateDimensions()" x-bind:style="{ top: top + 'px' }"
+          x-bind:class="{ 'enter': showModal, 'leave': !showModal }"
+          x-transition:leave="transition: opacity 0.3s ease-in, transform 0.3s ease-in;"
+          x-transition:leave-start="opacity: 1; transform: translateY(0);"
+          x-transition:leave-end="opacity: 0; transform: translateY(-200px);">
           <button class="menu-button">
             <a href="/" style="text-decoration: none; color: inherit">Home Page</a>
           </button>
@@ -505,5 +508,4 @@
   .leave {
     animation: flyOut 300ms ease-in forwards;
   }
-
 </style>
