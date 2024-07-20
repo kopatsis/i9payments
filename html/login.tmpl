@@ -38,7 +38,6 @@
   <body x-data="loginHandler">
     <div class="centerpage">
       <div class="wholepage">
-
         <div class="loading" id="loader" style="display: none">
           <div class="bouncer">
             <img src="/static/images/i9logotsp.png" alt="sdafa" />
@@ -202,13 +201,20 @@
       }
 
       function loginHandler() {
+        function sleep(ms) {
+          return new Promise((resolve) => setTimeout(resolve, ms));
+        }
+
         return {
           email: "",
           password: "",
           errorMessage: "",
-          login() {
-            this.errorMessage = "";
+          async login() {
             document.getElementById("loader").style.display = "absolute";
+            this.errorMessage = "";
+
+            await sleep(1000);
+
             window
               .signInWithEmailAndPassword(
                 window.auth,
@@ -231,13 +237,13 @@
               })
               .then((response) => {
                 if (response.ok) {
-                  document.getElementById("loader").style.display = 'none';
+                  document.getElementById("loader").style.display = "none";
                   window.location.assign("/{{.Return}}");
                 } else {
                   response.json().then((data) => {
                     console.error("Token verification failed", data);
                     this.errorMessage = "Token verification failed";
-                    document.getElementById("loader").style.display = 'none';
+                    document.getElementById("loader").style.display = "none";
                   });
                 }
               })
@@ -245,7 +251,7 @@
                 console.error("Login failed:", error.code, error.message);
                 this.errorMessage =
                   "Token verification failed: " + error.message;
-                  document.getElementById("loader").style.display = 'none';
+                document.getElementById("loader").style.display = "none";
               });
           },
         };
