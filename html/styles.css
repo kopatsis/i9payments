@@ -415,10 +415,42 @@ label {
     }
 }
 
+@keyframes scaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.5);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes scaleOut {
+    from {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    to {
+        opacity: 0;
+        transform: scale(0.5);
+    }
+}
+
 .enter {
     animation: flyIn 300ms ease-out forwards;
 }
 
 .leave {
     animation: flyOut 300ms ease-in forwards;
+}
+
+.enter-log {
+    animation: scaleIn 300ms ease-out forwards;
+}
+
+.leave-log {
+    animation: scaleOut 300ms ease-in forwards;
 }
