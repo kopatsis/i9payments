@@ -367,6 +367,12 @@ label {
     justify-content: center;
 }
 
+.closeline {
+    display: flex;
+    justify-content: right;
+    width: 100%;
+}
+
 @media (max-height: 700px) {
     .loginouter {
         min-height: 34.2857dvh;
