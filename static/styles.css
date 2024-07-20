@@ -492,10 +492,10 @@ label {
   .centerpage::after {
     content: "";
     position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 450%;
-    height: 450%;
+    top: -300%;
+    left: -300%;
+    width: 600%;
+    height: 600%;
     background-image: url("/static/images/bgminitr2.png");
     background-repeat: repeat;
     background-size: 121px 51px;
