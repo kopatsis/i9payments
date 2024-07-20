@@ -21,7 +21,7 @@ func New(auth *auth.Client, database *mongo.Database, client *sendgrid.Client) *
 	router.Use(middleware.AuthMiddleware(auth))
 
 	router.LoadHTMLGlob("html/*")
-	router.Static("/static", "./html")
+	router.Static("/static", "./static")
 
 	router.GET("/multipass", multipass.Multipass(auth, database))
 	// router.GET("/sub", pay.Subscription(auth, database))
