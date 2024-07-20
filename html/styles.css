@@ -42,6 +42,18 @@ body {
     z-index: 6;
 }
 
+.loghead-log {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    background: white;
+    height: clamp(24px, 10dvw, 54px);
+    font-size: clamp(16px, 8dvw, 48px);
+    z-index: 6;
+}
+
 .logheadtxt {
     user-select: none;
     background-color: white;

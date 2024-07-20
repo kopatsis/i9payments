@@ -39,7 +39,7 @@
     <div class="centerpage">
       <div class="wholepage">
         <div
-          class="loghead"
+          class="loghead-log"
           x-data="dimensionHandler()"
           x-init="updateDimensions()"
           @resize.window="updateDimensions()"
@@ -121,10 +121,10 @@
 
                 <div
                   x-show="showModal"
-                  class="modal"
+                  class="modal-log"
                   @keydown.window.escape="showModal = false"
                 >
-                  <div class="modal-content" @click.away="showModal = false">
+                  <div class="modal-content-log" @click.away="showModal = false">
                     <div class="closeline">
                       <button class="link-button" @click="showModal = false">
                         &times;
