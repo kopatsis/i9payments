@@ -38,6 +38,14 @@
   <body x-data="loginHandler">
     <div class="centerpage">
       <div class="wholepage">
+
+        <div class="loading" id="loader" style="display: none">
+          <div class="bouncer">
+            <img src="/static/images/i9logotsp.png" alt="sdafa" />
+          </div>
+          <div class="loader2"></div>
+        </div>
+
         <div
           class="loghead-log"
           x-data="dimensionHandler()"
@@ -200,6 +208,7 @@
           errorMessage: "",
           login() {
             this.errorMessage = "";
+            document.getElementById("loader").style.display = "absolute";
             window
               .signInWithEmailAndPassword(
                 window.auth,
@@ -222,11 +231,13 @@
               })
               .then((response) => {
                 if (response.ok) {
+                  document.getElementById("loader").style.display = 'none';
                   window.location.assign("/{{.Return}}");
                 } else {
                   response.json().then((data) => {
                     console.error("Token verification failed", data);
                     this.errorMessage = "Token verification failed";
+                    document.getElementById("loader").style.display = 'none';
                   });
                 }
               })
@@ -234,6 +245,7 @@
                 console.error("Login failed:", error.code, error.message);
                 this.errorMessage =
                   "Token verification failed: " + error.message;
+                  document.getElementById("loader").style.display = 'none';
               });
           },
         };
