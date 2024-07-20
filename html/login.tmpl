@@ -125,7 +125,7 @@
                   @keydown.window.escape="showModal = false"
                 >
                   <div
-                    x-how="showModal"
+                    x-show="showModal"
                     class="modal-content-log"
                     @click.away="showModal = false"
                     x-bind:class="{ 'enter-log': showModal, 'leave-log': !showModal }"
@@ -133,7 +133,6 @@
                     x-transition:leave-start="opacity: 1; transform: scale(1);"
                     x-transition:leave-end="opacity: 0; transform: scale(0.5);"
                   >
-                    >
                     <div class="closeline">
                       <button class="link-button" @click="showModal = false">
                         &times;
