@@ -1,256 +1,333 @@
 {{/* page.tmpl */}}
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Dashboard</title>
+    <script
+      src="https://cdn.jsdelivr.net/npm/alpinejs@3.10.0/dist/cdn.min.js"
+      defer
+    ></script>
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
+      import {
+        getAuth,
+        sendPasswordResetEmail,
+        sendEmailVerification,
+      } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Admin Dashboard</title>
-  <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.10.0/dist/cdn.min.js" defer></script>
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
-    import {
-      getAuth,
-      sendPasswordResetEmail,
-      sendEmailVerification,
-    } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
+      const firebaseConfig = {
+        apiKey: "AIzaSyBOksfyE0unI87E533LWTKV6jpW-F1dqDA",
+        authDomain: "i9auth.firebaseapp.com",
+        projectId: "i9auth",
+        storageBucket: "i9auth.appspot.com",
+        messagingSenderId: "284108905250",
+        appId: "1:284108905250:web:b866b21949e149af7ca37b",
+      };
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyBOksfyE0unI87E533LWTKV6jpW-F1dqDA",
-      authDomain: "i9auth.firebaseapp.com",
-      projectId: "i9auth",
-      storageBucket: "i9auth.appspot.com",
-      messagingSenderId: "284108905250",
-      appId: "1:284108905250:web:b866b21949e149af7ca37b",
-    };
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
+      // Expose the necessary Firebase functions globally
+      window.sendPasswordResetEmail = sendPasswordResetEmail;
+      window.sendEmailVerification = sendEmailVerification;
+      window.auth = auth;
+    </script>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
 
-    // Expose the necessary Firebase functions globally
-    window.sendPasswordResetEmail = sendPasswordResetEmail;
-    window.sendEmailVerification = sendEmailVerification;
-    window.auth = auth;
-  </script>
-  <link rel="stylesheet" href="/static/styles.css">
-</head>
-
-<body>
-  <div class="centerpage">
-    <div class="wholepage" x-data="{ showModal: false }">
-      <div class="loghead" x-data="dimensionHandler()" x-init="updateDimensions()" @resize.window="updateDimensions()"
-        x-bind:style="{ fontSize: fontSize + 'px', height: height + 'px' }">
-        <div class="logheadtxt icon">
-          <a href="/" style="text-decoration: none; color: inherit">&#10224;</a>
+  <body>
+    <div class="centerpage">
+      <div class="wholepage" x-data="{ showModal: false }">
+        <div
+          class="loghead"
+          :class="{ 'logWhite': showModal }"
+          x-data="dimensionHandler()"
+          x-init="updateDimensions()"
+          @resize.window="updateDimensions()"
+          x-bind:style="{ fontSize: fontSize + 'px', height: height + 'px' }"
+        >
+          <div class="logheadtxt icon">
+            <a href="/" style="text-decoration: none; color: inherit"
+              >&#10224;</a
+            >
+          </div>
+          <b class="logheadtxt headname">i9 Admin</b>
+          <div
+            class="logheadtxt icon"
+            @click="showModal = !showModal"
+            x-text="showModal ? '&#10006;' : '&#9776;'"
+          ></div>
         </div>
-        <b class="logheadtxt headname">i9 Admin</b>
-        <div class="logheadtxt icon" @click="showModal = !showModal" x-text="showModal ? '&#10006;' : '&#9776;'"></div>
-      </div>
 
-      <div x-show="showModal" class="modal" @keydown.window.escape="showModal = false">
-        <div x-show="showModal" class="modal-content" x-on:click.away="showModal = false" x-data="dimensionFixHandler()"
-          x-init="updateDimensions()" @resize.window="updateDimensions()" x-bind:style="{ top: top + 'px' }"
-          x-bind:class="{ 'enter': showModal, 'leave': !showModal }"
-          x-transition:leave="transition: opacity 0.3s ease-in, transform 0.3s ease-in;"
-          x-transition:leave-start="opacity: 1; transform: translateY(0);"
-          x-transition:leave-end="opacity: 0; transform: translateY(-200px);">
-          <button class="menu-button">
-            <a href="/" style="text-decoration: none; color: inherit">Home Page</a>
-          </button>
+        <div
+          x-show="showModal"
+          class="modal"
+          @keydown.window.escape="showModal = false"
+        >
+          <div
+            x-show="showModal"
+            class="modal-content"
+            x-on:click.away="showModal = false"
+            x-data="dimensionFixHandler()"
+            x-init="updateDimensions()"
+            @resize.window="updateDimensions()"
+            x-bind:style="{ top: top + 'px' }"
+            x-bind:class="{ 'enter': showModal, 'leave': !showModal }"
+            x-transition:leave="transition: opacity 0.3s ease-in, transform 0.3s ease-in;"
+            x-transition:leave-start="opacity: 1; transform: translateY(0);"
+            x-transition:leave-end="opacity: 0; transform: translateY(-200px);"
+          >
+            <button class="menu-button">
+              <a href="/" style="text-decoration: none; color: inherit"
+                >Home Page</a
+              >
+            </button>
+            {{ if not .Mobile }}
+            <button class="menu-button">
+              <a href="/pay" style="text-decoration: none; color: inherit"
+                >Giga Membership</a
+              >
+            </button>
+            {{ end }}
+            <button class="menu-button">
+              <a href="/login" style="text-decoration: none; color: inherit"
+                >Login Page</a
+              >
+            </button>
+            <button class="menu-button">
+              <a href="/logout" style="text-decoration: none; color: inherit"
+                >Sign Out</a
+              >
+            </button>
+          </div>
+        </div>
+
+        <div class="innercontent">
+          <div class="gigaSection">
+            <div class="partialHead">Basic Info</div>
+            <div>
+              Email: <b>{{.Email}}</b>
+            </div>
+
+            <div
+              class="justcenter"
+              x-data="{ editing: false, name: '{{.Name}}' }"
+            >
+              <div x-show="!editing">
+                <span>Name:</span> <b x-text="name"></b>
+                <button class="submit" @click="editing = true">Edit</button>
+              </div>
+              <form
+                class="form"
+                x-show="editing"
+                action="/updateName"
+                method="POST"
+              >
+                <div class="buttonRow" style="flex-wrap: wrap">
+                  <span>Name:</span>
+                  <input
+                    class="smallerInput"
+                    type="text"
+                    name="name"
+                    x-model="name"
+                  />
+                </div>
+
+                <div class="buttonRow">
+                  <button class="submit" type="submit">Save</button>
+                  <button class="submit" type="button" @click="editing = false">
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+
           {{ if not .Mobile }}
-          <button class="menu-button">
-            <a href="/pay" style="text-decoration: none; color: inherit">Giga Membership</a>
-          </button>
-          {{ end }}
-          <button class="menu-button">
-            <a href="/login" style="text-decoration: none; color: inherit">Login Page</a>
-          </button>
-          <button class="menu-button">
-            <a href="/logout" style="text-decoration: none; color: inherit">Sign Out</a>
-          </button>
-        </div>
-      </div>
-
-      <div class="innercontent">
-        <div class="gigaSection">
-          <div class="partialHead">Basic Info</div>
-          <div>
-            Email: <b>{{.Email}}</b>
-          </div>
-
-          <div class="justcenter" x-data="{ editing: false, name: '{{.Name}}' }">
-            <div x-show="!editing">
-              <span>Name:</span> <b x-text="name"></b>
-              <button class="submit" @click="editing = true">Edit</button>
-            </div>
-            <form class="form" x-show="editing" action="/updateName" method="POST">
-              <div class="buttonRow" style="flex-wrap: wrap">
-                <span>Name:</span>
-                <input class="smallerInput" type="text" name="name" x-model="name" />
+          <div class="gigaSection">
+            <div class="partialHead">Giga Membership</div>
+            <div class="justcenter">
+              {{ if .Paying }}
+              <button class="submit">
+                <a href="/pay" style="text-decoration: none; color: inherit"
+                  >Manage Membership</a
+                >
+              </button>
+              {{ else if .Verify }}
+              <button class="submit">
+                <a href="/pay" style="text-decoration: none; color: inherit"
+                  >Start Giga Membership</a
+                >
+              </button>
+              {{else}}
+              <div>
+                Please verify your email address to start a Giga Membership
               </div>
-
-              <div class="buttonRow">
-                <button class="submit" type="submit">Save</button>
-                <button class="submit" type="button" @click="editing = false">
-                  Cancel
-                </button>
+              {{if not .ClientOn}}
+              <div>
+                When you created an account, you were sent an email to verify
+                your email address. If you can't find it, check your spam
+                folder. To be sent another, log into the i9 app to access the
+                settings (gear icon) on the upper right corner and click 'Send
+                Verification Email'.
               </div>
-            </form>
-          </div>
-        </div>
-
-        {{ if not .Mobile }}
-        <div class="gigaSection">
-          <div class="partialHead">Giga Membership</div>
-          <div class="justcenter">
-            {{ if .Paying }}
-            <button class="submit">
-              <a href="/pay" style="text-decoration: none; color: inherit">Manage Membership</a>
-            </button>
-            {{ else if .Verify }}
-            <button class="submit">
-              <a href="/pay" style="text-decoration: none; color: inherit">Start Giga Membership</a>
-            </button>
-            {{else}}
-            <div>
-              Please verify your email address to start a Giga Membership
-            </div>
-            {{if not .ClientOn}}
-            <div>
-              When you created an account, you were sent an email to verify
-              your email address. If you can't find it, check your spam
-              folder. To be sent another, log into the i9 app to access the
-              settings (gear icon) on the upper right corner and click 'Send
-              Verification Email'.
+              {{ end }}
+              {{ end }}
             </div>
             {{ end }}
-            {{ end }}
-          </div>
-          {{ end }}
-        </div>
-
-        <div class="justcenter" x-data="firebaseHandler('{{.Email}}')">
-          <div class="buttonRow" style="flex-wrap: wrap">
-            <button class="submit" @click="sendReset">
-              Send Password Reset Email
-            </button>
-            {{if not .Verify}}
-            {{if .ClientOn}}
-            <button class="submit" @click="sendVerificationEmail">
-              Send Verification Email
-            </button>
-            {{ end }}
-            {{ end }}
           </div>
 
-          <div x-show="errorMessage" style="color: rgb(222, 0, 0)" x-text="errorMessage"></div>
-          <div x-show="successMessage" style="color: green" x-text="successMessage"></div>
-          <div class="buttonRow">
-            <button class="submit" x-show="successMessage" @click="location.reload()">
-              Refresh Page
-            </button>
-          </div>
-        </div>
+          <div class="justcenter" x-data="firebaseHandler('{{.Email}}')">
+            <div class="buttonRow" style="flex-wrap: wrap">
+              <button class="submit" @click="sendReset">
+                Send Password Reset Email
+              </button>
+              {{if not .Verify}}
+              {{if .ClientOn}}
+              <button class="submit" @click="sendVerificationEmail">
+                Send Verification Email
+              </button>
+              {{ end }}
+              {{ end }}
+            </div>
 
-        <div class="justcenter" x-data="{ showConfirmation: false, email: '' }">
-          <div class="partialHead">Danger Zone</div>
-          <div class="dangerZone justcenter">
-            <div class="buttonRow" x-show="!showConfirmation">
-              <button class="submit danger" @click="showConfirmation = true">
-                Delete Account
+            <div
+              x-show="errorMessage"
+              style="color: rgb(222, 0, 0)"
+              x-text="errorMessage"
+            ></div>
+            <div
+              x-show="successMessage"
+              style="color: green"
+              x-text="successMessage"
+            ></div>
+            <div class="buttonRow">
+              <button
+                class="submit"
+                x-show="successMessage"
+                @click="location.reload()"
+              >
+                Refresh Page
               </button>
             </div>
-            <form class="form" x-show="showConfirmation" action="/delete" method="POST"
-              @submit="showConfirmation = false">
-              <div class="miniHead">
-                Warning: This action is permanent and cannot be undone, no
-                matter how much you email us to undo it.
-              </div>
-              <div>
-                If you are absolutely sure you want to delete your account,
-                please enter your full email address.
-              </div>
+          </div>
 
-              <div>
-                <input type="email" x-model="email" placeholder="Email" />
-              </div>
-
-              <div class="buttonRow">
-                <button class="submit danger" type="submit" :disabled="email !== '{{.Email}}'">
+          <div
+            class="justcenter"
+            x-data="{ showConfirmation: false, email: '' }"
+          >
+            <div class="partialHead">Danger Zone</div>
+            <div class="dangerZone justcenter">
+              <div class="buttonRow" x-show="!showConfirmation">
+                <button class="submit danger" @click="showConfirmation = true">
                   Delete Account
                 </button>
-                <button class="submit" type="button" @click="showConfirmation = false; email = ''">
-                  Cancel
-                </button>
               </div>
-            </form>
+              <form
+                class="form"
+                x-show="showConfirmation"
+                action="/delete"
+                method="POST"
+                @submit="showConfirmation = false"
+              >
+                <div class="miniHead">
+                  Warning: This action is permanent and cannot be undone, no
+                  matter how much you email us to undo it.
+                </div>
+                <div>
+                  If you are absolutely sure you want to delete your account,
+                  please enter your full email address.
+                </div>
+
+                <div>
+                  <input type="email" x-model="email" placeholder="Email" />
+                </div>
+
+                <div class="buttonRow">
+                  <button
+                    class="submit danger"
+                    type="submit"
+                    :disabled="email !== '{{.Email}}'"
+                  >
+                    Delete Account
+                  </button>
+                  <button
+                    class="submit"
+                    type="button"
+                    @click="showConfirmation = false; email = ''"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <script>
-    function dimensionHandler() {
-      return {
-        fontSize: 16,
-        height: 24,
-        updateDimensions() {
-          const width = window.innerWidth;
-          const height = window.innerHeight;
-          const size = Math.min(width, height) * 0.08;
-          this.fontSize = Math.max(16, Math.min(48, size));
+    <script>
+      function dimensionHandler() {
+        return {
+          fontSize: 16,
+          height: 24,
+          updateDimensions() {
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            const size = Math.min(width, height) * 0.08;
+            this.fontSize = Math.max(16, Math.min(48, size));
 
-          const heightSize = Math.min(width, height) * 0.125;
-          this.height = Math.max(38, Math.min(85, heightSize));
-        },
-      };
-    }
+            const heightSize = Math.min(width, height) * 0.125;
+            this.height = Math.max(38, Math.min(85, heightSize));
+          },
+        };
+      }
 
-    function dimensionFixHandler() {
-      return {
-        top: 24,
-        updateDimensions() {
-          const width = window.innerWidth;
-          const height = window.innerHeight;
-          const heightSize = Math.min(width, height) * 0.125;
-          this.top = Math.max(38, Math.min(85, heightSize));
-        },
-      };
-    }
+      function dimensionFixHandler() {
+        return {
+          top: 24,
+          updateDimensions() {
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            const heightSize = Math.min(width, height) * 0.125;
+            this.top = Math.max(38, Math.min(85, heightSize));
+          },
+        };
+      }
 
-    function firebaseHandler(email) {
-      return {
-        errorMessage: "",
-        successMessage: "",
-        email: email,
+      function firebaseHandler(email) {
+        return {
+          errorMessage: "",
+          successMessage: "",
+          email: email,
 
-        async sendReset() {
-          this.errorMessage = "";
-          this.successMessage = "";
-          try {
-            await window.sendPasswordResetEmail(window.auth, this.email);
-            this.successMessage = "Password reset email sent!";
-          } catch (error) {
-            this.errorMessage =
-              "Error sending password reset email: " + error.message;
-          }
-        },
+          async sendReset() {
+            this.errorMessage = "";
+            this.successMessage = "";
+            try {
+              await window.sendPasswordResetEmail(window.auth, this.email);
+              this.successMessage = "Password reset email sent!";
+            } catch (error) {
+              this.errorMessage =
+                "Error sending password reset email: " + error.message;
+            }
+          },
 
-        async sendVerificationEmail() {
-          this.errorMessage = "";
-          this.successMessage = "";
-          try {
-            await window.sendEmailVerification(window.auth.currentUser);
-            this.successMessage = "Verification email sent!";
-          } catch (error) {
-            this.errorMessage =
-              "Error sending verification email: " + error.message;
-          }
-        },
-      };
-    }
-  </script>
-</body>
-
+          async sendVerificationEmail() {
+            this.errorMessage = "";
+            this.successMessage = "";
+            try {
+              await window.sendEmailVerification(window.auth.currentUser);
+              this.successMessage = "Verification email sent!";
+            } catch (error) {
+              this.errorMessage =
+                "Error sending verification email: " + error.message;
+            }
+          },
+        };
+      }
+    </script>
+  </body>
 </html>
