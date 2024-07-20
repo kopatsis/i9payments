@@ -27,7 +27,8 @@ body {
     display: flex;
     flex-direction: column;
     position: fixed;
-    background: white;
+    background: rgba(236, 241, 243, 0.85);
+    box-shadow: rgba(0, 0, 0, 0.25) 0px 54px 55px, rgba(0, 0, 0, 0.12) 0px -12px 30px, rgba(0, 0, 0, 0.12) 0px 4px 6px, rgba(0, 0, 0, 0.17) 0px 12px 13px, rgba(0, 0, 0, 0.09) 0px -3px 5px;
 }
 
 .loghead {
@@ -36,7 +37,7 @@ body {
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    background: white;
+    /* background: white; */
     height: clamp(24px, 10dvw, 54px);
     font-size: clamp(16px, 8dvw, 48px);
     z-index: 6;
@@ -48,7 +49,7 @@ body {
     flex-direction: row;
     align-items: center;
     justify-content: center;
-    background: white;
+    /* background: white; */
     height: clamp(24px, 10dvw, 54px);
     font-size: clamp(16px, 8dvw, 48px);
     z-index: 6;
@@ -56,7 +57,7 @@ body {
 
 .logheadtxt {
     user-select: none;
-    background-color: white;
+    /* background-color: white; */
 }
 
 .link-button {
@@ -250,6 +251,7 @@ body {
     position: absolute;
     left: 50%;
     transform: translateX(-50%);
+    font-family: "Fira Code", Courier, monospace;
 }
 
 button {
@@ -460,3 +462,34 @@ label {
 .leave-log {
     animation: scaleOut 300ms ease-in forwards;
 }
+
+.centerpage::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      rgb(36, 4, 48) 0%,
+      rgba(0, 0, 0, 1) 50%,
+      rgb(1, 26, 24) 100%
+    );
+    z-index: 0;
+  }
+
+  .centerpage::after {
+    content: "";
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 250%;
+    height: 250%;
+    background-image: url("/static/images/bgminitr2.png");
+    background-repeat: repeat;
+    background-size: 3%;
+    transform: rotate(45deg);
+    transform-origin: center;
+    z-index: 1;
+  }
