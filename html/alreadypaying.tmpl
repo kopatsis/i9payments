@@ -1,281 +1,349 @@
 {{/* page.tmpl */}}
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Manage Membership</title>
+    <script
+      src="https://cdn.jsdelivr.net/npm/alpinejs@3.10.0/dist/cdn.min.js"
+      defer
+    ></script>
+    <script src="https://js.stripe.com/v3/"></script>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Manage Membership</title>
-  <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.10.0/dist/cdn.min.js" defer></script>
-  <script src="https://js.stripe.com/v3/"></script>
-  <link rel="stylesheet" href="/static/styles.css">
-</head>
-
-<body>
-  <div style="display: none" id="loader">loading...</div>
-  <div class="centerpage">
-    <div class="wholepage" x-data="{ showModal: false }">
-      <div class="loghead" :class="{ 'logWhite': showModal, 'logWhite-remove': !showModal }"  x-data="dimensionHandler()" x-init="updateDimensions()" @resize.window="updateDimensions()"
-        x-bind:style="{ fontSize: fontSize + 'px', height: height + 'px' }">
-        <div class="logheadtxt icon">
-          <a href="/" style="text-decoration: none; color: inherit">&#10224;</a>
-        </div>
-        <b class="logheadtxt headname">i9 Admin</b>
-        <div class="logheadtxt icon" @click="showModal = !showModal" x-text="showModal ? '&#10006;' : '&#9776;'"></div>
-      </div>
-
-      <div x-show="showModal" class="modal" @keydown.window.escape="showModal = false">
-        <div x-show="showModal" class="modal-content" x-on:click.away="showModal = false" x-data="dimensionFixHandler()"
-          x-init="updateDimensions()" @resize.window="updateDimensions()" x-bind:style="{ top: top + 'px' }"
-          x-bind:class="{ 'enter': showModal, 'leave': !showModal }"
-          x-transition:leave="transition: opacity 0.3s ease-in, transform 0.3s ease-in;"
-          x-transition:leave-start="opacity: 1; transform: translateY(0);"
-          x-transition:leave-end="opacity: 0; transform: translateY(-200px);">
-          <button class="menu-button">
-            <a href="/" style="text-decoration: none; color: inherit">Home Page</a>
-          </button>
-          {{ if not .Mobile }}
-          <button class="menu-button">
-            <a href="/pay" style="text-decoration: none; color: inherit">Giga Membership</a>
-          </button>
-          {{ end }}
-          <button class="menu-button">
-            <a href="/login" style="text-decoration: none; color: inherit">Login Page</a>
-          </button>
-          <button class="menu-button">
-            <a href="/logout" style="text-decoration: none; color: inherit">Sign Out</a>
-          </button>
-        </div>
-      </div>
-
-      <div class="innercontent">
-        {{if .Past}}
-        <div class="gigaSection">
-          <div class="partialHead">Critical Notice</div>
-          <div class="miniHead" style="color: rgb(222, 0, 0)">
-            Please update your payment information to avoid membership
-            cancelation
+  <body>
+    <div class="centerpage">
+      <div class="wholepage" x-data="{ showModal: false }">
+        <div class="loading" id="loader" style="display: none">
+          <div class="bouncer">
+            <img src="/static/images/i9logotsp.png" alt="sdafa" />
           </div>
-        </div>
-        {{ end }}
-        <div class="gigaSection">
-          <div class="partialHead">Basic Info</div>
-
-          <div>
-            Email: <b>{{.Email}}</b>
-          </div>
-
-          <div>Next billing cycle charge date: {{.Date}}</div>
+          <div class="loader2"></div>
         </div>
 
-        <div x-data class="gigaSection">
-          <div class="partialHead">Giga Membership Plan</div>
-          {{if eq .Length "monthly"}}
-          <div>Current Plan: Charged <b>Monthly</b> for <b>$4.99</b></div>
-          <button class="submit" @click="swapFrequency('yearly')">
-            Change to Plan to Yearly: $49.99
-          </button>
-          {{else}}
-          <div>Current Plan: Charged <b>Yearly</b> for <b>$49.99</b></div>
-          <div>
-            <button class="link-button" @click="swapFrequency('monthly')">
-              Change to Plan to Monthly: $4.99</button>*
+        <div
+          class="loghead"
+          :class="{ 'logWhite': showModal, 'logWhite-remove': !showModal }"
+          x-data="dimensionHandler()"
+          x-init="updateDimensions()"
+          @resize.window="updateDimensions()"
+          x-bind:style="{ fontSize: fontSize + 'px', height: height + 'px' }"
+        >
+          <div class="logheadtxt icon">
+            <a href="/" style="text-decoration: none; color: inherit"
+              >&#10224;</a
+            >
           </div>
-          {{ end }}
-
-          <div>
-            *Changing membership plan takes effect <b>immediately</b>: You
-            will be refunded a prorated portion of your previous subscription
-            and charged the new fee.
-          </div>
-
-          <div id="showError"></div>
+          <b class="logheadtxt headname">i9 Admin</b>
+          <div
+            class="logheadtxt icon"
+            @click="showModal = !showModal"
+            x-text="showModal ? '&#10006;' : '&#9776;'"
+          ></div>
         </div>
 
-        <div class="gigaSection last">
-          <div class="partialHead">Payment Info</div>
-          {{ if .External }}
-          <div>Your payment is managed by {{.External}}.</div>
-          {{ else }}
-          <div>
-            Your default payment method is your card with the brand
-            {{.Brand}} and last four digits of {{.Four}}.
-          </div>
-          {{ end }}
-
-          <div id="payment-update-form" x-data="{ showForm: false }" class="form">
-            <button @click="showForm = !showForm" class="submit">
-              Change Default Payment Method
+        <div
+          x-show="showModal"
+          class="modal"
+          @keydown.window.escape="showModal = false"
+        >
+          <div
+            x-show="showModal"
+            class="modal-content"
+            x-on:click.away="showModal = false"
+            x-data="dimensionFixHandler()"
+            x-init="updateDimensions()"
+            @resize.window="updateDimensions()"
+            x-bind:style="{ top: top + 'px' }"
+            x-bind:class="{ 'enter': showModal, 'leave': !showModal }"
+            x-transition:leave="transition: opacity 0.3s ease-in, transform 0.3s ease-in;"
+            x-transition:leave-start="opacity: 1; transform: translateY(0);"
+            x-transition:leave-end="opacity: 0; transform: translateY(-200px);"
+          >
+            <button class="menu-button">
+              <a href="/" style="text-decoration: none; color: inherit"
+                >Home Page</a
+              >
             </button>
-            <form id="payment-form" x-show="showForm">
-              <div id="payment-element"></div>
-              <div class="buttonRow">
-                <button type="submit" class="submit">Submit</button>
-                <button type="button" @click="showForm = false" class="submit">
-                  Cancel
-                </button>
-              </div>
-            </form>
-          </div>
-
-          <div id="error-message" style="color: rgb(222, 0, 0)"></div>
-
-          <div x-data="{ showConfirm: false}" class="form">
-            <button x-show="!showConfirm" @click="showConfirm = true" class="submit danger">
-              Cancel Membership
+            {{ if not .Mobile }}
+            <button class="menu-button">
+              <a href="/pay" style="text-decoration: none; color: inherit"
+                >Giga Membership</a
+              >
             </button>
+            {{ end }}
+            <button class="menu-button">
+              <a href="/login" style="text-decoration: none; color: inherit"
+                >Login Page</a
+              >
+            </button>
+            <button class="menu-button">
+              <a href="/logout" style="text-decoration: none; color: inherit"
+                >Sign Out</a
+              >
+            </button>
+          </div>
+        </div>
 
-            <div x-show="showConfirm" class="form">
-              <div>Are you sure you want to cancel your membership?</div>
-              <div class="buttonRow">
-                <button @click="cancelMembership" class="submit danger">
-                  Cancel Membership
-                </button>
-                <button @click="showConfirm = false" class="submit">
-                  Go Back
-                </button>
-              </div>
+        <div class="innercontent">
+          {{if .Past}}
+          <div class="gigaSection">
+            <div class="partialHead">Critical Notice</div>
+            <div class="miniHead" style="color: rgb(222, 0, 0)">
+              Please update your payment information to avoid membership
+              cancelation
             </div>
           </div>
+          {{ end }}
+          <div class="gigaSection">
+            <div class="partialHead">Basic Info</div>
 
-          <div id="cancelError" style="color: rgb(222, 0, 0)"></div>
+            <div>
+              Email: <b>{{.Email}}</b>
+            </div>
+
+            <div>Next billing cycle charge date: {{.Date}}</div>
+          </div>
+
+          <div x-data class="gigaSection">
+            <div class="partialHead">Giga Membership Plan</div>
+            {{if eq .Length "monthly"}}
+            <div>Current Plan: Charged <b>Monthly</b> for <b>$4.99</b></div>
+            <button class="submit" @click="swapFrequency('yearly')">
+              Change to Plan to Yearly: $49.99
+            </button>
+            {{else}}
+            <div>Current Plan: Charged <b>Yearly</b> for <b>$49.99</b></div>
+            <div>
+              <button class="link-button" @click="swapFrequency('monthly')">
+                Change to Plan to Monthly: $4.99</button
+              >*
+            </div>
+            {{ end }}
+
+            <div>
+              *Changing membership plan takes effect <b>immediately</b>: You
+              will be refunded a prorated portion of your previous subscription
+              and charged the new fee.
+            </div>
+
+            <div id="showError"></div>
+          </div>
+
+          <div class="gigaSection last">
+            <div class="partialHead">Payment Info</div>
+            {{ if .External }}
+            <div>Your payment is managed by {{.External}}.</div>
+            {{ else }}
+            <div>
+              Your default payment method is your card with the brand
+              {{.Brand}} and last four digits of {{.Four}}.
+            </div>
+            {{ end }}
+
+            <div
+              id="payment-update-form"
+              x-data="{ showForm: false }"
+              class="form"
+            >
+              <button @click="showForm = !showForm" class="submit">
+                Change Default Payment Method
+              </button>
+              <form id="payment-form" x-show="showForm">
+                <div id="payment-element"></div>
+                <div class="buttonRow">
+                  <button type="submit" class="submit">Submit</button>
+                  <button
+                    type="button"
+                    @click="showForm = false"
+                    class="submit"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            <div id="error-message" style="color: rgb(222, 0, 0)"></div>
+
+            <div x-data="{ showConfirm: false}" class="form">
+              <button
+                x-show="!showConfirm"
+                @click="showConfirm = true"
+                class="submit danger"
+              >
+                Cancel Membership
+              </button>
+
+              <div x-show="showConfirm" class="form">
+                <div>Are you sure you want to cancel your membership?</div>
+                <div class="buttonRow">
+                  <button @click="cancelMembership" class="submit danger">
+                    Cancel Membership
+                  </button>
+                  <button @click="showConfirm = false" class="submit">
+                    Go Back
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div id="cancelError" style="color: rgb(222, 0, 0)"></div>
+          </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <script>
-    function dimensionHandler() {
-      return {
-        fontSize: 16,
-        height: 24,
-        updateDimensions() {
-          const width = window.innerWidth;
-          const height = window.innerHeight;
-          const size = Math.min(width, height) * 0.08;
-          this.fontSize = Math.max(16, Math.min(48, size));
+    <script>
+      function dimensionHandler() {
+        return {
+          fontSize: 16,
+          height: 24,
+          updateDimensions() {
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            const size = Math.min(width, height) * 0.08;
+            this.fontSize = Math.max(16, Math.min(48, size));
 
-          const heightSize = Math.min(width, height) * 0.1;
-          this.height = Math.max(24, Math.min(54, heightSize));
-        },
-      };
-    }
+            const heightSize = Math.min(width, height) * 0.1;
+            this.height = Math.max(24, Math.min(54, heightSize));
+          },
+        };
+      }
 
-    function dimensionFixHandler() {
-      return {
-        top: 24,
-        updateDimensions() {
-          const width = window.innerWidth;
-          const height = window.innerHeight;
-          const heightSize = Math.min(width, height) * 0.1;
-          this.top = Math.max(24, Math.min(54, heightSize));
-        },
-      };
-    }
+      function dimensionFixHandler() {
+        return {
+          top: 24,
+          updateDimensions() {
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            const heightSize = Math.min(width, height) * 0.1;
+            this.top = Math.max(24, Math.min(54, heightSize));
+          },
+        };
+      }
 
-    function cancelMembership() {
-      fetch("/cancel", {
-        method: "POST",
-        credentials: "include",
-      })
-        .then((response) => {
-          if (response.ok) {
-            window.location.reload();
-          } else {
-            response.text().then((text) => {
-              document.getElementById("cancelError").textContent = text;
-            });
-          }
+      function sleep(ms) {
+        return new Promise((resolve) => setTimeout(resolve, ms));
+      }
+
+      async function cancelMembership() {
+        document.getElementById("loader").style.display = "flex";
+
+        await sleep(500);
+
+        fetch("/cancel", {
+          method: "POST",
+          credentials: "include",
         })
-        .catch(() => {
-          document.getElementById("cancelError").textContent = error;
-        });
-    }
-
-    function swapFrequency(newFrequency) {
-      const formData = new FormData();
-      formData.append("frequency", newFrequency);
-
-      fetch("/swap", {
-        method: "POST",
-        credentials: "include",
-        body: formData,
-      })
-        .then((response) => {
-          if (response.ok) {
-            window.location.reload();
-          } else {
-            response.text().then((text) => {
-              document.getElementById("showError").textContent = text;
-            });
-          }
-        })
-        .catch((error) => {
-          document.getElementById("showError").textContent = error;
-        });
-    }
-
-    document.addEventListener("DOMContentLoaded", async () => {
-      const stripe = Stripe(
-        "pk_test_51PJLOAIstWH7VBmuSbipom0Z6Gy1Wj6wOjFtApmfGspxtTCywa9WEhP1UjB5XheYdCVXnUScy1zChx4lagbeZYvE002At1oIiP"
-      );
-      const clientSecret = "{{ .ClientSecret }}";
-
-      const elements = stripe.elements({ clientSecret });
-      const paymentElement = elements.create("payment");
-      paymentElement.mount("#payment-element");
-
-      const form = document.getElementById("payment-form");
-      form.addEventListener("submit", async (event) => {
-        event.preventDefault();
-
-        const startTime = Date.now();
-
-        document.getElementById("loader").style.display = "block";
-
-        try {
-          const { setupIntent, error } = await stripe.confirmSetup({
-            elements,
-            confirmParams: {
-              return_url: window.location.href,
-            },
-            redirect: "if_required",
-          });
-
-          if (error) {
-            document.getElementById("error-message").textContent =
-              error.message;
-          } else {
-            const paymentMethodId = setupIntent.payment_method;
-
-            const response = await fetch("/update", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              credentials: "include",
-              body: JSON.stringify({
-                payment_method_id: paymentMethodId,
-              }),
-            });
-
+          .then((response) => {
             if (response.ok) {
-              location.reload();
+              document.getElementById("loader").style.display = "none";
+              window.location.reload();
             } else {
-              const errorData = await response.json();
-              document.getElementById("error-message").textContent =
-                errorData.error;
+              response.text().then((text) => {
+                document.getElementById("cancelError").textContent = text;
+              });
+              document.getElementById("loader").style.display = "none";
             }
-          }
-        } catch (err) {
-          document.getElementById("error-message").textContent =
-            "Error processing payment, please try again.";
-        } finally {
-          document.getElementById("loader").style.display = "none";
-        }
-      });
-    });
-  </script>
-</body>
+          })
+          .catch(() => {
+            document.getElementById("cancelError").textContent = error;
+            document.getElementById("loader").style.display = "none";
+          });
+      }
 
+      async function swapFrequency(newFrequency) {
+        document.getElementById("loader").style.display = "flex";
+
+        await sleep(500);
+
+        const formData = new FormData();
+        formData.append("frequency", newFrequency);
+
+        fetch("/swap", {
+          method: "POST",
+          credentials: "include",
+          body: formData,
+        })
+          .then((response) => {
+            if (response.ok) {
+              window.location.reload();
+            } else {
+              response.text().then((text) => {
+                document.getElementById("showError").textContent = text;
+              });
+              document.getElementById("loader").style.display = "none";
+            }
+          })
+          .catch((error) => {
+            document.getElementById("showError").textContent = error;
+            document.getElementById("loader").style.display = "none";
+          });
+      }
+
+      document.addEventListener("DOMContentLoaded", async () => {
+        const stripe = Stripe(
+          "pk_test_51PJLOAIstWH7VBmuSbipom0Z6Gy1Wj6wOjFtApmfGspxtTCywa9WEhP1UjB5XheYdCVXnUScy1zChx4lagbeZYvE002At1oIiP"
+        );
+        const clientSecret = "{{ .ClientSecret }}";
+
+        const elements = stripe.elements({ clientSecret });
+        const paymentElement = elements.create("payment");
+        paymentElement.mount("#payment-element");
+
+        const form = document.getElementById("payment-form");
+        form.addEventListener("submit", async (event) => {
+          event.preventDefault();
+
+          const startTime = Date.now();
+
+          document.getElementById("loader").style.display = "flex";
+
+          try {
+            const { setupIntent, error } = await stripe.confirmSetup({
+              elements,
+              confirmParams: {
+                return_url: window.location.href,
+              },
+              redirect: "if_required",
+            });
+
+            if (error) {
+              document.getElementById("error-message").textContent =
+                error.message;
+            } else {
+              const paymentMethodId = setupIntent.payment_method;
+
+              const response = await fetch("/update", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                credentials: "include",
+                body: JSON.stringify({
+                  payment_method_id: paymentMethodId,
+                }),
+              });
+
+              if (response.ok) {
+                location.reload();
+              } else {
+                const errorData = await response.json();
+                document.getElementById("error-message").textContent =
+                  errorData.error;
+              }
+            }
+          } catch (err) {
+            document.getElementById("error-message").textContent =
+              "Error processing payment, please try again.";
+          } finally {
+            document.getElementById("loader").style.display = "none";
+          }
+        });
+      });
+    </script>
+  </body>
 </html>

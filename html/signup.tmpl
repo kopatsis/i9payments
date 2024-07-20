@@ -34,6 +34,14 @@
   <body x-data="registerHandler">
     <div class="centerpage">
       <div class="wholepage">
+
+        <div class="loading" id="loader" style="display: none">
+          <div class="bouncer">
+            <img src="/static/images/i9logotsp.png" alt="sdafa" />
+          </div>
+          <div class="loader2"></div>
+        </div>
+
         <div
           class="loghead-log"
           x-data="dimensionHandler()"
@@ -174,12 +182,18 @@
       }
 
       function registerHandler() {
+
+        function sleep(ms) {
+          return new Promise((resolve) => setTimeout(resolve, ms));
+        }
+
         return {
           name: "",
           email: "",
           password: "",
           confirmPassword: "",
-          register() {
+          async register() {
+
             if (!this.passwordAllowed(this.password)) {
               document.getElementById("error-message").textContent =
                 "Password must be at least 10 characters long, include at least one letter and one number.";
@@ -193,6 +207,10 @@
               document.getElementById("error-message").style.display = "block";
               return;
             }
+
+            document.getElementById("loader").style.display = "flex";
+
+            await sleep(400);
 
             window
               .createUserWithEmailAndPassword(auth, this.email, this.password)
@@ -216,6 +234,7 @@
               })
               .then((response) => {
                 if (response.ok) {
+                  document.getElementById("loader").style.display = "none";
                   window.location.assign("/{{ .Return }}");
                 } else {
                   response
@@ -223,6 +242,7 @@
                     .then((data) =>
                       console.error("Token verification failed", data)
                     );
+                    document.getElementById("loader").style.display = "none";
                 }
               })
               .catch((error) => {
@@ -231,6 +251,7 @@
                   error.code,
                   error.message
                 );
+                document.getElementById("loader").style.display = "none";
               });
           },
           passwordAllowed(password) {

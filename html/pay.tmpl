@@ -13,9 +13,15 @@
   </head>
 
   <body>
-    <div style="display: none" id="loader">loading...</div>
     <div class="centerpage">
       <div class="wholepage" x-data="{ showModal: false }">
+        <div class="loading" id="loader" style="display: none">
+          <div class="bouncer">
+            <img src="/static/images/i9logotsp.png" alt="sdafa" />
+          </div>
+          <div class="loader2"></div>
+        </div>
+
         <div
           class="loghead"
           :class="{ 'logWhite': showModal, 'logWhite-remove': !showModal }"
@@ -173,7 +179,7 @@
 
           const startTime = Date.now();
 
-          document.getElementById("loader").style.display = "block";
+          document.getElementById("loader").style.display = "flex";
 
           try {
             const subscriptionType = document.querySelector(
