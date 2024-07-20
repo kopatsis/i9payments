@@ -57,6 +57,7 @@ body {
 
 .logheadtxt {
     user-select: none;
+    font-family: "Fira Code", Courier, monospace;
     /* background-color: white; */
 }
 
@@ -251,7 +252,6 @@ body {
     position: absolute;
     left: 50%;
     transform: translateX(-50%);
-    font-family: "Fira Code", Courier, monospace;
 }
 
 button {
