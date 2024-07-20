@@ -375,6 +375,10 @@ label {
     width: 100%;
 }
 
+.closeline > .link-button {
+    text-decoration: none;
+}
+
 @media (max-height: 700px) {
     .loginouter {
         min-height: 34.2857dvh;
@@ -396,6 +400,12 @@ label {
 @media (max-height: 400px) {
     .loginouter {
         min-height: fit-content;
+    }
+}
+
+@media (max-width: 750px) {
+    .wholepage {
+        background: rgba(236, 241, 243, 0.8);
     }
 }
 
