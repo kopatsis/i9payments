@@ -4,6 +4,7 @@ import (
 	"context"
 	"i9pay/platform/login"
 	"net/http"
+	"strings"
 	"time"
 
 	"firebase.google.com/go/auth"
@@ -12,6 +13,11 @@ import (
 
 func AuthMiddleware(authClient *auth.Client) gin.HandlerFunc {
 	return func(c *gin.Context) {
+
+		if strings.HasPrefix(c.Request.URL.Path, "/static") {
+			c.Next()
+			return
+		}
 
 		if c.Request.URL.Path == "/login" || c.Request.URL.Path == "/verifyToken" || c.Request.URL.Path == "/new" || c.Request.URL.Path == "/code" || c.Request.URL.Path == "/multipass" || c.Request.URL.Path == "/confirmationwh" || c.Request.URL.Path == "/failedwh" || c.Request.URL.Path == "/resetdate" {
 			c.Next()
