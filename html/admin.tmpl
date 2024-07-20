@@ -229,7 +229,6 @@
           this.errorMessage = "";
           this.successMessage = "";
           try {
-            console.log(window.auth.currentUser, this.email);
             await window.sendPasswordResetEmail(window.auth, this.email);
             this.successMessage = "Password reset email sent!";
           } catch (error) {
@@ -242,7 +241,6 @@
           this.errorMessage = "";
           this.successMessage = "";
           try {
-            console.log(window.auth.currentUser);
             await window.sendEmailVerification(window.auth.currentUser);
             this.successMessage = "Verification email sent!";
           } catch (error) {

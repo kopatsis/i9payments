@@ -26,7 +26,6 @@
 
       const app = initializeApp(firebaseConfig);
       window.auth = getAuth(app);
-      console.log(window.auth);
       window.createUserWithEmailAndPassword = createUserWithEmailAndPassword;
     </script>
     <link rel="stylesheet" href="/static/styles.css">
@@ -217,7 +216,6 @@
               })
               .then((response) => {
                 if (response.ok) {
-                  console.log("Token verified");
                   window.location.assign("/{{ .Return }}");
                 } else {
                   response

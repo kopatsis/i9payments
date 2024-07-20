@@ -183,13 +183,11 @@
             window.location.reload();
           } else {
             response.text().then((text) => {
-              console.log(text);
               document.getElementById("cancelError").textContent = text;
             });
           }
         })
         .catch(() => {
-          console.log(error);
           document.getElementById("cancelError").textContent = error;
         });
     }
@@ -204,18 +202,15 @@
         body: formData,
       })
         .then((response) => {
-          console.log("reached???");
           if (response.ok) {
             window.location.reload();
           } else {
             response.text().then((text) => {
-              console.log(text);
               document.getElementById("showError").textContent = text;
             });
           }
         })
         .catch((error) => {
-          console.log(error);
           document.getElementById("showError").textContent = error;
         });
     }
