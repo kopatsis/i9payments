@@ -42,7 +42,7 @@
       <div class="wholepage" x-data="{ showModal: false }">
         <div
           class="loghead"
-          :class="{ 'logWhite': showModal }"
+          :class="{ 'logWhite': showModal, 'logWhite-remove': !showModal }"
           x-data="dimensionHandler()"
           x-init="updateDimensions()"
           @resize.window="updateDimensions()"

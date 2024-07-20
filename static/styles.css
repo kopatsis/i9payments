@@ -41,6 +41,7 @@ body {
     height: clamp(24px, 10dvw, 54px);
     font-size: clamp(16px, 8dvw, 48px);
     z-index: 6;
+    transition: background-color 0s linear;
 }
 
 .loghead-log {
@@ -57,6 +58,10 @@ body {
 
 .logWhite {
     background-color: white;
+}
+
+.loghead.logWhite-remove {
+    transition-delay: 300ms;
 }
 
 .logheadtxt {

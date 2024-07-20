@@ -15,7 +15,7 @@
   <div style="display: none" id="loader">loading...</div>
   <div class="centerpage">
     <div class="wholepage" x-data="{ showModal: false }">
-      <div class="loghead" :class="{ 'logWhite': showModal }"  x-data="dimensionHandler()" x-init="updateDimensions()" @resize.window="updateDimensions()"
+      <div class="loghead" :class="{ 'logWhite': showModal, 'logWhite-remove': !showModal }"  x-data="dimensionHandler()" x-init="updateDimensions()" @resize.window="updateDimensions()"
         x-bind:style="{ fontSize: fontSize + 'px', height: height + 'px' }">
         <div class="logheadtxt icon">
           <a href="/" style="text-decoration: none; color: inherit">&#10224;</a>
