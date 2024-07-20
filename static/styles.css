@@ -476,7 +476,7 @@ label {
       rgba(0, 0, 0, 1) 50%,
       rgb(1, 26, 24) 100%
     );
-    z-index: 0;
+    z-index: -2;
   }
 
   .centerpage::after {
@@ -491,5 +491,5 @@ label {
     background-size: 3%;
     transform: rotate(45deg);
     transform-origin: center;
-    z-index: 1;
+    z-index: -1;
   }
